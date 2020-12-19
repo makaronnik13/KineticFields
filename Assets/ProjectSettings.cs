@@ -13,6 +13,11 @@ public class ProjectSettings: ScriptableObject
 
     public AnimationCurve PointsCountCurve;
 
+
+
+    public int ThresholdWindowSize = 15;
+    public float ThresholdMultiplier = 2f;
+
     public int GetCount(float lifetime)
     {
         return Mathf.RoundToInt(PointsCountCurve.Evaluate(lifetime));

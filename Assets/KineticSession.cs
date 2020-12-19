@@ -2,6 +2,7 @@
 using com.armatur.common.flags;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
@@ -106,5 +107,31 @@ public class KineticSession
     {
         Debug.Log("save preset "+i);
         Presets[i] = ActivePreset.Value.Clone() as KineticPreset;
+    }
+
+    public void RandomSwap()
+    {
+        
+        int id = Presets.ToList().IndexOf(ActivePreset.Value);
+
+        if (UnityEngine.Random.value>0.5f)
+        {
+            id++;
+        }
+        else
+        {
+            id--;
+        }
+
+        if (id<0)
+        {
+            id = Presets.Count() - 1;
+        }
+        if (id>=Presets.Count())
+        {
+            id = 0;
+        }
+
+        LoadPreset(id);
     }
 }
