@@ -127,7 +127,7 @@ public class KineticFieldController: Singleton<KineticFieldController>
             int end = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.End);
             List<float> data = SpectrumBar.GetSpectrumData().ToList().GetRange(start, end - start);
             float dataAverage = data.Sum()/data.Count;
-            fg.UpdateFrequency(dataAverage, data.Max());
+            fg.UpdateFrequency(data);
         }
 
         for (int i = 0; i < keyCodes.Count(); i++)

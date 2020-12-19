@@ -2,6 +2,7 @@
 using System.Collections;
 using com.armatur.common.flags;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class KineticPoint : MonoBehaviour
 {
@@ -128,7 +129,7 @@ public class KineticPoint : MonoBehaviour
     private void ActivePointChanged(KineticPoint p)
     {
         Selector.SetActive(p == this);
-
+        GetComponent<Collider2D>().enabled = p != this;
     }
 
     // Update is called once per frame
@@ -173,7 +174,10 @@ public class KineticPoint : MonoBehaviour
 
     private void OnMouseDown()
     {
-
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
         if (doubleClickCoroutine!=null)
         {
             Point.Active.SetState(!point.Active.Value);

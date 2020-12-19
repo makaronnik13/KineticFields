@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PointTrigger : MonoBehaviour
 {
@@ -14,7 +15,11 @@ public class PointTrigger : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (doubleClickCoroutine != null)
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+            if (doubleClickCoroutine != null)
         {
             Point3d.Toggle();
             StopCoroutine(doubleClickCoroutine);
@@ -42,6 +47,10 @@ public class PointTrigger : MonoBehaviour
 
     private void OnMouseDrag()
     {
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
         Point3d.Drag();
 
 

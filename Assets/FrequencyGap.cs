@@ -1,5 +1,7 @@
 ﻿using com.armatur.common.flags;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
@@ -128,9 +130,10 @@ public class FrequencyGap: ISource, ICloneable
         Sprite = sprite;
     }
 
-    public void UpdateFrequency(float dataAverage, float max)
+    public void UpdateFrequency(List<float> data)
     {
-
+        float dataAverage = data.Average();
+        float max = data.Max();
         lastAverage = Mathf.Lerp(lastAverage, dataAverage, Time.deltaTime*2f);
 
         float diff = max/2f - lastAverage/2f;

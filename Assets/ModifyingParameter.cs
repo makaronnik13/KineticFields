@@ -26,9 +26,7 @@ public class ModifyingParameter: ICloneable
         }
         set
         {
-
-                SourceId.SetState(KineticFieldController.Instance.Sources.IndexOf(value));
-  
+            SetSource(value);
         }
     }
 
@@ -50,7 +48,8 @@ public class ModifyingParameter: ICloneable
         MIN = min;
         MAX = max;
         BaseValue.SetState(value);
-   
+        SourceId.SetState(KineticFieldController.Instance.Sources.IndexOf(source));
+
     }
 
     private void SourceChanged(int sourceId)
@@ -80,17 +79,19 @@ public class ModifyingParameter: ICloneable
     }
 
     public void SetSource(ISource source)
-    {  
+    {
+
         if (this.Source != null)
         {
             this.Source.OnValueChanged -= SourceValueChanged;
         }
-        this.Source = source;
-
+        SourceId.SetState(KineticFieldController.Instance.Sources.IndexOf(source));
         if (this.Source!= null)
         {
             this.Source.OnValueChanged += SourceValueChanged;
         }
+
+
     }
 
     private void SourceValueChanged(float v)
@@ -112,8 +113,14 @@ public class ModifyingParameter: ICloneable
     public object Clone()
     {
 
+        Debug.Log(SourceId.Value);
         ModifyingParameter mp = new ModifyingParameter(BaseValue.Value, MIN, MAX, Source);
- 
+
+        mp.Multiplicator.SetState(Multiplicator.Value);
+        mp.BaseValue.SetState(BaseValue.Value);
+        Debug.Log("clone "+mp.Source+" "+ mp.SourceId.Value);
+
+        mp.Init();
         return mp;
     }
 }

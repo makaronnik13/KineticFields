@@ -119,7 +119,6 @@ public class KineticPointInstance: ICloneable
 
     public object Clone()
     {
-        Debug.Log("clone point");  
         KineticPointInstance point = new KineticPointInstance(Id, Name);
         point.Active.SetState(Active.Value);
         point.CurveId = CurveId;

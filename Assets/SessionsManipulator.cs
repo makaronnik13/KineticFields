@@ -1,4 +1,5 @@
-﻿using System;
+﻿using com.armatur.common.flags;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -20,6 +21,12 @@ public class SessionsManipulator : MonoBehaviour
 
     [SerializeField]
     private GameObject SessionBtn;
+
+    private Coroutine swapCoroutine;
+    private float lastClickTime;
+    private float timer;
+    public GenericFlag<bool> Playing = new GenericFlag<bool>("isPlaying", false);
+    public GenericFlag<float> swapTime = new GenericFlag<float>("swapTime", 20f);
 
     private List<string> FileNames = new List<string>();
 
@@ -54,6 +61,73 @@ public class SessionsManipulator : MonoBehaviour
             {
                 Save(KineticFieldController.Instance.Session.Value.SessionName);
             }
+        }
+
+        if (Playing.Value)
+        {
+            timer += Time.deltaTime;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            if (Input.GetKey(KeyCode.RightShift))
+            {
+                Debug.Log("Stop");
+                //stop
+                if (swapCoroutine != null)
+                {
+                    StopCoroutine(swapCoroutine);
+                    swapCoroutine = null;
+                }
+                Playing.SetState(false);
+                lastClickTime = 0;
+                swapTime.SetState(10);
+            }
+
+            else
+            {
+                //play
+              
+
+
+                if (!Playing.Value)
+                {
+                    lastClickTime = timer;
+
+                    Debug.Log("Play");
+                    Playing.SetState(true);
+                    if (swapTime.Value == 0)
+                    {
+                        swapTime.SetState(10);
+                    }
+
+                }
+                else
+                {
+                    swapTime.SetState(timer - lastClickTime);
+                    lastClickTime = timer;
+
+                    if (swapCoroutine != null)
+                    {
+                        StopCoroutine(swapCoroutine);
+                        swapCoroutine = null;
+                    }
+                    //play
+                }
+
+                swapCoroutine = StartCoroutine(SwapCoroutine());
+                //run
+
+            }
+        }
+    }
+
+    private IEnumerator SwapCoroutine()
+    {
+        while (Playing.Value)
+        {
+            KineticFieldController.Instance.Session.Value.RandomSwap();
+            yield return new WaitForSeconds(swapTime.Value);
         }
     }
 
