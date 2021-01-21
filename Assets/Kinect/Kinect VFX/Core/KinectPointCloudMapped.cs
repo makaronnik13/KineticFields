@@ -7,6 +7,8 @@ public class KinectPointCloudMapped : MonoBehaviour
     public ComputeShader PointCloudBaker;
     public bool ManageSensor = true;
 
+    private bool fliped = false;
+
     private KinectSensor sensor;
     private DepthFrameReader depthFrameReader;
     private ushort[] depthFrameData;
@@ -80,7 +82,15 @@ public class KinectPointCloudMapped : MonoBehaviour
                 PointCloudBaker.SetTexture(kernel, "PositionTexture", tempPositionTexture);
                 PointCloudBaker.Dispatch(kernel, frameWidth / 8, frameHeight / 8, 1);
 
-                Graphics.CopyTexture(tempPositionTexture, PointCloudMap);
+                if (fliped)
+                {
+                    Graphics.CopyTexture(tempPositionTexture, StaticTools.FlipTexture(StaticTools.ToTexture2D(PointCloudMap, frameWidth, frameHeight)));
+                }
+                else
+                {
+                    Graphics.CopyTexture(tempPositionTexture, PointCloudMap);
+                }
+                
             }
         }
     }
@@ -114,5 +124,10 @@ public class KinectPointCloudMapped : MonoBehaviour
             Destroy(tempPositionTexture);
             tempPositionTexture = null;
         }
+    }
+
+    public void ToggleFlip()
+    {
+        fliped = !fliped;
     }
 }
