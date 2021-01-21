@@ -16,7 +16,7 @@ namespace Assets.WasapiAudio.Scripts.Unity
         {
             if (WasapiAudioSource == null)
             {
-                Debug.Log("You must set a WasapiAudioSource");
+                Debug.Log("You must set a WasapiAudioSource on "+gameObject);
                 return;
             }
 

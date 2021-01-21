@@ -1,4 +1,6 @@
-﻿using Assets.WasapiAudio.Scripts.Unity;
+﻿using System;
+using System.Collections;
+using Assets.WasapiAudio.Scripts.Unity;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -19,6 +21,8 @@ namespace Assets.Scripts
 
         public void Start()
         {
+            Profile.AudioSmoothingIterations = 1;
+           
             _spectrumBars = new GameObject[SpectrumSize];
             _originalPositions = new Vector3[SpectrumSize];
             _originalScale = Prefab.transform.localScale;
@@ -37,6 +41,15 @@ namespace Assets.Scripts
             Prefab.SetActive(false);
 
             _spectrumCaps = GetSpectrumData();
+
+            StartCoroutine(SetSmooth());
+
+        }
+
+        private IEnumerator SetSmooth()
+        {
+            yield return new WaitForSeconds(1f);
+            Profile.AudioSmoothingIterations = 6;
         }
 
         public void Update()
