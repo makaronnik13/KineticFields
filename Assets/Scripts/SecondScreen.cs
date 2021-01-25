@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SecondScreen : MonoBehaviour
 {
@@ -10,7 +12,24 @@ public class SecondScreen : MonoBehaviour
     [SerializeField]
     private GameObject Camera;
 
+    [SerializeField]
+    private Transform RawImg;
+
+    [SerializeField]
+    private GameObject FlipBtn;
+
     private int lastDisplaysCount = 0;
+
+
+    private void Start()
+    {
+        FlipBtn.GetComponent<Button>().onClick.AddListener(ToggleFlip);
+    }
+
+    private void ToggleFlip()
+    {
+        RawImg.localScale = new Vector3(-RawImg.localScale.x, RawImg.localScale.y, RawImg.localScale.z);
+    }
 
     // Update is called once per frame
     void Update()
@@ -30,6 +49,8 @@ public class SecondScreen : MonoBehaviour
             }
 
             lastDisplaysCount = Display.displays.Length;
+
+            FlipBtn.gameObject.SetActive(Display.displays.Length > 1);
         }
       
     }
