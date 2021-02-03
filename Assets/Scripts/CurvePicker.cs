@@ -6,9 +6,9 @@ using UnityEngine.UI;
 
 public class CurvePicker : MonoBehaviour
 {
-    public Action<int> OnCurvePicked = (v) => {};
+    public Action<string> OnCurvePicked = (v) => {};
 
-    private int currentId;
+    private string currentId;
 
     [SerializeField]
     private Image Img;
@@ -20,14 +20,14 @@ public class CurvePicker : MonoBehaviour
             FindObjectOfType<CurvePickWindow>().Show(currentId, (v)=>
             {
                 OnCurvePicked(v);
-                SetValue(v);
+                SetValue(SessionsManipulator.Instance.Curves.GetCurve(v));
             });
         });
     }
 
-    public void SetValue(int curveId)
+    public void SetValue(CurveInstance curve)
     {
-        currentId = curveId;
-        Img.sprite = CurveEditor.Instance.MakeScreenshot(DefaultResources.Settings.SizeCurves[curveId]);
+        currentId = curve.Id;
+        Img.sprite = CurveEditor.Instance.MakeScreenshot(curve.Curve);
     }
 }

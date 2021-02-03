@@ -11,7 +11,8 @@ using UnityEngine.VFX;
 public class KineticFieldController: Singleton<KineticFieldController>
 {
     private KeyCode[] keyCodes = 
-        {
+    {
+         KeyCode.Alpha0,
          KeyCode.Alpha1,
          KeyCode.Alpha2,
          KeyCode.Alpha3,
@@ -20,13 +21,11 @@ public class KineticFieldController: Singleton<KineticFieldController>
          KeyCode.Alpha6,
          KeyCode.Alpha7,
          KeyCode.Alpha8,
-         KeyCode.Alpha9,
-         KeyCode.Alpha0
+         KeyCode.Alpha9
     };
 
-
     [SerializeField]
-    private List<Sprite> OscilatorSprites;
+    private Transform OscilatorsHub;
 
     [SerializeField]
     public VisualEffect Visual;
@@ -44,7 +43,7 @@ public class KineticFieldController: Singleton<KineticFieldController>
     public GenericFlag<KineticPoint> ActivePoint = new GenericFlag<KineticPoint>("ActivePoint", null);
     public GenericFlag<FrequencyGap> ActiveGap = new GenericFlag<FrequencyGap>("ActiveGap", null);
 
-
+    public bool KeysEnabled = true;
 
     public List<ISource> Sources
     {
@@ -95,6 +94,13 @@ public class KineticFieldController: Singleton<KineticFieldController>
     private void SessionChanged(KineticSession session)
     {
         session.ActivePreset.SetState(session.Presets[0]);
+
+        int i = 0;
+        foreach (OscilatorView oscView in OscilatorsHub.GetComponentsInChildren<OscilatorView>())
+        {
+            oscView.Init(session.Oscilators[i]);
+            i++;
+        }
     }
 
     private void ActivePointChanged(KineticPoint obj)
@@ -157,24 +163,28 @@ public class KineticFieldController: Singleton<KineticFieldController>
             fg.UpdateFrequency(data);
         }
 
-        for (int i = 0; i < keyCodes.Count(); i++)
-        {
-            if (Input.GetKey(KeyCode.LeftShift))
-            {
-                if (Input.GetKeyDown(keyCodes[i]))
-                {
-                    Session.Value.SavePreset(i);
-                }
-            }
-            else
-            {
-                if (Input.GetKeyDown(keyCodes[i]))
-                {
-                    LoadPreset(i);
-                }
-            }
 
+        if (KeysEnabled)
+        {
+            for (int i = 0; i < keyCodes.Count(); i++)
+            {
+                if (Input.GetKey(KeyCode.LeftShift))
+                {
+                    if (Input.GetKeyDown(keyCodes[i]))
+                    {
+                        Session.Value.SavePreset(i);
+                    }
+                }
+                else
+                {
+                    if (Input.GetKeyDown(keyCodes[i]))
+                    {
+                        LoadPreset(i);
+                    }
+                }
+            }
         }
+
 
     }
 

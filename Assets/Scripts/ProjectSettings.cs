@@ -7,8 +7,6 @@ public class ProjectSettings: ScriptableObject
     [GradientUsage(true)]
     public List<Gradient> Gradients;
     public List<AnimationCurve> SizeCurves;
-    public List<Texture2D> ColorMaps;
-    public List<Texture2D> DisplacementMaps;
     public List<Mesh> Meshes;
 
     public AnimationCurve PointsCountCurve;

@@ -9,8 +9,8 @@ using UnityEngine;
 public class KineticSession
 {
     public List<FrequencyGap> Gaps = new List<FrequencyGap>();
-  //  [NonSerialized]
-  //  public List<Osc> Oscilators = new List<Osc>();
+
+    public List<Oscilator> Oscilators = new List<Oscilator>();
 
     public string SessionName;
 
@@ -32,13 +32,11 @@ public class KineticSession
 
     public KineticSession(string sessionName)
     {
-        Debug.Log("create session");
         SessionName = sessionName;
         for (int i = 0; i < 10; i++)
         {
             Presets[i] = new KineticPreset("Preset_"+i);
         }
-        Debug.Log("LOAD 0");
         ActivePreset.SetState(Presets[0]);
  
         AddGap("Fire", 0.1f, 0.3f, Color.red, DefaultResources.GapSprites[1]);
@@ -46,14 +44,18 @@ public class KineticSession
         AddGap("Earth", 0.6f, 0.3f, Color.green, DefaultResources.GapSprites[3]);
         AddGap("Water", 0.9f, 0.3f, Color.blue, DefaultResources.GapSprites[4]);
 
-        AddOscilator("O1", 1);
-        AddOscilator("O2", 2);
-        AddOscilator("O3", 4);
+        AddOscilator(1, 0);
+        AddOscilator(2, 0);
+        AddOscilator(1, 1);
+        AddOscilator(1, 1);
+        AddOscilator(1, 2);
+        AddOscilator(1, 3);
+        AddOscilator(1, 4);
     }
 
-    private void AddOscilator(string oName, int temp)
+    private void AddOscilator(float multiplyer, int repeatRate)
     {
-        //Oscilators.Add(new Oscilator(oName, Oscilators.Count, temp));
+        Oscilators.Add(new Oscilator(multiplyer, repeatRate));
     }
 
     public FrequencyGap AddGap(string name, float pos, float size, Color color, Sprite sprite)

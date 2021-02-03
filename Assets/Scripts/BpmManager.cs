@@ -38,7 +38,7 @@ public class BpmManager : AudioVisualizationEffect
     private Coroutine detectionCoroutine, spawnMarkerCoroutine, tapDetectionCoroutine;
 
 
-    
+    public Action OnBeat = () => { };
 
     private List<float> beats = new List<float>();
 
@@ -47,6 +47,8 @@ public class BpmManager : AudioVisualizationEffect
     private float sinceLastBeat = 0;
     private float lastClickTime;
     private float timer;
+
+    private Coroutine oscilatorsCoroutine;
 
     public override void Awake()
     {
@@ -108,11 +110,36 @@ public class BpmManager : AudioVisualizationEffect
 
         //bpm.SetState(beats.Count/Mathf.Min(DetectionTimeGap, Time.timeSinceLevelLoad) *60f);
 
+        OnBeat.Invoke();
+
         if (Playing.Value)
         {
             KineticFieldController.Instance.RandomSwap();
         }
+
+        if (oscilatorsCoroutine!=null)
+        {
+            StopCoroutine(oscilatorsCoroutine);
+        }
+
+        oscilatorsCoroutine = StartCoroutine(UpdateOscilators());
     }
+
+    private IEnumerator UpdateOscilators()
+    {
+        float gap = 60f / Bpm.Value;
+        float time = gap;
+        while (time >= 0)
+        {
+            foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
+            {
+                osc.UpdateOscilator(1f-time/gap);
+            }
+            time -= Time.deltaTime;
+            yield return null;
+        }
+    }
+
 
     void Update()
     {
@@ -121,60 +148,63 @@ public class BpmManager : AudioVisualizationEffect
             timer += Time.deltaTime;
         }
 
-        if (Input.GetKeyDown(KeyCode.Return))
+        if (KineticFieldController.Instance.KeysEnabled)
         {
-            if (Playing.Value)
+            if (Input.GetKeyDown(KeyCode.Return))
             {
-                Debug.Log("Stop");
-                //stop
-                Playing.SetState(false);
-            }
-            else
-            {
-                //play
+                if (Playing.Value)
+                {
+                    Debug.Log("Stop");
+                    //stop
+                    Playing.SetState(false);
+                }
+                else
+                {
+                    //play
                     Debug.Log("Play");
                     Playing.SetState(true);
-            }
-        }
-
-        if (Input.GetMouseButtonDown(2))
-        {
-            if (tapDetectionCoroutine!=null)
-            {
-                StopCoroutine(tapDetectionCoroutine);
-            }
-            tapDetectionCoroutine = StartCoroutine(TapDetection());
-            beats.Add(Time.timeSinceLevelLoad);
-
-            if (beats.Count>1)
-            {
-                float newBpm = 0;
-
-                newBpm = beats[beats.Count-1] - beats[0];
-
-                Debug.Log(newBpm);
-
-                newBpm /= beats.Count - 1f;
-
-                Debug.Log(newBpm);
-
-
-                Bpm.SetState(Mathf.RoundToInt(60f/newBpm));
-
-                if (spawnMarkerCoroutine != null)
-                {
-                    StopCoroutine(spawnMarkerCoroutine);
                 }
-                spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
             }
-            // StartDetection();
 
-         
-        }
+            if (Input.GetMouseButtonDown(2))
+            {
+                if (tapDetectionCoroutine != null)
+                {
+                    StopCoroutine(tapDetectionCoroutine);
+                }
+                tapDetectionCoroutine = StartCoroutine(TapDetection());
+                beats.Add(Time.timeSinceLevelLoad);
 
-        if (Input.GetMouseButtonUp(2))
-        {
-           // StopDetection();
+                if (beats.Count > 1)
+                {
+                    float newBpm = 0;
+
+                    newBpm = beats[beats.Count - 1] - beats[0];
+
+                    Debug.Log(newBpm);
+
+                    newBpm /= beats.Count - 1f;
+
+                    Debug.Log(newBpm);
+
+
+                    Bpm.SetState(Mathf.RoundToInt(60f / newBpm));
+
+                    if (spawnMarkerCoroutine != null)
+                    {
+                        StopCoroutine(spawnMarkerCoroutine);
+                    }
+                    spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
+                }
+                // StartDetection();
+
+
+            }
+
+            if (Input.GetMouseButtonUp(2))
+            {
+                // StopDetection();
+            }
         }
     }
 

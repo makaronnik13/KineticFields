@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class CurveEditor : MonoBehaviour
 {
+    public float HeigthMult = 1f;
+
     public static CurveEditor Instance;
 
     [SerializeField]
@@ -52,7 +54,7 @@ public class CurveEditor : MonoBehaviour
         for (int i = 0; i < 100; i++)
         {
 
-            Line.SetPosition(i, new Vector3(i/30f,curve.Evaluate(i/100f),0));   
+            Line.SetPosition(i, new Vector3(i/30f, curve.Evaluate(i/100f)*HeigthMult, 0));   
         }
     }
 }

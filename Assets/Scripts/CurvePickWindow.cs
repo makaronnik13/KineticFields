@@ -1,13 +1,16 @@
-﻿using System;
+﻿using com.armatur.common.flags;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CurvePickWindow : MonoBehaviour
+public class CurvePickWindow : Singleton<CurvePickWindow>
 {
-    public Action<int> OnPicked = (v) => { };
-    private Action<int> callback;
+    public GenericFlag<string> selectedCurveId = new GenericFlag<string>("selectedCurveId", "");
+
+    public Action<string> OnPicked = (v) => { };
+    private Action<string> callback;
 
     [SerializeField]
     private GameObject Btn;
@@ -18,13 +21,26 @@ public class CurvePickWindow : MonoBehaviour
     void Start()
     {
         KineticFieldController.Instance.ActivePoint.AddListener(PointChanged);
-        int i = 0;
-        foreach (AnimationCurve curve in DefaultResources.Settings.SizeCurves)
+        CreateBtns();
+        View.SetActive(false);
+    }
+
+    private void CreateBtns()
+    {
+        foreach (Transform t in View.transform)
         {
-            StartCoroutine(CreateCurveBtn(curve, i, i*0.2f));
+            if (t.gameObject.name != "AddBtn")
+            {
+                Destroy(t.gameObject);
+            }
+        }
+
+        int i = 0;
+        foreach (CurveInstance curve in SessionsManipulator.Instance.Curves.Curves)
+        {
+            StartCoroutine(CreateCurveBtn(curve, i * 0.05f));
             i++;
         }
-        View.SetActive(false);
     }
 
     private void PointChanged(KineticPoint obj)
@@ -32,16 +48,16 @@ public class CurvePickWindow : MonoBehaviour
         Hide();   
     }
 
-    private IEnumerator CreateCurveBtn(AnimationCurve curve, int id, float delay)
+    private IEnumerator CreateCurveBtn(CurveInstance curve, float delay)
     {
         yield return new WaitForSeconds(delay);
         GameObject newGradientBtn = Instantiate(Btn);
         newGradientBtn.transform.SetParent(View.transform);
-        newGradientBtn.GetComponent<Image>().sprite = CurveEditor.Instance.MakeScreenshot(curve);
-        newGradientBtn.GetComponent<Button>().onClick.AddListener(() => SelectCurve(id));
+        newGradientBtn.GetComponent<GradientCurveBtn>().Set(curve);
+
     }
 
-    private void SelectCurve(int id)
+    public void SelectCurve(string id)
     {
         OnPicked(id);
         if (callback!=null)
@@ -51,27 +67,32 @@ public class CurvePickWindow : MonoBehaviour
         Hide();
     }
 
-    [ContextMenu("Show")]
-    public void Test()
-    {
-        Show(3);
-    }
 
-    public void Show(int id, Action<int> callback = null)
+    public void Show(string id, Action<string> callback = null)
     {
-        Debug.Log(id);
+        selectedCurveId.SetState(id);
+        KineticFieldController.Instance.KeysEnabled = false;
         this.callback = callback;
         View.SetActive(true);
-        foreach (Transform t in View.transform)
-        {
-            t.GetChild(0).gameObject.SetActive(false);
-        }
-        View.transform.GetChild(id).GetChild(0).gameObject.SetActive(true);
+
+       
     }
 
     [ContextMenu("Hide")]
     public void Hide()
     {
+        KineticFieldController.Instance.KeysEnabled = true;
         View.SetActive(false);
+    }
+
+    public void AddCurve()
+    {
+        Debug.Log("AddCurve");
+        AnimationCurve nc = new AnimationCurve(new Keyframe[] {new Keyframe(0f,0f), new Keyframe(1f,0f) });
+        CurveInstance newCurve = new CurveInstance(nc);
+        StartCoroutine(CreateCurveBtn(newCurve, 0.05f));
+        selectedCurveId.SetState(newCurve.Id);
+        SessionsManipulator.Instance.Curves.Curves.Add(newCurve);
+        SessionsManipulator.Instance.SaveCurves();
     }
 }

@@ -37,8 +37,8 @@ public class MainPointInspector : Singleton<MainPointInspector>
         preset = KineticFieldController.Instance.Session.Value.ActivePreset.Value;
 
 
-        Curve.SetValue(preset.MainPoint.CurveId);
-        Gradient.SetValue(preset.MainPoint.gradientId);
+        Curve.SetValue(preset.MainPoint.Curve);
+        Gradient.SetValue(preset.MainPoint.Gradient);
         Mesh.SetValue(preset.MeshId.Value);
         Count.Init(preset.ParticlesCount);
         Size.Init(preset.MainPoint.Deep);
@@ -48,10 +48,10 @@ public class MainPointInspector : Singleton<MainPointInspector>
        
     }
 
-    private void GradientChanged(int gradient)
+    private void GradientChanged(string gradientId)
     {
-        KineticFieldController.Instance.ActivePoint.Value.Point.gradientId = gradient;
-        KineticFieldController.Instance.Visual.SetGradient("P0Gradient", DefaultResources.Settings.Gradients[gradient]);
+        KineticFieldController.Instance.ActivePoint.Value.Point.Gradient = SessionsManipulator.Instance.Gradients.GetGradient(gradientId);
+        KineticFieldController.Instance.Visual.SetGradient("P0Gradient", KineticFieldController.Instance.ActivePoint.Value.Point.Gradient.Gradient);
     }
 
     private void MeshChanged(int v)
@@ -60,10 +60,10 @@ public class MainPointInspector : Singleton<MainPointInspector>
         KineticFieldController.Instance.Visual.SetMesh("ParticleMesh", DefaultResources.Settings.Meshes[v]);
     }
 
-    private void CurveChanged(int v)
+    private void CurveChanged(string curveId)
     {
-        KineticFieldController.Instance.ActivePoint.Value.Point.CurveId = v;
-        KineticFieldController.Instance.Visual.SetAnimationCurve("P0Func", DefaultResources.Settings.SizeCurves[v]);
+        KineticFieldController.Instance.ActivePoint.Value.Point.Curve = SessionsManipulator.Instance.Curves.GetCurve(curveId);
+        KineticFieldController.Instance.Visual.SetAnimationCurve("P0Func", KineticFieldController.Instance.ActivePoint.Value.Point.Curve.Curve);
     }
 
     private void ActivePointChanged(KineticPoint point)
@@ -77,8 +77,8 @@ public class MainPointInspector : Singleton<MainPointInspector>
             KineticPreset  preset = KineticFieldController.Instance.Session.Value.ActivePreset.Value;
     
 
-            Curve.SetValue(preset.MainPoint.CurveId);
-            Gradient.SetValue(preset.MainPoint.gradientId);
+            Curve.SetValue(preset.MainPoint.Curve);
+            Gradient.SetValue(preset.MainPoint.Gradient);
             Mesh.SetValue(preset.MeshId.Value);
             Count.Init(preset.ParticlesCount);
             Size.Init(preset.MainPoint.Deep);

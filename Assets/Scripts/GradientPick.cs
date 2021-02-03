@@ -4,9 +4,9 @@ using UnityEngine.UI;
 
 public class GradientPick: MonoBehaviour
 {
-    public Action<int> OnGradientPicked = (v) => { };
+    public Action<string> OnGradientPicked = (v) => { };
 
-    private int currentId;
+    private string currentId;
 
     [SerializeField]
     private Image Img;
@@ -18,14 +18,14 @@ public class GradientPick: MonoBehaviour
             FindObjectOfType<GradientPickWindow>().Show(currentId, (v) =>
             {
                 OnGradientPicked(v);
-                SetValue(v);
+                SetValue(SessionsManipulator.Instance.Gradients.GetGradient(v));
             });
         });
     }
 
-    public void SetValue(int gradientId)
+    public void SetValue(GradientInstance gr)
     {
-        currentId = gradientId;
-        Img.sprite = FindObjectOfType<GradientPickWindow>().GetImage(DefaultResources.Settings.Gradients[gradientId]);
+        currentId = gr.Id;
+        Img.sprite = FindObjectOfType<GradientPickWindow>().GetImage(gr.Gradient);
     }
 }
