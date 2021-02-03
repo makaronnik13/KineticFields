@@ -29,33 +29,33 @@ public class KineticPointInstance: ICloneable
         }
     }
 
-    public Action<int> OnCurveChanged = (v) => { };
-    public Action<int> OnGradientChanged = (v) => { };
+    public Action<string> OnCurveChanged = (v) => { };
+    public Action<string> OnGradientChanged = (v) => { };
 
-    public int CurveId = 0;
-    public AnimationCurve Curve
+    public string CurveId = "";
+    public CurveInstance Curve
     {
         get
         {
-            return DefaultResources.Settings.SizeCurves[CurveId];
+            return SessionsManipulator.Instance.Curves.GetCurve(CurveId);//DefaultResources.Settings.SizeCurves[CurveId];
         }
         set
         {
-            CurveId = DefaultResources.Settings.SizeCurves.IndexOf(value);
+            CurveId = value.Id;
             OnCurveChanged(CurveId);
         }
     }
 
-    public int gradientId = 0;
-    public Gradient Gradient
+    public string gradientId = "";
+    public GradientInstance Gradient
     {
         get
         {
-            return DefaultResources.Settings.Gradients[gradientId];
+            return SessionsManipulator.Instance.Gradients.GetGradient(gradientId);//DefaultResources.Settings.Gradients[gradientId];
         }
         set
         {
-            gradientId = DefaultResources.Settings.Gradients.IndexOf(value);
+            gradientId = value.Id;
             OnGradientChanged(gradientId);
         }
     }
@@ -85,7 +85,6 @@ public class KineticPointInstance: ICloneable
             ShowGradient = true;
         }
 
-        CurveId = 2;
         Deep.Value.AddListener(DeepChanged);
     }
 
@@ -107,14 +106,14 @@ public class KineticPointInstance: ICloneable
         Position = new Vector3(Position.x, Position.y, v-1);
     }
 
-    private void GradientChanged(int g)
+    private void GradientChanged(string g)
     {
-            KineticFieldController.Instance.Visual.SetGradient("P" + Id + "Gradient".ToString(), DefaultResources.Settings.Gradients[g]);
+            KineticFieldController.Instance.Visual.SetGradient("P" + Id + "Gradient".ToString(), SessionsManipulator.Instance.Gradients.GetGradient(g).Gradient);
     }
 
-    private void CurveChanged(int v)
+    private void CurveChanged(string v)
     {
-            KineticFieldController.Instance.Visual.SetAnimationCurve("P" + Id + "Func", DefaultResources.Settings.SizeCurves[v]);
+            KineticFieldController.Instance.Visual.SetAnimationCurve("P" + Id + "Func", SessionsManipulator.Instance.Curves.GetCurve(v).Curve);
     }
 
     public object Clone()

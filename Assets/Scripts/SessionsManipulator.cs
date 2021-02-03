@@ -8,8 +8,11 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SessionsManipulator : MonoBehaviour
+public class SessionsManipulator : Singleton<SessionsManipulator>
 {
+    private string curvesPath;
+    private string gradientPath;
+
     [SerializeField]
     private TMPro.TMP_InputField SessionName;
 
@@ -22,10 +25,19 @@ public class SessionsManipulator : MonoBehaviour
     [SerializeField]
     private GameObject SessionBtn;
 
-  
+    public CurvesStorage Curves;
+    public GradientStorage Gradients;
 
- 
     private List<string> FileNames = new List<string>();
+
+    void Awake()
+    {
+        curvesPath = Application.persistentDataPath + "/" + "Curves.kfcu";
+        gradientPath = Application.persistentDataPath + "/" + "Gradients.kfgr";
+
+        LoadCurves();
+        LoadGradients();
+    }
 
     private void Start()
     {
@@ -48,6 +60,73 @@ public class SessionsManipulator : MonoBehaviour
         }
 
         KineticFieldController.Instance.Session.AddListener(SessionChanged);
+
+        StartCoroutine(DelayLoad());
+    }
+
+    private void LoadGradients()
+    {
+        if (File.Exists(gradientPath))
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(gradientPath, FileMode.Open);
+            Gradients = (GradientStorage)bf.Deserialize(file);
+            file.Close();
+        }
+        else
+        {
+            Gradients = new GradientStorage();
+            foreach (Gradient gr in DefaultResources.Settings.Gradients)
+            {
+                Gradients.Gradients.Add(new GradientInstance(gr));
+            }
+            SaveGradients();
+        }
+
+    }
+
+    public void SaveGradients()
+    {
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file = File.Create(gradientPath);
+        bf.Serialize(file, Gradients);
+        file.Close();
+    }
+
+
+    private void LoadCurves()
+    {
+        
+        if (File.Exists(curvesPath))
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(curvesPath, FileMode.Open);
+            Curves = (CurvesStorage)bf.Deserialize(file);
+            file.Close();
+        }
+        else
+        {
+            Curves = new CurvesStorage();
+            foreach (AnimationCurve cu in DefaultResources.Settings.SizeCurves)
+            {
+                Curves.Curves.Add(new CurveInstance(cu));
+            }
+            SaveCurves();
+        }
+    }
+
+    public void SaveCurves()
+    {
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file = File.Create(curvesPath);
+        bf.Serialize(file, Curves);
+        file.Close();
+    }
+
+    private IEnumerator DelayLoad()
+    {
+        yield return new WaitForSeconds(0.3f);
+        Load(FileNames[0]);
     }
 
     private void Update()
@@ -58,9 +137,7 @@ public class SessionsManipulator : MonoBehaviour
             {
                 Save(KineticFieldController.Instance.Session.Value.SessionName);
             }
-        }
-
-        
+        }      
     }
 
    
@@ -100,7 +177,6 @@ public class SessionsManipulator : MonoBehaviour
 
     public void Load(string sessionName)
     {
-        Debug.Log("Load "+sessionName);
 
        // Save(sessionName);
 
@@ -115,7 +191,6 @@ public class SessionsManipulator : MonoBehaviour
             file.Close();
         KineticFieldController.Instance.LoadSession(KineticFieldController.Instance.Session.Value);
 
-        Debug.Log(KineticFieldController.Instance.Session.Value.SessionName+" Loaded");
         SessionSelection.SetActive(false);
     }
 

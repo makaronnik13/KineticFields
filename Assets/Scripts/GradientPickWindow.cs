@@ -1,14 +1,17 @@
-﻿using System;
+﻿using com.armatur.common.flags;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class GradientPickWindow : MonoBehaviour
+public class GradientPickWindow : Singleton<GradientPickWindow>
 {
-    public Action<int> OnPicked = (v)=> { };
-    public Action<int> callback;
+    public GenericFlag<string> selectedGradientId = new GenericFlag<string>("selectedGradientId", "");
+
+    public Action<string> OnPicked = (v)=> { };
+    public Action<string> callback;
 
     [SerializeField]
     private GameObject GradientBtn;
@@ -19,13 +22,25 @@ public class GradientPickWindow : MonoBehaviour
     void Start()
     {
         KineticFieldController.Instance.ActivePoint.AddListener(PointChanged);
-        int i = 0;
-        foreach (Gradient gradient in DefaultResources.Settings.Gradients)
+        CreateGradientBtns();
+        View.SetActive(false);
+    }
+
+    void CreateGradientBtns()
+    {
+        foreach (Transform t in View.transform)
         {
-            CreateGradientBtn(gradient, i);
+            if (t.gameObject.name!="AddBtn")
+            {
+                Destroy(t.gameObject);
+            }
+        }
+        int i = 0;
+        foreach (GradientInstance gradient in SessionsManipulator.Instance.Gradients.Gradients)
+        {
+            CreateGradientBtn(gradient);
             i++;
         }
-        View.SetActive(false);
     }
 
     private void PointChanged(KineticPoint obj)
@@ -33,7 +48,7 @@ public class GradientPickWindow : MonoBehaviour
         Hide();
     }
 
-    private void CreateGradientBtn(Gradient gradient, int id)
+    private void CreateGradientBtn(GradientInstance gradient)
     {
         GameObject newGradientBtn = Instantiate(GradientBtn);
         newGradientBtn.transform.SetParent(View.transform);
@@ -41,13 +56,12 @@ public class GradientPickWindow : MonoBehaviour
 
         for (int i = 0; i < 175; i++)
         {
-                newTex.SetPixel(i, 0, gradient.Evaluate(i / 175f));
+                newTex.SetPixel(i, 0, gradient.Gradient.Evaluate(i / 175f));
         }
 
         newTex.Apply();
 
-        newGradientBtn.GetComponent<Image>().sprite = GetImage(gradient);
-        newGradientBtn.GetComponent<Button>().onClick.AddListener(()=>SelectGradient(id));
+        newGradientBtn.GetComponent<GradientCurveBtn>().Set(gradient);
     }
 
     public Sprite GetImage(Gradient gradient)
@@ -64,7 +78,7 @@ public class GradientPickWindow : MonoBehaviour
         return Sprite.Create(newTex, new Rect(0, 0, newTex.width, newTex.height), Vector3.one / 2f);
     }
 
-    private void SelectGradient(int id)
+    public void SelectGradient(string id)
     {
         OnPicked(id);
         if (callback!=null)
@@ -74,26 +88,29 @@ public class GradientPickWindow : MonoBehaviour
         Hide();
     }
 
-    [ContextMenu("Show")]
-    public void Test()
+    public void Show(string id, Action<string> callback = null)
     {
-        Show(3);
-    }
-
-    public void Show(int id, Action<int> callback = null)
-    {
+        selectedGradientId.SetState(id);
+        KineticFieldController.Instance.KeysEnabled = false;
         this.callback = callback;
         View.SetActive(true);
-        foreach (Transform t in View.transform)
-        {
-            t.GetChild(0).gameObject.SetActive(false);
-        }
-        View.transform.GetChild(id).GetChild(0).gameObject.SetActive(true);
+        
     }
 
     [ContextMenu("Hide")]
     public void Hide()
     {
+        KineticFieldController.Instance.KeysEnabled = true;
         View.SetActive(false);
+    }
+
+    public void AddGradient()
+    {
+        Debug.Log("AddGradient");
+        GradientInstance newGradient = new GradientInstance(new Gradient());
+        CreateGradientBtn(newGradient);
+        selectedGradientId.SetState(newGradient.Id);
+        SessionsManipulator.Instance.Gradients.Gradients.Add(newGradient);
+        SessionsManipulator.Instance.SaveGradients();
     }
 }

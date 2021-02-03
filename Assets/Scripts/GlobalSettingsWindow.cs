@@ -14,26 +14,28 @@ public class GlobalSettingsWindow : MonoBehaviour
     private GameObject View;
 
     [SerializeField]
-    private TMPro.TMP_Dropdown ColorTexture, DisplacementTexture, Gradient, SizeOverLifetime, Mesh;
+    private TMPro.TMP_Dropdown  Gradient, SizeOverLifetime, Mesh;
 
     [SerializeField]
     private TMPro.TMP_InputField CountPerFrame, MinLifetime, MaxLifetime;
 
     private void Start()
     {
-        ColorTexture.onValueChanged.AddListener(ColorTextureChanged);
-        DisplacementTexture.onValueChanged.AddListener(DisplacementTextureChanged);
+
         Gradient.onValueChanged.AddListener(GradientChanged);
         SizeOverLifetime.onValueChanged.AddListener(SizeOverLifetimeChanged);
         Mesh.onValueChanged.AddListener(MeshChanged);
+        
+        /*
+   ColorTexture.ClearOptions();
 
-        ColorTexture.ClearOptions();
-        for (int i = 0; i < DefaultResources.Settings.ColorMaps.Count; i++)
-        {
-            Sprite newSprite = Sprite.Create(DefaultResources.Settings.ColorMaps[i], new Rect(Vector2.zero, new Vector2(DefaultResources.Settings.ColorMaps[i].width, DefaultResources.Settings.ColorMaps[i].height)), Vector2.one / 2f);
-            Debug.Log(newSprite);
-            ColorTexture.AddOptions(new List<TMPro.TMP_Dropdown.OptionData>() {new TMPro.TMP_Dropdown.OptionData(DefaultResources.Settings.ColorMaps[i].name, newSprite)});
-        }
+   for (int i = 0; i < DefaultResources.Settings.ColorMaps.Count; i++)
+   {
+       Sprite newSprite = Sprite.Create(DefaultResources.Settings.ColorMaps[i], new Rect(Vector2.zero, new Vector2(DefaultResources.Settings.ColorMaps[i].width, DefaultResources.Settings.ColorMaps[i].height)), Vector2.one / 2f);
+       Debug.Log(newSprite);
+       ColorTexture.AddOptions(new List<TMPro.TMP_Dropdown.OptionData>() {new TMPro.TMP_Dropdown.OptionData(DefaultResources.Settings.ColorMaps[i].name, newSprite)});
+   }
+ 
 
         DisplacementTexture.ClearOptions();
         for (int i = 0; i < DefaultResources.Settings.DisplacementMaps.Count; i++)
@@ -42,7 +44,7 @@ public class GlobalSettingsWindow : MonoBehaviour
             Debug.Log(newSprite);
             DisplacementTexture.AddOptions(new List<TMPro.TMP_Dropdown.OptionData>() { new TMPro.TMP_Dropdown.OptionData(DefaultResources.Settings.DisplacementMaps[i].name, newSprite) });
         }
-
+        */
 
         Gradient.ClearOptions();
         for (int i = 0; i < DefaultResources.Settings.Gradients.Count; i++)
@@ -65,8 +67,7 @@ public class GlobalSettingsWindow : MonoBehaviour
         MinLifetime.onSubmit.AddListener(LifetimeChanged);
         MaxLifetime.onSubmit.AddListener(LifetimeChanged);
 
-        ColorTexture.value = 0;
-        DisplacementTexture.value = 0;
+
         Gradient.value = 0;
         SizeOverLifetime.value = 0;
         Mesh.value = 0;
@@ -75,10 +76,6 @@ public class GlobalSettingsWindow : MonoBehaviour
         MaxLifetime.text = 1f.ToString();
     }
 
-    private void DisplacementTextureChanged(int v)
-    {
-        Visual.SetTexture("DisplacementMap", DefaultResources.Settings.DisplacementMaps[v]);
-    }
 
     private void GradientChanged(int v)
     {
@@ -107,10 +104,6 @@ public class GlobalSettingsWindow : MonoBehaviour
         Visual.SetFloat("MaxLifetime", float.Parse(MaxLifetime.text));
     }
 
-    private void ColorTextureChanged(int v)
-    {
-        Visual.SetTexture("ColorMap", DefaultResources.Settings.ColorMaps[v]);
-    }
 
     public void ToggleWindow()
     {

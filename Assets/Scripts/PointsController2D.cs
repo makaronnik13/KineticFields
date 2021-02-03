@@ -37,43 +37,47 @@ public class PointsController2D : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        if (KineticFieldController.Instance.KeysEnabled)
         {
-            if (KineticFieldController.Instance.ActivePoint.Value == null)
+            if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                KineticFieldController.Instance.ActivePoint.SetState(transform.GetChild(0).GetComponent<KineticPoint>());
-            }
-            else
-            {
-                int pos = GetComponentsInChildren<KineticPoint>().ToList().IndexOf(KineticFieldController.Instance.ActivePoint.Value);
-
-                pos++;
-                if (pos >= GetComponentsInChildren<KineticPoint>().Count())
+                if (KineticFieldController.Instance.ActivePoint.Value == null)
                 {
-                    pos = 0;
+                    KineticFieldController.Instance.ActivePoint.SetState(transform.GetChild(0).GetComponent<KineticPoint>());
                 }
-                KineticFieldController.Instance.ActivePoint.SetState(GetComponentsInChildren<KineticPoint>()[pos]);
+                else
+                {
+                    int pos = GetComponentsInChildren<KineticPoint>().ToList().IndexOf(KineticFieldController.Instance.ActivePoint.Value);
+
+                    pos++;
+                    if (pos >= GetComponentsInChildren<KineticPoint>().Count())
+                    {
+                        pos = 0;
+                    }
+                    KineticFieldController.Instance.ActivePoint.SetState(GetComponentsInChildren<KineticPoint>()[pos]);
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                if (KineticFieldController.Instance.ActivePoint.Value == null)
+                {
+                    KineticFieldController.Instance.ActivePoint.SetState(transform.GetChild(0).GetComponent<KineticPoint>());
+                }
+                else
+                {
+                    int pos = GetComponentsInChildren<KineticPoint>().ToList().IndexOf(KineticFieldController.Instance.ActivePoint.Value);
+
+                    pos--;
+                    if (pos < 0)
+                    {
+                        pos = GetComponentsInChildren<KineticPoint>().Count() - 1;
+                    }
+
+                    KineticFieldController.Instance.ActivePoint.SetState(GetComponentsInChildren<KineticPoint>()[pos]);
+                }
             }
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            if (KineticFieldController.Instance.ActivePoint.Value == null)
-            {
-                KineticFieldController.Instance.ActivePoint.SetState(transform.GetChild(0).GetComponent<KineticPoint>());
-            }
-            else
-            {
-                int pos = GetComponentsInChildren<KineticPoint>().ToList().IndexOf(KineticFieldController.Instance.ActivePoint.Value);
-
-                pos--;
-                if (pos < 0)
-                {
-                    pos = GetComponentsInChildren<KineticPoint>().Count()-1;
-                }
-
-                KineticFieldController.Instance.ActivePoint.SetState(GetComponentsInChildren<KineticPoint>()[pos]);
-            }
-        }
+       
     }
 
     private void Start()

@@ -102,7 +102,6 @@ public class ModifiyngParameterView : MonoBehaviour
 
     private void BaseSliderChanged(float v)
     {
-        Debug.Log("1");
         Parameter.SliderValueChanged(v);
   
         ValueText.text = Math.Round(v, decRound).ToString();

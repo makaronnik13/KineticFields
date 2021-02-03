@@ -31,6 +31,8 @@ public class FrequencyGapEditor : MonoBehaviour
     void Start()
     {
         KineticFieldController.Instance.ActiveGap.AddListener(ActiveGapChanged);
+
+        /*
         foreach (Transform t in transform)
         {
             t.gameObject.SetActive(false);
@@ -43,7 +45,7 @@ public class FrequencyGapEditor : MonoBehaviour
         foreach (MeshRenderer mr in PointsVisual3d.GetComponentsInChildren<MeshRenderer>())
         {
             mr.enabled = false;
-        }
+        }*/
     }
 
     private void GroupChanged(FrequencyGap.GapGroup group)
@@ -61,7 +63,7 @@ public class FrequencyGapEditor : MonoBehaviour
         {
             if (hideCoroutine == null)
             {
-                hideCoroutine = StartCoroutine(Hide(HideTime));
+               // hideCoroutine = StartCoroutine(Hide(HideTime)); //hide ui
             }
         }
         else
