@@ -18,6 +18,7 @@ public class Oscilator : ISource
         }
     }
 
+    [NonSerialized]
     private Action<float> onValueChanged = (v) => { };
     public Action<float> OnValueChanged
     {
@@ -31,7 +32,9 @@ public class Oscilator : ISource
         }
     }
 
+    [NonSerialized]
     public Action<float> onTimeChanged = (v) => { };
+    [NonSerialized]
     public Action<float> onMiddleValueChanged = (v) => { };
 
     private float value;
@@ -60,19 +63,67 @@ public class Oscilator : ISource
         }
     }
 
-    public void UpdateOscilator(float v)
+    private float startBeatTime = 0;
+    private int beatsCount = 0;
+
+    public void UpdateOscilator()
     {
-        v /= Mathf.Pow(2,RepeatRate);
+        float repeatTime = 60f / BpmManager.Instance.Bpm.Value;
+
+        if (RepeatRate>0)
+        {
+            repeatTime /= Mathf.Pow(2, RepeatRate);
+        }
+        else
+        {
+            repeatTime *= Mathf.Pow(2, Mathf.Abs(RepeatRate));
+        }
+
+        float timeLast = Time.realtimeSinceStartup - startBeatTime;
+
+        float v = timeLast / repeatTime;
+
+        if (RepeatRate > 0)
+        {
+            v *= Mathf.Pow(2, RepeatRate);
+            while (v>1f)
+            {
+                v--;
+            }
+        }
 
         onTimeChanged(v);
 
-        while (v>1f)
-        {
-            v -= 1f;
-        }
+        
         value = Curve.Curve.Evaluate(v);
+
         onMiddleValueChanged(value);
         value*=Multiplyer;
         OnValueChanged(value);
+    }
+
+
+
+    public void Beat()
+    {
+        beatsCount++;
+
+        if (RepeatRate<0)
+        {
+            if (beatsCount>= Mathf.Pow(2, Mathf.Abs(RepeatRate)))
+            {
+                Reset();
+            }
+        }
+        else
+        {
+            Reset();
+        }
+    }
+
+    public void Reset()
+    {
+        beatsCount = 0;
+        startBeatTime = Time.realtimeSinceStartup;
     }
 }

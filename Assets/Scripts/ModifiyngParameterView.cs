@@ -12,7 +12,6 @@ public class ModifiyngParameterView : MonoBehaviour
 
     [SerializeField]
     private int decRound = 2;
-
     [SerializeField]
     private TMPro.TextMeshProUGUI ValueText;
     [SerializeField]
@@ -21,8 +20,7 @@ public class ModifiyngParameterView : MonoBehaviour
     private ArcSlider MultiplicatorSlider;
     [SerializeField]
     private RectTransform ExtraValue;
-    [SerializeField]
-    private GameObject AddSourceBtn;
+
 
     private void Start()
     {
@@ -66,8 +64,9 @@ public class ModifiyngParameterView : MonoBehaviour
 
     private void SourceChanged(int sourceId)
     {
-        AddSourceBtn.SetActive(Parameter.Source == null);
-        MultiplicatorSlider.gameObject.SetActive(Parameter.Source != null);
+        MultiplicatorSlider.transform.GetChild(0).gameObject.SetActive(Parameter.Source != null);
+        MultiplicatorSlider.transform.GetChild(1).gameObject.SetActive(Parameter.Source == null);
+
         if (Parameter.Source != null)
         {
             MultiplicatorSlider.Value = Parameter.Multiplicator.Value;
@@ -120,24 +119,10 @@ public class ModifiyngParameterView : MonoBehaviour
         dragCoroutine = null;
     }
 
-    public void ChooseSource()
-    {
 
-        int index = KineticFieldController.Instance.Sources.IndexOf(Parameter.Source);
-        if (index == -1)
-        {
-            index = 0;
-        }
-        FindObjectOfType<SourcePickWindow>().Show(index, (v)=>
-        {
-            if (v == 0)
-            {
-                Parameter.SetSource(null);
-            }
-            else
-            {
-                Parameter.SetSource(KineticFieldController.Instance.Sources[v]);
-            }
-        });
+
+    public void ChooseSource(ISource source)
+    {
+        Parameter.SetSource(source);
     }
 }

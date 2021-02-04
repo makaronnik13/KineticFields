@@ -16,7 +16,19 @@ public class KineticSession
 
     public GenericFlag<KineticPreset> ActivePreset = new GenericFlag<KineticPreset>("ActivePreset", null);
 
-    public KineticPreset[] Presets = new KineticPreset[10];
+    public KineticPresetLine[] Lines = new KineticPresetLine[10]
+    {
+        new KineticPresetLine("Line_0"),
+        new KineticPresetLine("Line_1"),
+        new KineticPresetLine("Line_2"),
+        new KineticPresetLine("Line_3"),
+        new KineticPresetLine("Line_4"),
+        new KineticPresetLine("Line_5"),
+        new KineticPresetLine("Line_6"),
+        new KineticPresetLine("Line_7"),
+        new KineticPresetLine("Line_8"),
+        new KineticPresetLine("Line_9")
+    };
 
     public KineticSession()
     {
@@ -24,9 +36,12 @@ public class KineticSession
 
     public void Init()
     {
-        foreach (KineticPreset preset in Presets)
+        foreach (KineticPresetLine presetLine in Lines)
         {
-            preset.Init();
+            foreach (KineticPreset preset in presetLine.Presets)
+            {
+                preset.Init();
+            }
         }
     }
 
@@ -35,9 +50,13 @@ public class KineticSession
         SessionName = sessionName;
         for (int i = 0; i < 10; i++)
         {
-            Presets[i] = new KineticPreset("Preset_"+i);
+            for (int j = 0; j < 10; j++)
+            {
+                Lines[i].Presets[j] = new KineticPreset("Preset_" + j);
+            }
         }
-        ActivePreset.SetState(Presets[0]);
+
+        ActivePreset.SetState(Lines[0].Presets[0]);
  
         AddGap("Fire", 0.1f, 0.3f, Color.red, DefaultResources.GapSprites[1]);
         AddGap("Air", 0.3f, 0.3f, Color.cyan, DefaultResources.GapSprites[2]);
@@ -79,7 +98,7 @@ public class KineticSession
             ActivePreset.Value.MeshId.RemoveListener(MeshChanged);
         }
 
-        ActivePreset.SetState(Presets[i]);
+        ActivePreset.SetState(Lines[0].Presets[i]);
         ActivePreset.Value.Init();
 
         ActivePreset.Value.NearCutPlane.Value.AddListener(NearCutPlaneChanged);
@@ -134,7 +153,7 @@ public class KineticSession
     public void SavePreset(int i)
     {
         Debug.Log("save preset "+i);
-        Presets[i] = ActivePreset.Value.Clone() as KineticPreset;
+        Lines[0].Presets[i] = ActivePreset.Value.Clone() as KineticPreset;
     }
 
   

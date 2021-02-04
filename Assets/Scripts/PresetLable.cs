@@ -43,7 +43,7 @@ public class PresetLable : MonoBehaviour
 
     private void PresetChanged(KineticPreset preset)
     {
-        Lable.text = KineticFieldController.Instance.Session.Value.Presets.ToList().IndexOf(preset).ToString();
+        Lable.text = KineticFieldController.Instance.Session.Value.Lines[0].Presets.ToList().IndexOf(preset).ToString();
         StartCoroutine(HideLable());
     }
 

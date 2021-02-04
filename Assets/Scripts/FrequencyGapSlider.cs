@@ -16,6 +16,13 @@ public class FrequencyGapSlider : MonoBehaviour
     private Slider Slider;
 
     private FrequencyGap gap;
+    public FrequencyGap Gap
+    {
+        get
+        {
+            return gap;
+        }
+    }
 
     private void Start()
     {
