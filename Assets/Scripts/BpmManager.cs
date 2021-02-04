@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BpmManager : AudioVisualizationEffect
 {
@@ -48,7 +49,7 @@ public class BpmManager : AudioVisualizationEffect
     private float lastClickTime;
     private float timer;
 
-    private Coroutine oscilatorsCoroutine;
+    //private Coroutine oscilatorsCoroutine;
 
     public override void Awake()
     {
@@ -92,7 +93,11 @@ public class BpmManager : AudioVisualizationEffect
     private void BpmChanged(int v)
     {
         BpmLable.text = v + "bpm";
-       //Debug.Log(v);
+        foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
+        {
+            osc.Reset();
+        }
+        //Debug.Log(v);
     }
 
 
@@ -117,14 +122,20 @@ public class BpmManager : AudioVisualizationEffect
             KineticFieldController.Instance.RandomSwap();
         }
 
-        if (oscilatorsCoroutine!=null)
+        /*if (oscilatorsCoroutine!=null)
         {
             StopCoroutine(oscilatorsCoroutine);
-        }
+        }*/
 
-        oscilatorsCoroutine = StartCoroutine(UpdateOscilators());
+        //oscilatorsCoroutine = StartCoroutine(UpdateOscilators());
+
+        foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
+        {
+            osc.Beat();
+        }
     }
 
+    /*
     private IEnumerator UpdateOscilators()
     {
         float gap = 60f / Bpm.Value;
@@ -133,13 +144,13 @@ public class BpmManager : AudioVisualizationEffect
         {
             foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
             {
-                osc.UpdateOscilator(1f-time/gap);
+                osc.UpdateOscilator(1f-time/gap, beatId);
             }
             time -= Time.deltaTime;
             yield return null;
         }
     }
-
+    */
 
     void Update()
     {
@@ -148,7 +159,7 @@ public class BpmManager : AudioVisualizationEffect
             timer += Time.deltaTime;
         }
 
-        if (KineticFieldController.Instance.KeysEnabled)
+        if (KineticFieldController.Instance.KeysEnabled && EventSystem.current.currentSelectedGameObject == null)
         {
             if (Input.GetKeyDown(KeyCode.Return))
             {
@@ -181,12 +192,7 @@ public class BpmManager : AudioVisualizationEffect
 
                     newBpm = beats[beats.Count - 1] - beats[0];
 
-                    Debug.Log(newBpm);
-
                     newBpm /= beats.Count - 1f;
-
-                    Debug.Log(newBpm);
-
 
                     Bpm.SetState(Mathf.RoundToInt(60f / newBpm));
 
@@ -205,6 +211,11 @@ public class BpmManager : AudioVisualizationEffect
             {
                 // StopDetection();
             }
+        }
+
+        foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
+        {
+            osc.UpdateOscilator();
         }
     }
 

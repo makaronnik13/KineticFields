@@ -26,6 +26,13 @@ public class OscilatorView : MonoBehaviour
 
 
     private Oscilator oscilator;
+    public Oscilator Oscilator
+    {
+        get
+        {
+            return oscilator;
+        }
+    }
 
     private void Start()
     {
@@ -53,7 +60,16 @@ public class OscilatorView : MonoBehaviour
         this.oscilator.onMiddleValueChanged += MiddleValueChanged;
 
         Multiplyer.text = oscilator.Multiplyer.ToString();
-        RateValue.text = "1/" + Mathf.Pow(2, oscilator.RepeatRate);
+
+        if (oscilator.RepeatRate>0)
+        {
+            RateValue.text = "1/" + Mathf.Pow(2, oscilator.RepeatRate);
+        }
+        else
+        {
+            RateValue.text = Mathf.Pow(2, Mathf.Abs(oscilator.RepeatRate)).ToString();
+        }
+
 
         CurveImg.sprite = CurveEditor.Instance.MakeScreenshot(oscilator.Curve.Curve);
     }
@@ -89,15 +105,21 @@ public class OscilatorView : MonoBehaviour
 
         if (oscilator.RepeatRate>4)
         {
-            oscilator.RepeatRate = 0;
+            oscilator.RepeatRate = -4;
         }
 
-        RateValue.text = "1/" + Mathf.Pow(2, oscilator.RepeatRate);
+        if (oscilator.RepeatRate > 0)
+        {
+            RateValue.text = "1/" + Mathf.Pow(2, oscilator.RepeatRate);
+        }
+        else
+        {
+            RateValue.text = Mathf.Pow(2, Mathf.Abs(oscilator.RepeatRate)).ToString();
+        }
     }
 
     public void Toggle()
     {
-        Debug.Log("toggle");
         Animator.SetBool("Show", !Animator.GetBool("Show"));
 
         if (Animator.GetBool("Show"))

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ArcSlider : MonoBehaviour, IBeginDragHandler, IDragHandler, IPointerClickHandler, IEndDragHandler
+public class ArcSlider : MonoBehaviour, IBeginDragHandler, IDragHandler, IPointerClickHandler, IEndDragHandler, IDropHandler
 {
     public float DistMultiplyer = 1;
 
@@ -86,11 +86,20 @@ public class ArcSlider : MonoBehaviour, IBeginDragHandler, IDragHandler, IPointe
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        GetComponentInParent<ModifiyngParameterView>().ChooseSource();
+        GetComponentInParent<ModifiyngParameterView>().ChooseSource(null);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         ValueChanger.enabled = false;
+    }
+
+    public void OnDrop(PointerEventData eventData)
+    {
+
+        if (KineticFieldController.Instance.DraggingSource.Value!=null)
+        {
+            GetComponentInParent<ModifiyngParameterView>().ChooseSource(KineticFieldController.Instance.DraggingSource.Value);
+        }
     }
 }

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.VFX;
 
@@ -33,8 +34,6 @@ public class KineticFieldController: Singleton<KineticFieldController>
     [SerializeField]
     private BarSpectrum SpectrumBar;
 
-
-
     [SerializeField]
     private FrequencyGapEditor GapEditor;
 
@@ -42,8 +41,12 @@ public class KineticFieldController: Singleton<KineticFieldController>
     public GenericFlag<KineticSession> Session = new GenericFlag<KineticSession>("CurrentSession", null);
     public GenericFlag<KineticPoint> ActivePoint = new GenericFlag<KineticPoint>("ActivePoint", null);
     public GenericFlag<FrequencyGap> ActiveGap = new GenericFlag<FrequencyGap>("ActiveGap", null);
+    public GenericFlag<ISource> DraggingSource = new GenericFlag<ISource>("DraggingSource", null);
 
     public bool KeysEnabled = true;
+
+    [SerializeField]
+    private GameObject draggingSourceView;
 
     public List<ISource> Sources
     {
@@ -54,8 +57,10 @@ public class KineticFieldController: Singleton<KineticFieldController>
             if (Session.Value!=null)
             {
                 scs.AddRange(Session.Value.Gaps);
+                scs.AddRange(Session.Value.Oscilators);
             }
-            //scs.AddRange(Session.ActivePreset.Value.Oscilators);   
+          
+            
             return scs;
         }
     }
@@ -93,7 +98,7 @@ public class KineticFieldController: Singleton<KineticFieldController>
 
     private void SessionChanged(KineticSession session)
     {
-        session.ActivePreset.SetState(session.Presets[0]);
+        session.ActivePreset.SetState(session.Lines[0].Presets[0]);
 
         int i = 0;
         foreach (OscilatorView oscView in OscilatorsHub.GetComponentsInChildren<OscilatorView>())
@@ -122,7 +127,7 @@ public class KineticFieldController: Singleton<KineticFieldController>
 
     public void RandomSwap()
     {
-            int id = Session.Value.Presets.ToList().IndexOf(Session.Value.ActivePreset.Value);
+            int id = Session.Value.Lines[0].Presets.ToList().IndexOf(Session.Value.ActivePreset.Value);
 
             if (UnityEngine.Random.value > 0.5f)
             {
@@ -135,9 +140,9 @@ public class KineticFieldController: Singleton<KineticFieldController>
 
             if (id < 0)
             {
-                id = Session.Value.Presets.Count() - 1;
+                id = Session.Value.Lines.Count() - 1;
             }
-            if (id >= Session.Value.Presets.Count())
+            if (id >= Session.Value.Lines.Count())
             {
                 id = 0;
             }
@@ -150,10 +155,28 @@ public class KineticFieldController: Singleton<KineticFieldController>
         ActivePoint.AddListener(ActivePointChanged);
         ActiveGap.AddListener(ActiveGapChanged);
         Session.AddListener(SessionChanged);
+        DraggingSource.AddListener(DraggingSourceChanged);
+    }
+
+    private void DraggingSourceChanged(ISource source)
+    {
+
+        draggingSourceView.SetActive(source!=null);
+        
+        if (source!=null)
+        {
+            draggingSourceView.transform.GetChild(0).GetComponent<Image>().sprite = source.Icon;
+        }
     }
 
     private void Update()
     {
+        draggingSourceView.transform.position = Input.mousePosition;
+        if (DraggingSource.Value!=null && Input.GetMouseButtonUp(0))
+        {
+            DraggingSource.SetState(null);
+        }
+
         foreach (FrequencyGap fg in Session.Value.Gaps)
         {
             int start = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.Start);
@@ -164,7 +187,7 @@ public class KineticFieldController: Singleton<KineticFieldController>
         }
 
 
-        if (KeysEnabled)
+        if (KeysEnabled && EventSystem.current.currentSelectedGameObject == null)
         {
             for (int i = 0; i < keyCodes.Count(); i++)
             {
@@ -185,7 +208,10 @@ public class KineticFieldController: Singleton<KineticFieldController>
             }
         }
 
-
+        if (Input.GetMouseButtonDown(1))
+        {
+            ActivePoint.SetState(null);
+        }
     }
 
     public void LoadPreset(int i)
@@ -205,7 +231,7 @@ public class KineticFieldController: Singleton<KineticFieldController>
         int j = 0;
         foreach (KineticPoint kp in FindObjectsOfType<KineticPoint>().OrderBy(kp=>kp.transform.GetSiblingIndex()))
         {
-            kp.Init(Session.Value.Presets[i].Points[j]);
+            kp.Init(Session.Value.Lines[0].Presets[i].Points[j]);
             j++;
         }
     }
