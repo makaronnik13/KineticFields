@@ -97,6 +97,11 @@ public class PointsController2D : MonoBehaviour
 
     private void PresetChanged(KineticPreset preset)
     {
+        if (preset == null)
+        {
+            return;
+        }
+
         preset = KineticFieldController.Instance.Session.Value.ActivePreset.Value;
         Gravity = preset.Gravity;
         Speed = preset.Speed;

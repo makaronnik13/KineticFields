@@ -49,7 +49,6 @@ public class ModifyingParameter: ICloneable
         MAX = max;
         BaseValue.SetState(value);
         SourceId.SetState(KineticFieldController.Instance.Sources.IndexOf(source));
-
     }
 
     private void SourceChanged(int sourceId)

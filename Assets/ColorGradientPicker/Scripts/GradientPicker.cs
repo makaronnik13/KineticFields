@@ -25,8 +25,10 @@ public class GradientPicker : MonoBehaviour
     private static GradientEvent onGS;
 
     //Gradient before editing
+    [GradientUsage(true)]
     private static Gradient originalGradient;
     //current Gradient
+    [GradientUsage(true)]
     private static Gradient modifiedGradient;
 
     //key template

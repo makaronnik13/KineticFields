@@ -16,19 +16,27 @@ public class SecondScreen : MonoBehaviour
     private Transform RawImg;
 
     [SerializeField]
-    private GameObject FlipBtn;
+    private Toggle FlipBtn;
 
     private int lastDisplaysCount = 0;
 
 
     private void Start()
     {
-        FlipBtn.GetComponent<Button>().onClick.AddListener(ToggleFlip);
+        FlipBtn.onValueChanged.AddListener(ToggleFlip);
     }
 
-    private void ToggleFlip()
+    private void ToggleFlip(bool v)
     {
-        RawImg.localScale = new Vector3(-RawImg.localScale.x, RawImg.localScale.y, RawImg.localScale.z);
+        if (v)
+        {
+            RawImg.localScale = new Vector3(-RawImg.localScale.x, RawImg.localScale.y, RawImg.localScale.z);
+        }
+        else
+        {
+            RawImg.localScale = new Vector3(RawImg.localScale.x, RawImg.localScale.y, RawImg.localScale.z);
+        }
+        
     }
 
     // Update is called once per frame

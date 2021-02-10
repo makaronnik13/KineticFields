@@ -30,6 +30,19 @@ public static class DefaultResources
         }
     }
 
+    private static List<Sprite> presetSprites;
+    public static List<Sprite> PresetSprites
+    {
+        get
+        {
+            if (presetSprites == null)
+            {
+                presetSprites = Resources.LoadAll<Sprite>("Sprites/Presets").ToList();
+            }
+            return presetSprites;
+        }
+    }
+
     private static List<Sprite> oscilatorSprites;
     public static List<Sprite> OscilatorSprites
     {
