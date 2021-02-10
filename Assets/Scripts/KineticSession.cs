@@ -18,8 +18,7 @@ public class KineticSession
 
     public string[,] PresetsGrid = new string[8, 8];
 
-    public SpectrumShot[,] SpectrumShots = new SpectrumShot[8, 8];
-       
+    public SpectrumShot[,] SpectrumShots = new SpectrumShot[8, 8];    
 
     public GenericFlag<SerializedVector2Int> SelectedPresetPos = new GenericFlag<SerializedVector2Int>("SelectedPresetId", new SerializedVector2Int(0,0));
 
@@ -43,9 +42,12 @@ public class KineticSession
 
     }
 
+    [NonSerialized]
+    public KineticPreset AveragePreset;
 
     public KineticSession()
     {
+       
     }
 
     public void Init()
@@ -55,9 +57,8 @@ public class KineticSession
             preset.Init();
         }
 
- 
+        AveragePreset = new KineticPreset("AveragePreset");
     }
-
 
     public KineticSession(string sessionName)
     {
@@ -82,6 +83,143 @@ public class KineticSession
         AddOscilator(1, 2);
         AddOscilator(1, 3);
         AddOscilator(1, 4);
+    }
+
+    public void UpdateAveragePreset(Dictionary<KineticPreset, float> weihgts)
+    {
+        float weigthsSum = weihgts.Select(p=>p.Value).Sum();
+        Dictionary<int, float> meshesWeigth = new Dictionary<int, float>();
+
+        float lifetime = 0f;
+        float cutPlane = 0f;
+        float nearPlane = 0f;
+        float particlesCount = 0f;
+
+        foreach (KeyValuePair<KineticPreset, float> weigthpair in weihgts)
+        {
+            cutPlane += weigthpair.Value * weigthpair.Key.FarCutPlane.Value.Value;
+            lifetime += weigthpair.Value * weigthpair.Key.Lifetime.Value.Value;
+            nearPlane += weigthpair.Value * weigthpair.Key.NearCutPlane.Value.Value;
+            particlesCount += weigthpair.Value * weigthpair.Key.ParticlesCount.Value.Value;
+
+            if (!meshesWeigth.ContainsKey(weigthpair.Key.MeshId.Value))
+            {
+                meshesWeigth.Add(weigthpair.Key.MeshId.Value, 0);
+            }
+            meshesWeigth[weigthpair.Key.MeshId.Value] += weigthpair.Value;
+
+        }
+
+        cutPlane /= weigthsSum;
+        nearPlane /= weigthsSum;
+        lifetime /= weigthsSum;
+        particlesCount /= weigthsSum;
+
+
+        AveragePreset.FarCutPlane.SetValue(cutPlane);
+        AveragePreset.NearCutPlane.SetValue(nearPlane);
+        AveragePreset.Lifetime.SetValue(lifetime);
+        AveragePreset.ParticlesCount.SetValue(particlesCount);     
+        AveragePreset.MeshId.SetState(meshesWeigth.OrderByDescending(p => p.Value).FirstOrDefault().Key);
+
+
+        for (int i = 0; i < 13; i++)
+        {
+            Dictionary<KineticPointInstance, float> pointsWeigths = new Dictionary<KineticPointInstance, float>();
+            foreach (KeyValuePair<KineticPreset, float> pair in weihgts)
+            {
+                pointsWeigths.Add(pair.Key.Points[i], pair.Value);
+            }
+
+            InterpolatePoint(AveragePreset.Points[i], pointsWeigths);
+        }
+
+
+    }
+
+    private void InterpolatePoint(KineticPointInstance averagePoint, Dictionary<KineticPointInstance, float> pointsWeigths)
+    {
+        List<KineticPointInstance> points = new List<KineticPointInstance>();
+        List<int> values = new List<int>();
+
+        foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
+        {
+            if (!pair.Key.Active.Value)
+            {
+                pointsWeigths[pair.Key] = 0;
+            }
+        }
+
+      
+        float weigthsSum = pointsWeigths.Select(p => p.Value).Sum();
+
+        averagePoint.Active.SetState(true);
+
+        AnimationCurve pointCurve = new AnimationCurve();
+
+        for (int i = 0; i < 100; i++)
+        {
+            float averageValue = 0;
+            foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
+            {
+                averageValue += pair.Value * pair.Key.Curve.Curve.Evaluate(i/100f);
+            }
+            averageValue /= weigthsSum;
+            pointCurve.AddKey(i/100f, averageValue);
+        }
+
+        averagePoint.Curve = new CurveInstance(pointCurve);
+
+        float deep = 0;
+        float x = 0;
+        float y = 0;
+        float radius = 0;
+        float volume = 0;
+
+        Gradient gradient = pointsWeigths.FirstOrDefault().Key.Gradient.Gradient;
+        float weigth = pointsWeigths.FirstOrDefault().Value;
+
+        float mult = 1;
+
+        foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
+        {
+            float w = weigth *= mult;
+
+            if (w>pair.Value)
+            {
+                gradient = StaticTools.Lerp(gradient, pair.Key.Gradient.Gradient, pair.Value / w);
+            }
+            else
+            {
+                gradient = StaticTools.Lerp(pair.Key.Gradient.Gradient, gradient, w/ pair.Value);
+            }
+
+            weigth = (weigth + pair.Value)/2f;
+
+            mult += weigth;
+        }
+
+
+        foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
+        {
+            deep += pair.Value * pair.Key.Deep.Value.Value;
+            x += pair.Value * pair.Key.Position.x;
+            y += pair.Value * pair.Key.Position.y;
+            radius += pair.Value * pair.Key.Radius.Value.Value;
+            volume += pair.Value * pair.Key.Volume.Value.Value;
+        }
+
+        deep /= weigthsSum;
+        x /= weigthsSum;
+        y /= weigthsSum;
+        radius /= weigthsSum;
+        volume /= weigthsSum;
+
+        averagePoint.Deep.SetValue(deep);
+        averagePoint.Position = new Vector3(x,y,deep);
+        averagePoint.Radius.SetValue(radius);
+        averagePoint.Volume.SetValue(volume);
+        averagePoint.Gradient = new GradientInstance(gradient);
     }
 
     private void AddOscilator(float multiplyer, int repeatRate)
