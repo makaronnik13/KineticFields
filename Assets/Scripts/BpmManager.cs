@@ -47,7 +47,7 @@ public class BpmManager : AudioVisualizationEffect
 
     private float sinceLastBeat = 0;
     private float lastClickTime;
-    private float timer;
+ 
 
     //private Coroutine oscilatorsCoroutine;
 
@@ -154,28 +154,9 @@ public class BpmManager : AudioVisualizationEffect
 
     void Update()
     {
-        if (Playing.Value)
-        {
-            timer += Time.deltaTime;
-        }
 
         if (KineticFieldController.Instance.KeysEnabled && EventSystem.current.currentSelectedGameObject == null)
         {
-            if (Input.GetKeyDown(KeyCode.Return))
-            {
-                if (Playing.Value)
-                {
-                    Debug.Log("Stop");
-                    //stop
-                    Playing.SetState(false);
-                }
-                else
-                {
-                    //play
-                    Debug.Log("Play");
-                    Playing.SetState(true);
-                }
-            }
 
             if (Input.GetMouseButtonDown(2))
             {

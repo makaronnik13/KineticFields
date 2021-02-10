@@ -16,19 +16,33 @@ public class KineticSession
 
     public GenericFlag<KineticPreset> ActivePreset = new GenericFlag<KineticPreset>("ActivePreset", null);
 
-    public KineticPresetLine[] Lines = new KineticPresetLine[10]
+    public string[,] PresetsGrid = new string[8, 8];
+
+    public SpectrumShot[,] SpectrumShots = new SpectrumShot[8, 8];
+       
+
+    public GenericFlag<SerializedVector2Int> SelectedPresetPos = new GenericFlag<SerializedVector2Int>("SelectedPresetId", new SerializedVector2Int(0,0));
+
+    public List<KineticPreset> Presets = new List<KineticPreset>();
+
+    public KineticPreset GetPresetById(string presetId)
     {
-        new KineticPresetLine("Line_0"),
-        new KineticPresetLine("Line_1"),
-        new KineticPresetLine("Line_2"),
-        new KineticPresetLine("Line_3"),
-        new KineticPresetLine("Line_4"),
-        new KineticPresetLine("Line_5"),
-        new KineticPresetLine("Line_6"),
-        new KineticPresetLine("Line_7"),
-        new KineticPresetLine("Line_8"),
-        new KineticPresetLine("Line_9")
-    };
+        return Presets.FirstOrDefault(p => p.Id == presetId);
+    }
+
+    public KineticPreset GetPresetByPosition(Vector2Int pos)
+    {
+        string id = PresetsGrid[pos.x, pos.y];
+
+        if (id == null)
+        {
+            return null;
+        }
+
+        return GetPresetById(id);
+
+    }
+
 
     public KineticSession()
     {
@@ -36,28 +50,26 @@ public class KineticSession
 
     public void Init()
     {
-        foreach (KineticPresetLine presetLine in Lines)
+        foreach (KineticPreset preset in Presets)
         {
-            foreach (KineticPreset preset in presetLine.Presets)
-            {
-                preset.Init();
-            }
+            preset.Init();
         }
+
+ 
     }
+
 
     public KineticSession(string sessionName)
     {
+        Debug.Log("Create session");
         SessionName = sessionName;
-        for (int i = 0; i < 10; i++)
-        {
-            for (int j = 0; j < 10; j++)
-            {
-                Lines[i].Presets[j] = new KineticPreset("Preset_" + j);
-            }
-        }
+        Presets.Clear();
+        Presets.Add(new KineticPreset("Preset_0"));
 
-        ActivePreset.SetState(Lines[0].Presets[0]);
- 
+        PresetsGrid[0, 0] = Presets[0].Id;
+
+        ActivePreset.SetState(Presets[0]);
+
         AddGap("Fire", 0.1f, 0.3f, Color.red, DefaultResources.GapSprites[1]);
         AddGap("Air", 0.3f, 0.3f, Color.cyan, DefaultResources.GapSprites[2]);
         AddGap("Earth", 0.6f, 0.3f, Color.green, DefaultResources.GapSprites[3]);
@@ -78,16 +90,25 @@ public class KineticSession
     }
 
     public FrequencyGap AddGap(string name, float pos, float size, Color color, Sprite sprite)
+    {
+        FrequencyGap fg = new FrequencyGap(name, pos, size, color, sprite);
+        Gaps.Add(fg);
+        return fg;
+    }
+
+    public void LoadPreset(SerializedVector2Int pos)
+    {
+        Debug.Log(pos.x+"/"+pos.y);
+
+        KineticPreset pr = GetPresetByPosition(new Vector2Int(pos.y, pos.x));
+        if (pr == null)
         {
-            FrequencyGap fg = new FrequencyGap(name, pos, size, color, sprite);
-            Gaps.Add(fg);
-            return fg;
+            Debug.Log("null preset loaded!");
+           // return;
+            ///pr = Presets.FirstOrDefault();
         }
 
-        public void LoadPreset(int i)
-        {
-
-        if (ActivePreset.Value!=null)
+        if (ActivePreset.Value != null)
         {
             ActivePreset.Value.NearCutPlane.Value.RemoveListener(NearCutPlaneChanged);
             ActivePreset.Value.FarCutPlane.Value.RemoveListener(FarCutPlaneChanged);
@@ -98,14 +119,19 @@ public class KineticSession
             ActivePreset.Value.MeshId.RemoveListener(MeshChanged);
         }
 
-        ActivePreset.SetState(Lines[0].Presets[i]);
+        SelectedPresetPos.SetState(pos);
+
+
+        ActivePreset.SetState(pr);
+
+
         ActivePreset.Value.Init();
 
         ActivePreset.Value.NearCutPlane.Value.AddListener(NearCutPlaneChanged);
         ActivePreset.Value.FarCutPlane.Value.AddListener(FarCutPlaneChanged);
         ActivePreset.Value.Lifetime.Value.AddListener(LifetimeChanged);
         ActivePreset.Value.ParticlesCount.Value.AddListener(PCountChanged);
-       
+
         ActivePreset.Value.MainPoint.Deep.Value.AddListener(GlobalSizeChanged);
         ActivePreset.Value.MainPoint.Radius.Value.AddListener(NoizeChanged);
         ActivePreset.Value.MeshId.AddListener(MeshChanged);
@@ -152,9 +178,9 @@ public class KineticSession
 
     public void SavePreset(int i)
     {
-        Debug.Log("save preset "+i);
-        Lines[0].Presets[i] = ActivePreset.Value.Clone() as KineticPreset;
+        Debug.Log("save preset " + i);
+        Presets[i] = ActivePreset.Value.Clone() as KineticPreset;
     }
 
-  
+
 }

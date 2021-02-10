@@ -18,6 +18,51 @@ public class KineticPreset: ICloneable
     public ModifyingParameter ParticlesCount;
     public ModifyingParameter Gravity, Speed;
 
+    public GenericFlag<int> IconId = new GenericFlag<int>("IconId", 0);
+    public GenericFlag<string> color = new GenericFlag<string>("Color","00FF00FF");
+    public GenericFlag<string> color2 = new GenericFlag<string>("Color", "FF0000FF");
+
+    public Sprite Icon
+    {
+        get
+        {
+            return DefaultResources.PresetSprites[IconId.Value];
+        }
+        set
+        {
+            IconId.SetState(DefaultResources.PresetSprites.IndexOf(value));
+        }
+    }
+
+    public Color Color
+    {
+        get
+        {
+            Color c = Color.white;
+            ColorUtility.TryParseHtmlString("#"+color.Value, out c);
+            return c;
+        }
+        set
+        {
+            color.SetState(ColorUtility.ToHtmlStringRGBA(value));
+        }
+    }
+    public Color Color2
+    {
+        get
+        {
+            Color c = Color.white;
+            ColorUtility.TryParseHtmlString("#" + color2.Value, out c);
+            return c;
+        }
+        set
+        {
+            color2.SetState(ColorUtility.ToHtmlStringRGBA(value));
+        }
+    }
+
+    public string Id;
+
     public KineticPointInstance MainPoint
     {
         get
@@ -47,6 +92,11 @@ public class KineticPreset: ICloneable
 
     public KineticPreset(string presetName)
     {
+        Id = Guid.NewGuid().ToString();
+
+        IconId.SetState(UnityEngine.Random.Range(0, DefaultResources.PresetSprites.Count - 1));
+        Color = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.3f, 0.3f, 1f, 1f);
+        Color2 = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 1f, 1f, 1f, 1f);
 
         PresetName = presetName;
 
@@ -83,6 +133,10 @@ public class KineticPreset: ICloneable
         Debug.Log("CLONE");
 
         KineticPreset clone = new KineticPreset(PresetName);
+        clone.Id = System.Guid.NewGuid().ToString();
+        clone.IconId.SetState(IconId.Value);
+        clone.Color = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.3f, 0.3f, 1f, 1f);
+        clone.Color2 = Color2;
         clone.FarCutPlane = FarCutPlane.Clone() as ModifyingParameter;
         clone.Gravity = Gravity.Clone() as ModifyingParameter;
         clone.Lifetime = Lifetime.Clone() as ModifyingParameter;

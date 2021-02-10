@@ -35,7 +35,9 @@ public class PresetLable : MonoBehaviour
 
     private void SessionChanged(KineticSession session)
     {
-        if (session!=null && session.ActivePreset.Value!=null)
+        Debug.Log("add listener");
+
+        if (session!=null)
         {
             session.ActivePreset.AddListener(PresetChanged);
         }
@@ -43,7 +45,7 @@ public class PresetLable : MonoBehaviour
 
     private void PresetChanged(KineticPreset preset)
     {
-        Lable.text = KineticFieldController.Instance.Session.Value.Lines[0].Presets.ToList().IndexOf(preset).ToString();
+        Lable.text = preset.PresetName;
         StartCoroutine(HideLable());
     }
 
