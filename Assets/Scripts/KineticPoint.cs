@@ -40,6 +40,11 @@ public class KineticPoint : MonoBehaviour
     {
         get
         {
+            if (PresetsLerper.Instance.View.activeInHierarchy)
+            {
+                return KineticFieldController.Instance.Session.Value.AveragePreset.Points[point.Id];
+            }
+            
             return point;
         }
         set
@@ -108,22 +113,22 @@ public class KineticPoint : MonoBehaviour
     {
         if (Point.Active.Value)
         {
-            KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Radius", v);
+            //KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Radius", v);
         }
         else
         {
-            KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Radius", 0);
+            //KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Radius", 0);
         }
     }
     private void VolumeChanged(float v)
     {
         if (Point.Active.Value)
         {
-            KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Value", v);
+            //KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Value", v);
         }
         else
         {
-            KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Value", 0);
+            //KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Value", 0);
         }
     }
     private void ActivePointChanged(KineticPoint p)

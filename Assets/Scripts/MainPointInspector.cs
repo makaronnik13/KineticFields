@@ -51,19 +51,19 @@ public class MainPointInspector : Singleton<MainPointInspector>
     private void GradientChanged(string gradientId)
     {
         KineticFieldController.Instance.ActivePoint.Value.Point.Gradient = SessionsManipulator.Instance.Gradients.GetGradient(gradientId);
-        KineticFieldController.Instance.Visual.SetGradient("P0Gradient", KineticFieldController.Instance.ActivePoint.Value.Point.Gradient.Gradient);
+        //KineticFieldController.Instance.Visual.SetGradient("P0Gradient", KineticFieldController.Instance.ActivePoint.Value.Point.Gradient.Gradient);
     }
 
     private void MeshChanged(int v)
     {
         KineticFieldController.Instance.Session.Value.ActivePreset.Value.MeshId.SetState(v);
-        KineticFieldController.Instance.Visual.SetMesh("ParticleMesh", DefaultResources.Settings.Meshes[v]);
+       // KineticFieldController.Instance.Visual.SetMesh("ParticleMesh", DefaultResources.Settings.Meshes[v]);
     }
 
     private void CurveChanged(string curveId)
     {
         KineticFieldController.Instance.ActivePoint.Value.Point.Curve = SessionsManipulator.Instance.Curves.GetCurve(curveId);
-        KineticFieldController.Instance.Visual.SetAnimationCurve("P0Func", KineticFieldController.Instance.ActivePoint.Value.Point.Curve.Curve);
+        //KineticFieldController.Instance.Visual.SetAnimationCurve("P0Func", KineticFieldController.Instance.ActivePoint.Value.Point.Curve.Curve);
     }
 
     private void ActivePointChanged(KineticPoint point)

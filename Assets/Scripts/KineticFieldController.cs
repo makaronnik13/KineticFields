@@ -256,6 +256,47 @@ public class KineticFieldController: Singleton<KineticFieldController>
         {
             ActivePoint.SetState(null);
         }
+
+        if (!PresetsLerper.Instance.View.activeInHierarchy)
+        {
+            UpdateVisual(Session.Value.ActivePreset.Value);
+        }
+        else
+        {
+            Session.Value.UpdateAveragePreset(PresetsLerper.Instance.Weigths);
+            UpdateVisual(Session.Value.AveragePreset, true);
+        }
+    }
+
+    private void UpdateVisual(KineticPreset preset, bool useTemp = false)
+    {
+
+        Visual.SetFloat("FrontCutPlane", preset.NearCutPlane.Value.Value);
+        Visual.SetFloat("BackCutPlane", preset.FarCutPlane.Value.Value);
+        Visual.SetMesh("ParticleMesh", DefaultResources.Settings.Meshes[preset.MeshId.Value]);
+        Visual.SetFloat("Lifetime", preset.Lifetime.Value.Value);
+        Visual.SetInt("Rate", Mathf.RoundToInt(preset.ParticlesCount.Value.Value));
+
+
+        Visual.SetFloat("Size", (0.05f + preset.MainPoint.Deep.Value.Value - 1f) / 8f);
+        //size
+
+        for (int i = 0; i < 13; i++)
+        {
+            Visual.SetFloat("P" + i + "Radius", preset.Points[i].Radius.Value.Value);
+            Visual.SetFloat("P" + i + "Value", preset.Points[i].Volume.Value.Value);
+            if (useTemp)
+            {
+                Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points[i].TempGradient.Gradient);
+                Visual.SetAnimationCurve("P" + i + "Func", preset.Points[i].TempCurve.Curve);
+            }
+            else
+            {
+                Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points[i].Gradient.Gradient);
+                Visual.SetAnimationCurve("P" + i + "Func", preset.Points[i].Curve.Curve);
+            }
+        } 
+
     }
 
     public void LoadPreset(SerializedVector2Int pos)

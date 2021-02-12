@@ -3,17 +3,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PresetsLerper : MonoBehaviour
+public class PresetsLerper : Singleton<PresetsLerper>
 {
     private KineticSession Session;
 
     [SerializeField]
-    private GameObject View;
+    public GameObject View;
 
     [SerializeField]
     private GameObject PointPrefab;
 
     private List<PresetPoint> points = new List<PresetPoint>();
+
+    public Dictionary<KineticPreset, float> Weigths
+    {
+        get
+        {
+            Dictionary<KineticPreset, float> weigths = new Dictionary<KineticPreset, float>();
+            foreach (PresetPoint point in points)
+            {
+                weigths.Add(point.Preset, point.Volume.Value);
+            }
+            return weigths;
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -58,4 +71,5 @@ public class PresetsLerper : MonoBehaviour
         point.Init(preset);
         points.Add(point);
     }
+
 }

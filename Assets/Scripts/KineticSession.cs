@@ -87,7 +87,14 @@ public class KineticSession
 
     public void UpdateAveragePreset(Dictionary<KineticPreset, float> weihgts)
     {
+      
         float weigthsSum = weihgts.Select(p=>p.Value).Sum();
+
+        if (weigthsSum == 0)
+        {
+            weigthsSum = 100000f;
+        }
+
         Dictionary<int, float> meshesWeigth = new Dictionary<int, float>();
 
         float lifetime = 0f;
@@ -115,11 +122,14 @@ public class KineticSession
         lifetime /= weigthsSum;
         particlesCount /= weigthsSum;
 
+        //Debug.Log(cutPlane+"/"+nearPlane+"/"+lifetime+"/"+particlesCount+"/"+ meshesWeigth.OrderByDescending(p => p.Value).FirstOrDefault().Key);
 
-        AveragePreset.FarCutPlane.SetValue(cutPlane);
-        AveragePreset.NearCutPlane.SetValue(nearPlane);
-        AveragePreset.Lifetime.SetValue(lifetime);
-        AveragePreset.ParticlesCount.SetValue(particlesCount);     
+
+
+        AveragePreset.FarCutPlane.Value.SetState(cutPlane);
+        AveragePreset.NearCutPlane.Value.SetState(nearPlane);
+        AveragePreset.Lifetime.Value.SetState(lifetime);
+        AveragePreset.ParticlesCount.Value.SetState(particlesCount);     
         AveragePreset.MeshId.SetState(meshesWeigth.OrderByDescending(p => p.Value).FirstOrDefault().Key);
 
 
@@ -142,16 +152,25 @@ public class KineticSession
         List<KineticPointInstance> points = new List<KineticPointInstance>();
         List<int> values = new List<int>();
 
-        foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
+        for (int i = 0; i < pointsWeigths.Count; i++)
         {
-            if (!pair.Key.Active.Value)
+           KeyValuePair<KineticPointInstance, float> pair = pointsWeigths.ToList<KeyValuePair<KineticPointInstance, float>>()[i];
+            if (!pair.Key.Active.Value && pair.Key.Id!=0)
             {
                 pointsWeigths[pair.Key] = 0;
             }
         }
 
+
       
         float weigthsSum = pointsWeigths.Select(p => p.Value).Sum();
+
+        if (weigthsSum == 0)
+        {
+            weigthsSum = 10000f;
+        }
+
+        Debug.Log(weigthsSum);
 
         averagePoint.Active.SetState(true);
 
@@ -168,7 +187,7 @@ public class KineticSession
             pointCurve.AddKey(i/100f, averageValue);
         }
 
-        averagePoint.Curve = new CurveInstance(pointCurve);
+        averagePoint.TempCurve = new CurveInstance(pointCurve);
 
         float deep = 0;
         float x = 0;
@@ -183,15 +202,15 @@ public class KineticSession
 
         foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
         {
-            float w = weigth *= mult;
+            float w = weigth * mult;
 
             if (w>pair.Value)
             {
-                gradient = StaticTools.Lerp(gradient, pair.Key.Gradient.Gradient, pair.Value / w);
+                //gradient = StaticTools.Lerp(gradient, pair.Key.Gradient.Gradient, pair.Value / w);
             }
             else
             {
-                gradient = StaticTools.Lerp(pair.Key.Gradient.Gradient, gradient, w/ pair.Value);
+                //gradient = StaticTools.Lerp(pair.Key.Gradient.Gradient, gradient, w/ pair.Value);
             }
 
             weigth = (weigth + pair.Value)/2f;
@@ -217,9 +236,10 @@ public class KineticSession
 
         averagePoint.Deep.SetValue(deep);
         averagePoint.Position = new Vector3(x,y,deep);
+
         averagePoint.Radius.SetValue(radius);
         averagePoint.Volume.SetValue(volume);
-        averagePoint.Gradient = new GradientInstance(gradient);
+        averagePoint.TempGradient = new GradientInstance(gradient);
     }
 
     private void AddOscilator(float multiplyer, int repeatRate)
@@ -290,7 +310,7 @@ public class KineticSession
 
     private void GlobalSizeChanged(float val)
     {
-        KineticFieldController.Instance.Visual.SetFloat("Size", (0.05f + val - 1f) / 8f);
+        //KineticFieldController.Instance.Visual.SetFloat("Size", (0.05f + val - 1f) / 8f);
     }
 
     private void PCountChanged(float v)
@@ -306,12 +326,12 @@ public class KineticSession
 
     private void NearCutPlaneChanged(float v)
     {
-        KineticFieldController.Instance.Visual.SetFloat("FrontCutPlane", v);
+        //KineticFieldController.Instance.Visual.SetFloat("FrontCutPlane", v);
     }
 
     private void FarCutPlaneChanged(float v)
     {
-        KineticFieldController.Instance.Visual.SetFloat("BackCutPlane", v);
+        //KineticFieldController.Instance.Visual.SetFloat("BackCutPlane", v);
     }
 
     public void SavePreset(int i)
