@@ -330,4 +330,12 @@ public class KineticFieldController: Singleton<KineticFieldController>
         }
     }
 
+    public void SyncOsc()
+    {
+        foreach (Oscilator o in Session.Value.Oscilators)
+        {
+            o.Reset();
+        }
+    }
+
 }

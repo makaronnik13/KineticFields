@@ -1,10 +1,14 @@
-﻿using System;
+﻿using com.armatur.common.flags;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PresetsLerper : Singleton<PresetsLerper>
 {
+    [SerializeField]
+    private TMPro.TextMeshProUGUI RateLable;
+
     private KineticSession Session;
 
     [SerializeField]
@@ -14,6 +18,10 @@ public class PresetsLerper : Singleton<PresetsLerper>
     private GameObject PointPrefab;
 
     private List<PresetPoint> points = new List<PresetPoint>();
+
+    private GenericFlag<int> Rate = new GenericFlag<int>("RandomRate", 0);
+
+    private int beats = 0;
 
     public Dictionary<KineticPreset, float> Weigths
     {
@@ -32,6 +40,37 @@ public class PresetsLerper : Singleton<PresetsLerper>
     void Start()
     {
         KineticFieldController.Instance.Session.AddListener(SessionChanged);
+        Rate.AddListener(RateChanged);
+    }
+
+    private void RateChanged(int v)
+    {
+        if (v==0)
+        {
+            RateLable.text = "-";
+        }
+        else
+        {
+            RateLable.text = Mathf.Pow(2, v - 1).ToString();
+        }
+        beats = 0;
+
+        BpmManager.Instance.OnBeat -= Beat;
+
+        if (v!=0)
+        {
+            BpmManager.Instance.OnBeat += Beat;
+        }
+    }
+
+    private void Beat()
+    {
+        beats++;
+        if (beats>= Mathf.Pow(2, Rate.Value-1))
+        {
+            beats = 0;
+            RandomPositions();
+        }
     }
 
     private void SessionChanged(KineticSession session)
@@ -72,4 +111,27 @@ public class PresetsLerper : Singleton<PresetsLerper>
         points.Add(point);
     }
 
+    [ContextMenu("Random")]
+    public void RandomPositions()
+    {
+        float angle = 360f / points.Count;
+
+        for (int i = 0; i < points.Count; i++)
+        {
+            float a = angle * i;
+
+            float r = UnityEngine.Random.Range(0, 150f);
+
+            points[i].transform.localPosition = new Vector3(r * Mathf.Cos(a * Mathf.Rad2Deg), r * Mathf.Sin(a * Mathf.Rad2Deg), 0);
+        }
+    }
+
+    public void ChangeRate()
+    {
+        Rate.SetState(Rate.Value+1);
+        if (Rate.Value>4)
+        {
+            Rate.SetState(0);
+        }
+    }
 }
