@@ -187,8 +187,6 @@ public class KineticFieldController: Singleton<KineticFieldController>
         }
 
 
-        Debug.Log(s);
-
         LoadPreset(nearIds.OrderBy(id=>Guid.NewGuid()).FirstOrDefault());
     }
 
@@ -285,6 +283,7 @@ public class KineticFieldController: Singleton<KineticFieldController>
         {
             if (preset.Points[i].Active.Value || useTemp)
             {
+
                 Visual.SetFloat("P" + i + "Radius", preset.Points[i].Radius.Value.Value);
                 Visual.SetFloat("P" + i + "Value", preset.Points[i].Volume.Value.Value);
             }

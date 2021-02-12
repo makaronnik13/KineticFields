@@ -46,8 +46,16 @@ public class KineticPoint3dAnchor : MonoBehaviour
 
         if (Point2d)
         {
+            if (Point2d.Point.Id == 0)
+            {
+                //                Debug.Log(Point2d.Point.Position);
+
+
+            }
+
             transform.position = Vector3.Lerp(transform.position, Point2d.Point.Position, Time.deltaTime*2f);
 
+          
             transform.localScale = Vector3.one * Point2d.Point.Radius.Value.Value;
         }
 
