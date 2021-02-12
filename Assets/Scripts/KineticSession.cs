@@ -18,9 +18,9 @@ public class KineticSession
 
     public string[,] PresetsGrid = new string[8, 8];
 
-    public SpectrumShot[,] SpectrumShots = new SpectrumShot[8, 8];    
+    public SpectrumShot[,] SpectrumShots = new SpectrumShot[8, 8];
 
-    public GenericFlag<SerializedVector2Int> SelectedPresetPos = new GenericFlag<SerializedVector2Int>("SelectedPresetId", new SerializedVector2Int(0,0));
+    public GenericFlag<SerializedVector2Int> SelectedPresetPos = new GenericFlag<SerializedVector2Int>("SelectedPresetId", new SerializedVector2Int(0, 0));
 
     public List<KineticPreset> Presets = new List<KineticPreset>();
 
@@ -47,7 +47,7 @@ public class KineticSession
 
     public KineticSession()
     {
-       
+
     }
 
     public void Init()
@@ -87,8 +87,8 @@ public class KineticSession
 
     public void UpdateAveragePreset(Dictionary<KineticPreset, float> weihgts)
     {
-      
-        float weigthsSum = weihgts.Select(p=>p.Value).Sum();
+
+        float weigthsSum = weihgts.Select(p => p.Value).Sum();
 
         if (weigthsSum == 0)
         {
@@ -129,7 +129,7 @@ public class KineticSession
         AveragePreset.FarCutPlane.Value.SetState(cutPlane);
         AveragePreset.NearCutPlane.Value.SetState(nearPlane);
         AveragePreset.Lifetime.Value.SetState(lifetime);
-        AveragePreset.ParticlesCount.Value.SetState(particlesCount);     
+        AveragePreset.ParticlesCount.Value.SetState(particlesCount);
         AveragePreset.MeshId.SetState(meshesWeigth.OrderByDescending(p => p.Value).FirstOrDefault().Key);
 
 
@@ -152,17 +152,20 @@ public class KineticSession
         List<KineticPointInstance> points = new List<KineticPointInstance>();
         List<int> values = new List<int>();
 
+        string s = "";
+
         for (int i = 0; i < pointsWeigths.Count; i++)
         {
-           KeyValuePair<KineticPointInstance, float> pair = pointsWeigths.ToList<KeyValuePair<KineticPointInstance, float>>()[i];
-            if (!pair.Key.Active.Value && pair.Key.Id!=0)
+            KeyValuePair<KineticPointInstance, float> pair = pointsWeigths.ToList<KeyValuePair<KineticPointInstance, float>>()[i];
+            if (!pair.Key.Active.Value && pair.Key.Id != 0)
             {
                 pointsWeigths[pair.Key] = 0;
             }
+
+            s += pointsWeigths[pair.Key]+"/";    
         }
 
 
-      
         float weigthsSum = pointsWeigths.Select(p => p.Value).Sum();
 
         if (weigthsSum == 0)
@@ -170,7 +173,6 @@ public class KineticSession
             weigthsSum = 10000f;
         }
 
-        Debug.Log(weigthsSum);
 
         averagePoint.Active.SetState(true);
 
@@ -181,10 +183,10 @@ public class KineticSession
             float averageValue = 0;
             foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
             {
-                averageValue += pair.Value * pair.Key.Curve.Curve.Evaluate(i/100f);
+                averageValue += pair.Value * pair.Key.Curve.Curve.Evaluate(i / 100f);
             }
             averageValue /= weigthsSum;
-            pointCurve.AddKey(i/100f, averageValue);
+            pointCurve.AddKey(i / 100f, averageValue);
         }
 
         averagePoint.TempCurve = new CurveInstance(pointCurve);
@@ -204,7 +206,7 @@ public class KineticSession
         {
             float w = weigth * mult;
 
-            if (w>pair.Value)
+            if (w > pair.Value)
             {
                 //gradient = StaticTools.Lerp(gradient, pair.Key.Gradient.Gradient, pair.Value / w);
             }
@@ -213,7 +215,7 @@ public class KineticSession
                 //gradient = StaticTools.Lerp(pair.Key.Gradient.Gradient, gradient, w/ pair.Value);
             }
 
-            weigth = (weigth + pair.Value)/2f;
+            weigth = (weigth + pair.Value) / 2f;
 
             mult += weigth;
         }
@@ -229,16 +231,33 @@ public class KineticSession
         }
 
         deep /= weigthsSum;
+
+
+
         x /= weigthsSum;
         y /= weigthsSum;
+
+
+   
+
         radius /= weigthsSum;
+
+
         volume /= weigthsSum;
 
-        averagePoint.Deep.SetValue(deep);
-        averagePoint.Position = new Vector3(x,y,deep);
+        averagePoint.Deep.Value.SetState(deep);
+        averagePoint.Position = new Vector3(x, y, deep);
 
-        averagePoint.Radius.SetValue(radius);
-        averagePoint.Volume.SetValue(volume);
+        if (averagePoint.Id == 0)
+        {
+          //  Debug.Log(radius + "!1");
+        }
+
+        averagePoint.Radius.Value.SetState(radius);
+
+
+
+        averagePoint.Volume.Value.SetState(volume);
         averagePoint.TempGradient = new GradientInstance(gradient);
     }
 
