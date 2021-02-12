@@ -200,24 +200,31 @@ public class KineticSession
         Gradient gradient = pointsWeigths.FirstOrDefault().Key.Gradient.Gradient;
         float weigth = pointsWeigths.FirstOrDefault().Value;
 
-        float mult = 1;
+       // float mult = 1;
 
         foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
         {
+            if (pair.Value>weigth)
+            {
+                weigth = pair.Value;
+                gradient = pair.Key.Gradient.Gradient;
+            }
+            /*
             float w = weigth * mult;
 
             if (w > pair.Value)
             {
-                //gradient = StaticTools.Lerp(gradient, pair.Key.Gradient.Gradient, pair.Value / w);
+                gradient = StaticTools.Lerp(gradient, pair.Key.Gradient.Gradient, pair.Value / w);
             }
             else
             {
-                //gradient = StaticTools.Lerp(pair.Key.Gradient.Gradient, gradient, w/ pair.Value);
+                gradient = StaticTools.Lerp(pair.Key.Gradient.Gradient, gradient, w/ pair.Value);
             }
 
             weigth = (weigth + pair.Value) / 2f;
 
             mult += weigth;
+            */
         }
 
 

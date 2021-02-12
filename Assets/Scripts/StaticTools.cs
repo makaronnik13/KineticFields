@@ -146,8 +146,24 @@ public static class StaticTools
             alphas[i] = new GradientAlphaKey(clr.a, key);
         }
 
+        List<GradientAlphaKey> alphas2 = new List<GradientAlphaKey>();
+        List<GradientColorKey> colors2 = new List<GradientColorKey>();
+
+        for (int i = 0; i < Mathf.FloorToInt(alphas.Count()/2f); i++)
+        {
+            alphas2.Add(new GradientAlphaKey((alphas[i].alpha+alphas[i+1].alpha)/2f, (alphas[i].time + alphas[i + 1].time) / 2f));
+        }
+
+        for (int i = 0; i < Mathf.FloorToInt(clrs.Count() / 2f); i++)
+        {
+            Color nc = Color.Lerp(clrs[i].color, clrs[i+1].color, 0.5f);
+            float tim = Mathf.Lerp(clrs[i].time, clrs[i+1].time, 0.5f);
+
+            colors2.Add(new GradientColorKey(nc, tim));
+        }
+
         var g = new UnityEngine.Gradient();
-        g.SetKeys(clrs, alphas);
+        g.SetKeys(colors2.ToArray(), alphas2.ToArray());
 
         return g;
     }
