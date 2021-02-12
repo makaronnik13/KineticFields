@@ -33,6 +33,9 @@ public class KineticPointInstance: ICloneable
     public Action<string> OnGradientChanged = (v) => { };
 
     public string CurveId = "";
+
+    [NonSerialized]
+    public CurveInstance TempCurve;
     public CurveInstance Curve
     {
         get
@@ -47,6 +50,10 @@ public class KineticPointInstance: ICloneable
     }
 
     public string gradientId = "";
+
+    [NonSerialized]
+    public GradientInstance TempGradient;
+
     public GradientInstance Gradient
     {
         get
@@ -99,6 +106,10 @@ public class KineticPointInstance: ICloneable
         GradientChanged(gradientId);
         OnCurveChanged = CurveChanged;
         CurveChanged(CurveId);
+        if (Id == 0)
+        {
+            Active.SetState(true);
+        }
     }
 
     private void DeepChanged(float v)
@@ -108,12 +119,12 @@ public class KineticPointInstance: ICloneable
 
     private void GradientChanged(string g)
     {
-            KineticFieldController.Instance.Visual.SetGradient("P" + Id + "Gradient".ToString(), SessionsManipulator.Instance.Gradients.GetGradient(g).Gradient);
+            //KineticFieldController.Instance.Visual.SetGradient("P" + Id + "Gradient".ToString(), SessionsManipulator.Instance.Gradients.GetGradient(g).Gradient);
     }
 
     private void CurveChanged(string v)
     {
-            KineticFieldController.Instance.Visual.SetAnimationCurve("P" + Id + "Func", SessionsManipulator.Instance.Curves.GetCurve(v).Curve);
+            //KineticFieldController.Instance.Visual.SetAnimationCurve("P" + Id + "Func", SessionsManipulator.Instance.Curves.GetCurve(v).Curve);
     }
 
     public object Clone()

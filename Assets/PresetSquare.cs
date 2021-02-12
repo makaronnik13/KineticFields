@@ -7,7 +7,6 @@ using UnityEngine.UI;
 
 public class PresetSquare : MonoBehaviour, IDragHandler, IBeginDragHandler, IDropHandler
 {
-
     [SerializeField]
     private GameObject Frame;
 
@@ -100,4 +99,6 @@ public class PresetSquare : MonoBehaviour, IDragHandler, IBeginDragHandler, IDro
     {
         PresetsGrid.Instance.DropPreset(this);
     }
+
+    
 }
