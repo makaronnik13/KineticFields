@@ -283,8 +283,18 @@ public class KineticFieldController: Singleton<KineticFieldController>
 
         for (int i = 0; i < 13; i++)
         {
-            Visual.SetFloat("P" + i + "Radius", preset.Points[i].Radius.Value.Value);
-            Visual.SetFloat("P" + i + "Value", preset.Points[i].Volume.Value.Value);
+            if (preset.Points[i].Active.Value || useTemp)
+            {
+                Visual.SetFloat("P" + i + "Radius", preset.Points[i].Radius.Value.Value);
+                Visual.SetFloat("P" + i + "Value", preset.Points[i].Volume.Value.Value);
+            }
+            else
+            {
+
+                Visual.SetFloat("P" + i + "Radius", 0);
+                Visual.SetFloat("P" + i + "Value", 0);
+            }
+
             if (useTemp)
             {
                 Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points[i].TempGradient.Gradient);
