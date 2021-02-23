@@ -30,11 +30,11 @@ public class KineticPoint3dAnchor : MonoBehaviour
     {
         if (Input.mouseScrollDelta.y!=0)
         {
-            BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.one*2, Time.deltaTime * 3);
+            BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.one*3, Time.deltaTime * 3);
         }
         else
         {
-            BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.zero, Time.deltaTime);
+            BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.zero, Time.deltaTime*3);
         }
 
         if (KineticFieldController.Instance.ActivePoint.Value == Point2d)

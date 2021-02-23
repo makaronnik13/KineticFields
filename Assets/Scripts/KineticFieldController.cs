@@ -43,10 +43,14 @@ public class KineticFieldController: Singleton<KineticFieldController>
     public GenericFlag<FrequencyGap> ActiveGap = new GenericFlag<FrequencyGap>("ActiveGap", null);
     public GenericFlag<ISource> DraggingSource = new GenericFlag<ISource>("DraggingSource", null);
 
+    public GenericFlag<ISource> SelectedSource = new GenericFlag<ISource>("SelectedSource", null);
+
     public bool KeysEnabled = true;
 
     [SerializeField]
     private GameObject draggingSourceView;
+
+    private KineticPointInstance CoppyingPoint;
 
     public List<ISource> Sources
     {
@@ -226,6 +230,26 @@ public class KineticFieldController: Singleton<KineticFieldController>
             fg.UpdateFrequency(data);
         }
 
+        if (ActivePoint.Value)
+        {
+            if (Input.GetKey(KeyCode.LeftControl)||Input.GetKey(KeyCode.RightControl))
+            {
+                if (Input.GetKeyDown(KeyCode.C))
+                {
+                    CoppyingPoint = ActivePoint.Value.Point;
+                }
+                if (CoppyingPoint!=null && Input.GetKeyDown(KeyCode.V))
+                {
+                    ActivePoint.Value.Point.Active.SetState(CoppyingPoint.Active.Value);
+                    ActivePoint.Value.Point.Curve = CoppyingPoint.Curve;
+                    ActivePoint.Value.Point.Deep = CoppyingPoint.Deep.Clone() as ModifyingParameter;
+                    ActivePoint.Value.Point.Gradient = CoppyingPoint.Gradient;
+                    ActivePoint.Value.Point.Position = CoppyingPoint.Position;
+                    ActivePoint.Value.Point.Radius = CoppyingPoint.Radius.Clone() as ModifyingParameter;
+                    ActivePoint.Value.Point.Volume = CoppyingPoint.Volume.Clone() as ModifyingParameter;
+                }
+            }
+        }
 /*
         if (KeysEnabled && EventSystem.current.currentSelectedGameObject == null)
         {

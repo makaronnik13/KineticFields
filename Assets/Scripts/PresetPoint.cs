@@ -31,18 +31,20 @@ public class PresetPoint : MonoBehaviour, IDragHandler
     public void OnDrag(PointerEventData eventData)
     {
         transform.position = eventData.position;
-        transform.localPosition = new Vector3(Mathf.Clamp(transform.localPosition.x, -150f, 150f), Mathf.Clamp(transform.localPosition.y, -150f, 150f), 0);
+        //transform.localPosition = new Vector3(Mathf.Clamp(transform.localPosition.x, -150f, 150f), Mathf.Clamp(transform.localPosition.y, -150f, 150f), 0);
     }
 
     void Update()
     {
-        float dist = Mathf.Clamp(transform.localPosition.magnitude,0,120f);
-        Volume.SetState(Mathf.Lerp(1,0, dist/120f));
+        float dist = Vector3.Distance(transform.position, PresetsLerper.Instance.RadiusView.position);
+
+        /*Volume.SetState(Mathf.Lerp(1,0, Vector3.Distance(PresetsLerper.Instance.RadiusView.position, transform.position)/PresetsLerper.Instance.Radius.Value));
+
         Line.SetPosition(0, transform.parent.position);
         Line.SetPosition(1, transform.position);
         Line.widthCurve = new AnimationCurve(new Keyframe[]{
             new Keyframe(0,Volume.Value*100f),
             new Keyframe(1,Volume.Value*100f)
-        });
+        });*/
     }
 }

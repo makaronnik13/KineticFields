@@ -1,12 +1,21 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
 public class SerializingCurve
 {
+    [NonSerialized]
+    private AnimationCurve curve = null;
+
     [SerializeField]
     private List<SerializingKeyframe> keys = new List<SerializingKeyframe>();
+
+    public SerializingCurve()
+    {
+        CreateCurve();
+    }
 
     public SerializingCurve(AnimationCurve curve)
     {
@@ -14,11 +23,13 @@ public class SerializingCurve
         {
             keys.Add(new SerializingKeyframe(kf));
         }
+
+        CreateCurve();
     }
 
-    public AnimationCurve GetAnimationCurve()
+    private void CreateCurve()
     {
-        AnimationCurve crv = new AnimationCurve();
+        curve = new AnimationCurve();
         foreach (SerializingKeyframe kf in keys)
         {
             Keyframe newKey = new Keyframe(kf.time, kf.value);
@@ -30,10 +41,17 @@ public class SerializingCurve
             newKey.value = kf.value;
             newKey.weightedMode = kf.weightedMode;
             newKey.outWeight = kf.outWeight;
-            crv.AddKey(newKey);
+            curve.AddKey(newKey);
         }
+    }
 
-        return crv;
+    public AnimationCurve GetAnimationCurve()
+    {
+        if (curve == null)
+        {
+            CreateCurve();
+        }
+        return curve;
     }
 
 }

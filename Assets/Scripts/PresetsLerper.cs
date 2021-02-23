@@ -2,10 +2,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PresetsLerper : Singleton<PresetsLerper>
 {
+    [SerializeField]
+    private GameObject PresetEditView;
+
+    [SerializeField]
+    private Camera PointsCamera;
+
     [SerializeField]
     private TMPro.TextMeshProUGUI RateLable;
 
@@ -21,6 +28,10 @@ public class PresetsLerper : Singleton<PresetsLerper>
 
     private GenericFlag<int> Rate = new GenericFlag<int>("RandomRate", 0);
 
+    public GenericFlag<float> Radius = new GenericFlag<float>("Radius", 250);
+
+    public RectTransform RadiusView;
+
     private int beats = 0;
 
     public Dictionary<KineticPreset, float> Weigths
@@ -28,10 +39,15 @@ public class PresetsLerper : Singleton<PresetsLerper>
         get
         {
             Dictionary<KineticPreset, float> weigths = new Dictionary<KineticPreset, float>();
-            foreach (PresetPoint point in points)
+            foreach (PresetPoint point in points.Where(p=>Vector3.Distance(p.transform.position, RadiusView.transform.position)<=Radius.Value))
             {
+                point.Volume.SetState(1f- Vector3.Distance(point.transform.position, RadiusView.transform.position)/Radius.Value);
                 weigths.Add(point.Preset, point.Volume.Value);
             }
+
+            Debug.Log(weigths.Count);
+ 
+
             return weigths;
         }
     }
@@ -41,6 +57,13 @@ public class PresetsLerper : Singleton<PresetsLerper>
     {
         KineticFieldController.Instance.Session.AddListener(SessionChanged);
         Rate.AddListener(RateChanged);
+        Radius.AddListener(RadiusChanged);
+    }
+
+    private void RadiusChanged(float v)
+    {
+        RadiusView.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, v*2);
+        RadiusView.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, v*2);
     }
 
     private void RateChanged(int v)
@@ -78,6 +101,11 @@ public class PresetsLerper : Singleton<PresetsLerper>
         this.Session = session;
     }
 
+    public void Toggle()
+    {
+        SetState(!View.activeInHierarchy);
+    }
+
     public void SetState(bool v)
     {
         View.SetActive(v);
@@ -98,6 +126,9 @@ public class PresetsLerper : Singleton<PresetsLerper>
             }
             points.Clear();
         }
+
+        PointsCamera.enabled = !v;
+        PresetEditView.SetActive(!v);
     }
 
     private void CreatePoint(KineticPreset preset, float angle)
