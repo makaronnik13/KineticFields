@@ -98,7 +98,14 @@ public class Oscilator : ISource
         value = Curve.Curve.Evaluate(v);
 
         onMiddleValueChanged(value);
+
         value*=Multiplyer;
+
+        if (Mathf.Abs(Multiplyer)==100)
+        {
+            value *= 100000f;
+        }
+
         OnValueChanged(value);
     }
 

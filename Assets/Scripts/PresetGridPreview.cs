@@ -1,4 +1,5 @@
-﻿using System;
+﻿using com.armatur.common.flags;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,9 @@ using UnityEngine.UI;
 
 public class PresetGridPreview : MonoBehaviour
 {
+    [SerializeField]
+    private Transform TempBtns;
+
     [SerializeField]
     private GameObject View;
 
@@ -17,12 +21,47 @@ public class PresetGridPreview : MonoBehaviour
 
     private KineticSession session;
 
+    private int beats = 0;
+    private GenericFlag<int> Rate = new GenericFlag<int>("RandomRate", 0);
+
     private void Start()
     {
         KineticFieldController.Instance.Session.AddListener(SessionChanged);
         PresetsGrid.Instance.GridShowing.AddListener(SetState);
+        SetTemp(0);
     }
 
+    public void SetTemp(int v)
+    {
+        Rate.SetState(v);
+        beats = 0;
+
+        BpmManager.Instance.OnBeat -= Beat;
+        BpmManager.Instance.Playing.SetState(v!=0);
+        if (v != 0)
+        {
+            BpmManager.Instance.OnBeat += Beat;
+        }
+
+        for (int i = 0; i < TempBtns.childCount; i++)
+        {
+            TempBtns.GetChild(i).GetChild(1).gameObject.SetActive(i==Rate.Value);
+        }
+
+    }
+
+    private void Beat()
+    {
+        beats++;
+        if (beats >= Mathf.Pow(2, Rate.Value - 1))
+        {
+            beats = 0;
+            if (BpmManager.Instance.Playing.Value)
+            {
+                KineticFieldController.Instance.RandomSwap();
+            }
+        }
+    }
 
     private void SessionChanged(KineticSession session)
     {

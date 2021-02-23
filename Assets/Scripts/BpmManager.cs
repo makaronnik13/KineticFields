@@ -119,7 +119,7 @@ public class BpmManager : AudioVisualizationEffect
 
         if (Playing.Value)
         {
-            KineticFieldController.Instance.RandomSwap();
+           // KineticFieldController.Instance.RandomSwap();
         }
 
         /*if (oscilatorsCoroutine!=null)

@@ -42,6 +42,8 @@ public class OscilatorView : MonoBehaviour
     private void MultiplyerChanged(string mult)
     {
         oscilator.Multiplyer = Mathf.Clamp(float.Parse(mult), -100, 100);
+
+
         Multiplyer.text = oscilator.Multiplyer.ToString();
     }
 

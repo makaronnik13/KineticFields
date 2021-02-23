@@ -62,6 +62,7 @@ public class KineticPoint : MonoBehaviour
     void Start()
     {
         KineticFieldController.Instance.ActivePoint.AddListener(ActivePointChanged);
+        KineticFieldController.Instance.SelectedSource.AddListener(SourceChanged);
     }
 
     public void Init(KineticPointInstance point)
@@ -134,8 +135,34 @@ public class KineticPoint : MonoBehaviour
     }
     private void ActivePointChanged(KineticPoint p)
     {
-        Selector.SetActive(p == this);
         GetComponent<Collider2D>().enabled = p != this;
+    }
+
+    private void SourceChanged(ISource source)
+    {
+        if (point == null)
+        {
+            return;
+        }
+        if (source == null)
+        {
+            Selector.SetActive(false);
+            return;
+        }
+
+        Selector.SetActive(point.Deep.Source == source || point.Radius.Source == source || point.Volume.Source == source);
+
+        Debug.Log(point.Id+"/"+(point.Deep.Source == source) +"/"+ (point.Radius.Source == source) +"/"+ (point.Volume.Source == source));
+        Debug.Log(Selector.activeInHierarchy);
+
+        if (point == KineticFieldController.Instance.Session.Value.ActivePreset.Value.MainPoint)
+        {
+            Selector.SetActive(Selector.activeInHierarchy 
+                || KineticFieldController.Instance.Session.Value.ActivePreset.Value.FarCutPlane.Source == source
+                || KineticFieldController.Instance.Session.Value.ActivePreset.Value.NearCutPlane.Source == source
+                || KineticFieldController.Instance.Session.Value.ActivePreset.Value.ParticlesCount.Source == source
+                || KineticFieldController.Instance.Session.Value.ActivePreset.Value.Lifetime.Source == source);
+        }
     }
 
     // Update is called once per frame

@@ -5,10 +5,26 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class SorceView : MonoBehaviour, IDragHandler, IBeginDragHandler
+public class SorceView : MonoBehaviour, IDragHandler, IBeginDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
+    private ISource source;
+
+    void OnEnable()
+    {
+        if (GetComponentInParent<OscilatorView>() != null)
+        {
+            source = GetComponentInParent<OscilatorView>().Oscilator;
+        }
+
+        if (GetComponentInParent<FrequencyGapSlider>() != null)
+        {
+            source = GetComponentInParent<FrequencyGapSlider>().Gap;
+        }
+    }
+
     void Start()
     {
+       
         KineticFieldController.Instance.ActivePoint.AddListener(ActivePointChanged);
     }
 
@@ -22,6 +38,8 @@ public class SorceView : MonoBehaviour, IDragHandler, IBeginDragHandler
         this.enabled = p != null;
     }
 
+
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (KineticFieldController.Instance.ActivePoint.Value==null)
@@ -29,17 +47,7 @@ public class SorceView : MonoBehaviour, IDragHandler, IBeginDragHandler
             return;
         }
 
-        ISource source = null;
-
-        if (GetComponentInParent<OscilatorView>()!=null)
-        {
-            source = GetComponentInParent<OscilatorView>().Oscilator;
-        }
-       
-        if (GetComponentInParent<FrequencyGapSlider>() != null)
-        {
-            source = GetComponentInParent<FrequencyGapSlider>().Gap;
-        }
+        Debug.Log(source);
 
         KineticFieldController.Instance.DraggingSource.SetState(source);
     }
@@ -47,5 +55,15 @@ public class SorceView : MonoBehaviour, IDragHandler, IBeginDragHandler
     public void OnDrag(PointerEventData eventData)
     {
         
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        KineticFieldController.Instance.SelectedSource.SetState(source);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        KineticFieldController.Instance.SelectedSource.SetState(null);
     }
 }

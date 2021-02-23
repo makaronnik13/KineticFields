@@ -149,6 +149,11 @@ public class KineticSession
 
     private void InterpolatePoint(KineticPointInstance averagePoint, Dictionary<KineticPointInstance, float> pointsWeigths)
     {
+        if (pointsWeigths.Count == 0)
+        {
+            return;
+        }
+
         List<KineticPointInstance> points = new List<KineticPointInstance>();
         List<int> values = new List<int>();
 
