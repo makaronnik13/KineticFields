@@ -17,8 +17,9 @@ public class KinectPointCloudMapped : MonoBehaviour
 
     void Start()
     {
+     
         sensor = KinectSensor.GetDefault();
-
+        Debug.Log(sensor);
         if (sensor != null)
         {
             if (!sensor.IsOpen)

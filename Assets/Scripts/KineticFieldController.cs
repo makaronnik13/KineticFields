@@ -84,13 +84,9 @@ public class KineticFieldController: Singleton<KineticFieldController>
 
     public void LoadSession(KineticSession session)
     {
-        if (Session.Value!=null)
-        {
-            Session.Value.SelectedPresetPos.RemoveListener(LoadPreset);
-        }
 
         Session.SetState(session);
-        LoadPreset(new SerializedVector2Int(0,0));
+        LoadPreset(session.Presets.FirstOrDefault());
         /*
         int i = 1;
         foreach (AnimationCurve curve in DefaultResources.Settings.SizeCurves)
@@ -107,7 +103,7 @@ public class KineticFieldController: Singleton<KineticFieldController>
 
     private void SessionChanged(KineticSession session)
     {
-        session.LoadPreset(new SerializedVector2Int(0, 0));
+      
 
         int i = 0;
         foreach (OscilatorView oscView in OscilatorsHub.GetComponentsInChildren<OscilatorView>())
@@ -116,7 +112,8 @@ public class KineticFieldController: Singleton<KineticFieldController>
             i++;
         }
 
-        session.SelectedPresetPos.AddListener(LoadPreset);
+        PresetsLerper.Instance.SelectedPreset.AddListener(LoadPreset);
+        session.LoadPreset(session.Presets.FirstOrDefault());
     }
 
     private void ActivePointChanged(KineticPoint obj)
@@ -136,64 +133,7 @@ public class KineticFieldController: Singleton<KineticFieldController>
         }
     }
 
-    public void RandomSwap()
-    {
-        SerializedVector2Int pos = Session.Value.SelectedPresetPos.Value;
-
-        List<SerializedVector2Int> nearIds = new List<SerializedVector2Int>();
-
-
-        string s = "";
-
-
-        if (pos.y < Session.Value.PresetsGrid.GetLength(1) - 1)
-        {
-            SerializedVector2Int p4 = new SerializedVector2Int(pos.x, pos.y + 1);
-            if (Session.Value.PresetsGrid[p4.y, p4.x] != null)
-            {
-                nearIds.Add(p4);
-                s += ">";
-            }
-
-        }
-        
-       if (pos.y>0)
-       {
-           SerializedVector2Int p1 = new SerializedVector2Int(pos.x, pos.y-1);
-           if (Session.Value.PresetsGrid[p1.y, p1.x]!= null)
-           {
-               nearIds.Add(p1);
-                s += "<";
-            }
-
-       }
-
-        if (pos.x < Session.Value.PresetsGrid.GetLength(0) - 1)
-        {
-            SerializedVector2Int p4 = new SerializedVector2Int(pos.x+1, pos.y);
-            if (Session.Value.PresetsGrid[p4.y, p4.x] != null)
-            {
-                nearIds.Add(p4);
-                s += "A";
-            }
-
-        }
-
-        if (pos.x > 0)
-        {
-            SerializedVector2Int p1 = new SerializedVector2Int(pos.x-1, pos.y);
-            if (Session.Value.PresetsGrid[p1.y, p1.x] != null)
-            {
-                nearIds.Add(p1);
-                s += "V";
-            }
-
-        }
-
-
-        LoadPreset(nearIds.OrderBy(id=>Guid.NewGuid()).FirstOrDefault());
-    }
-
+   
     private void Start()
     {
         ActivePoint.AddListener(ActivePointChanged);
@@ -305,11 +245,11 @@ public class KineticFieldController: Singleton<KineticFieldController>
 
         for (int i = 0; i < 13; i++)
         {
-            if (preset.Points[i].Active.Value || useTemp)
+            if (preset.Points.FirstOrDefault(p=>p.Id == i).Active.Value || useTemp)
             {
 
-                Visual.SetFloat("P" + i + "Radius", preset.Points[i].Radius.Value.Value);
-                Visual.SetFloat("P" + i + "Value", preset.Points[i].Volume.Value.Value);
+                Visual.SetFloat("P" + i + "Radius", preset.Points.FirstOrDefault(p => p.Id == i).Radius.Value.Value);
+                Visual.SetFloat("P" + i + "Value", preset.Points.FirstOrDefault(p => p.Id == i).Volume.Value.Value);
             }
             else
             {
@@ -320,19 +260,23 @@ public class KineticFieldController: Singleton<KineticFieldController>
 
             if (useTemp)
             {
-                Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points[i].TempGradient.Gradient);
-                Visual.SetAnimationCurve("P" + i + "Func", preset.Points[i].TempCurve.Curve);
+                if (preset.Points.FirstOrDefault(p => p.Id == i).ShowGradient)
+                {
+                    Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points.FirstOrDefault(p => p.Id == i).TempGradient.Gradient);
+                    Visual.SetAnimationCurve("P" + i + "Func", preset.Points.FirstOrDefault(p => p.Id == i).TempCurve.Curve);
+                }
+               
             }
             else
             {
-                Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points[i].Gradient.Gradient);
-                Visual.SetAnimationCurve("P" + i + "Func", preset.Points[i].Curve.Curve);
+                Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points.FirstOrDefault(p => p.Id == i).Gradient.Gradient);
+                Visual.SetAnimationCurve("P" + i + "Func", preset.Points.FirstOrDefault(p => p.Id == i).Curve.Curve);
             }
         } 
 
     }
 
-    public void LoadPreset(SerializedVector2Int pos)
+    public void LoadPreset(KineticPreset preset)
     {
 
         ActivePoint.SetState(null);
@@ -343,13 +287,13 @@ public class KineticFieldController: Singleton<KineticFieldController>
         
         }
 
-        Session.Value.LoadPreset(pos);
+        Session.Value.LoadPreset(preset);
         GapEditor.Init(Session.Value);
 
         int j = 0;
         foreach (KineticPoint kp in FindObjectsOfType<KineticPoint>().OrderBy(kp=>kp.transform.GetSiblingIndex()))
         {
-            kp.Init(Session.Value.ActivePreset.Value.Points[j]);
+            kp.Init(Session.Value.ActivePreset.Value.Points.FirstOrDefault(p=>p.Id == j));
             j++;
         }
     }

@@ -85,7 +85,6 @@ public class CurveRedactor : Singleton<CurveRedactor>
     {
         Curve.Curve = new AnimationCurve(editingCurve.keys);
         Curve.OnEdited();
-        SessionsManipulator.Instance.SaveCurves();
         Cancel();
     }
 

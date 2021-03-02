@@ -14,29 +14,15 @@ public class PresetLable : MonoBehaviour
     [SerializeField]
     private TMPro.TextMeshProUGUI Lable;
 
-    [SerializeField]
-    private GameObject PlayIcon;
-
 
     // Start is called before the first frame update
     void Start()
     {
-        BpmManager.Playing.AddListener(PlayingStateChanged);
         KineticFieldController.Instance.Session.AddListener(SessionChanged);
     }
 
-
-    private void PlayingStateChanged(bool v)
-    {
-        PlayIcon.SetActive(v);
-    }
-
-
-
     private void SessionChanged(KineticSession session)
     {
-        Debug.Log("add listener");
-
         if (session!=null)
         {
             session.ActivePreset.AddListener(PresetChanged);
@@ -45,8 +31,15 @@ public class PresetLable : MonoBehaviour
 
     private void PresetChanged(KineticPreset preset)
     {
-        Lable.text = preset.PresetName;
-        StartCoroutine(HideLable());
+        if (preset!=null)
+        {
+            Lable.text = preset.PresetName;
+            StartCoroutine(HideLable());
+        }
+        else
+        {
+            Lable.text = string.Empty;
+        }
     }
 
     private IEnumerator HideLable()

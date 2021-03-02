@@ -96,7 +96,7 @@ public class OscilatorView : MonoBehaviour
     {
         CurvePickWindow.Instance.Show(oscilator.Curve.Id, (id)=>
         {
-            oscilator.Curve = SessionsManipulator.Instance.Curves.GetCurve(id);
+            oscilator.Curve = KineticFieldController.Instance.Session.Value.Curves.GetCurve(id);
             CurveImg.sprite = CurveEditor.Instance.MakeScreenshot(oscilator.Curve.Curve);
         });
     }

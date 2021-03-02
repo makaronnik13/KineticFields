@@ -18,7 +18,7 @@ public class GradientPick: MonoBehaviour
             FindObjectOfType<GradientPickWindow>().Show(currentId, (v) =>
             {
                 OnGradientPicked(v);
-                SetValue(SessionsManipulator.Instance.Gradients.GetGradient(v));
+                SetValue(KineticFieldController.Instance.Session.Value.Gradients.GetGradient(v));
             });
         });
     }

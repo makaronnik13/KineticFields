@@ -10,6 +10,9 @@ using UnityEngine.EventSystems;
 public class BpmManager : AudioVisualizationEffect
 {
     [SerializeField]
+    private int BeatTreshold = 15;
+
+    [SerializeField]
     private TMPro.TextMeshProUGUI BpmLable;
 
     public static BpmManager Instance;
@@ -67,7 +70,7 @@ public class BpmManager : AudioVisualizationEffect
 
         spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
 
-       
+        StartDetection();
     }
 
     private IEnumerator SpawnMarker()
@@ -100,7 +103,26 @@ public class BpmManager : AudioVisualizationEffect
         //Debug.Log(v);
     }
 
+    public void TestBeat()
+    {
+        if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count >= realTimeSpectralFluxAnalyzer.thresholdWindowSize)
+        {
+            if (Mathf.Abs(realTimeSpectralFluxAnalyzer.Bpm - Bpm.Value) > BeatTreshold)
+            {
+                Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
 
+                if (spawnMarkerCoroutine != null)
+                {
+                    StopCoroutine(spawnMarkerCoroutine);
+                }
+                spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
+                //realTimeSpectralFluxAnalyzer.Reset();
+            }
+        }
+       
+        //Tap();
+        //Debug.Log(realTimeSpectralFluxAnalyzer.Bpm);
+    }
 
     public void Beat()
     {
@@ -160,30 +182,15 @@ public class BpmManager : AudioVisualizationEffect
 
             if (Input.GetMouseButtonDown(2))
             {
-                if (tapDetectionCoroutine != null)
+                Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
+
+                if (spawnMarkerCoroutine != null)
                 {
-                    StopCoroutine(tapDetectionCoroutine);
+                    StopCoroutine(spawnMarkerCoroutine);
                 }
-                tapDetectionCoroutine = StartCoroutine(TapDetection());
-                beats.Add(Time.timeSinceLevelLoad);
+                spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
+                //Tap();
 
-                if (beats.Count > 1)
-                {
-                    float newBpm = 0;
-
-                    newBpm = beats[beats.Count - 1] - beats[0];
-
-                    newBpm /= beats.Count - 1f;
-
-                    Bpm.SetState(Mathf.RoundToInt(60f / newBpm));
-
-                    if (spawnMarkerCoroutine != null)
-                    {
-                        StopCoroutine(spawnMarkerCoroutine);
-                    }
-                    spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
-                }
-                // StartDetection();
 
 
             }
@@ -198,6 +205,34 @@ public class BpmManager : AudioVisualizationEffect
         {
             osc.UpdateOscilator();
         }
+    }
+
+    public void Tap()
+    {
+        if (tapDetectionCoroutine != null)
+        {
+            StopCoroutine(tapDetectionCoroutine);
+        }
+        tapDetectionCoroutine = StartCoroutine(TapDetection());
+        beats.Add(Time.timeSinceLevelLoad);
+
+        if (beats.Count > 1)
+        {
+            float newBpm = 0;
+
+            newBpm = beats[beats.Count - 1] - beats[0];
+
+            newBpm /= beats.Count - 1f;
+
+            Bpm.SetState(Mathf.RoundToInt(60f / newBpm));
+
+            if (spawnMarkerCoroutine != null)
+            {
+                StopCoroutine(spawnMarkerCoroutine);
+            }
+            spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
+        }
+        // StartDetection();
     }
 
     private IEnumerator TapDetection()
@@ -242,12 +277,11 @@ public class BpmManager : AudioVisualizationEffect
         {
             realTimeSpectralFluxAnalyzer.analyzeSpectrum(GetSpectrumData().Take(Samples).ToArray(), Time.timeSinceLevelLoad);
 
-
             //bpm.SetState(Mathf.Lerp(bpm.Value, realTimeSpectralFluxAnalyzer.Bpm, 0.2f));
 
             if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count>=WindowSize)
             {
-                Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
+                //Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
             }
 
             yield return null;

@@ -9,6 +9,21 @@ public class KineticPreset: ICloneable
 {
     public string PresetName;
 
+    public Vector2 Position
+    {
+        get
+        {
+            return new Vector2(X,Y);
+        }
+        set
+        {
+            X = value.x;
+            Y = value.y;
+        }
+    }
+
+    public float X, Y;
+
     public List<KineticPointInstance> Points = new List<KineticPointInstance>();
     public GenericFlag<int> MeshId = new GenericFlag<int>("MeshId", 0);
 
@@ -107,23 +122,27 @@ public class KineticPreset: ICloneable
         Gravity = new ModifyingParameter(0f, -1f, 1f);
         Speed = new ModifyingParameter(0f, 0f, 1f);
 
-     
 
-        Points.Add(new KineticPointInstance(0, "Настройки"));
-        Points.Add(new KineticPointInstance(1, "Цвет с глубиной"));
-        Points.Add(new KineticPointInstance(2, "Завихрения"));
 
-        Points.Add(new KineticPointInstance(3, "Непонятные искажения"));
-        Points.Add(new KineticPointInstance(4, "Шлейф с глубиной"));
+        Points.Add(new KineticPointInstance(0, "Настройки", Vector3.zero));
 
-        Points.Add(new KineticPointInstance(5, "Шлейф"));
-        Points.Add(new KineticPointInstance(6, "Цвет"));
-        Points.Add(new KineticPointInstance(7, "Размер с глубиной"));
-        Points.Add(new KineticPointInstance(8, "Отталкивающая сила"));
-        Points.Add(new KineticPointInstance(9, "Искажение простое"));
-        Points.Add(new KineticPointInstance(10, "Цвет со временем"));
-        Points.Add(new KineticPointInstance(11, "Размер"));
-        Points.Add(new KineticPointInstance(12, "Зигзаг"));
+        Points.Add(new KineticPointInstance(1, "Цвет с глубиной", new Vector3(-0.25f, 0.5f, 0)));
+        Points.Add(new KineticPointInstance(6, "Цвет", new Vector3(0f, 0.5f, 0)));
+        Points.Add(new KineticPointInstance(10, "Цвет со временем", new Vector3(0.25f, 0.5f, 0)));
+
+
+        Points.Add(new KineticPointInstance(5, "Шлейф", new Vector3(-0.5f, 0.1f, 0)));
+        Points.Add(new KineticPointInstance(4, "Шлейф с глубиной", new Vector3(-0.5f, -0.1f, 0)));
+
+        Points.Add(new KineticPointInstance(7, "Размер с глубиной", new Vector3(0.5f, 0.1f, 0)));
+        Points.Add(new KineticPointInstance(11, "Размер", new Vector3(0.5f, -0.1f, 0)));
+
+        Points.Add(new KineticPointInstance(2, "Завихрения", new Vector3(-0.2f, 0.2f, 0)));
+        Points.Add(new KineticPointInstance(12, "Бесполезная точка", new Vector3(0.2f, 0.2f, 0)));
+
+        Points.Add(new KineticPointInstance(3, "Непонятные искажения", new Vector3(-0.25f, -0.5f, 0)));
+        Points.Add(new KineticPointInstance(9, "Искажение простое", new Vector3(0f, -0.5f, 0)));
+        Points.Add(new KineticPointInstance(8, "Отталкивающая сила", new Vector3(0.25f, -0.5f, 0)));   
     }
 
      
