@@ -18,8 +18,6 @@ public class CurveEditor : MonoBehaviour
     [SerializeField]
     private LineRenderer Line;
 
-    [SerializeField]
-    private GameObject pointPrefab;
 
     private List<GameObject> points = new List<GameObject>();
 

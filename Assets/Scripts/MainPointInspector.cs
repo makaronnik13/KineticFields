@@ -50,7 +50,7 @@ public class MainPointInspector : Singleton<MainPointInspector>
 
     private void GradientChanged(string gradientId)
     {
-        KineticFieldController.Instance.ActivePoint.Value.Point.Gradient = SessionsManipulator.Instance.Gradients.GetGradient(gradientId);
+        KineticFieldController.Instance.ActivePoint.Value.Point.Gradient = KineticFieldController.Instance.Session.Value.Gradients.GetGradient(gradientId);
         //KineticFieldController.Instance.Visual.SetGradient("P0Gradient", KineticFieldController.Instance.ActivePoint.Value.Point.Gradient.Gradient);
     }
 
@@ -62,7 +62,7 @@ public class MainPointInspector : Singleton<MainPointInspector>
 
     private void CurveChanged(string curveId)
     {
-        KineticFieldController.Instance.ActivePoint.Value.Point.Curve = SessionsManipulator.Instance.Curves.GetCurve(curveId);
+        KineticFieldController.Instance.ActivePoint.Value.Point.Curve = KineticFieldController.Instance.Session.Value.Curves.GetCurve(curveId);
         //KineticFieldController.Instance.Visual.SetAnimationCurve("P0Func", KineticFieldController.Instance.ActivePoint.Value.Point.Curve.Curve);
     }
 

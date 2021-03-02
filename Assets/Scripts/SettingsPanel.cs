@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
+using Windows.Kinect;
 
 public class SettingsPanel : MonoBehaviour
 {
@@ -28,6 +29,15 @@ public class SettingsPanel : MonoBehaviour
     {
         SourceDropdown.onValueChanged.AddListener(SorceChanged);
         VisualDropdown.onValueChanged.AddListener(VisualChanged);
+
+        
+        KinectSensor sensor = KinectSensor.GetDefault();
+      
+        if (sensor == null || !sensor.IsAvailable)
+        {
+            Debug.Log("Mesh");
+            VisualChanged(1);
+        }
     }
 
     public void Toggle()

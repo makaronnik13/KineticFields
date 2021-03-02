@@ -22,7 +22,7 @@ public class GradientPickWindow : Singleton<GradientPickWindow>
     void Start()
     {
         KineticFieldController.Instance.ActivePoint.AddListener(PointChanged);
-        CreateGradientBtns();
+       
         View.SetActive(false);
     }
 
@@ -36,7 +36,7 @@ public class GradientPickWindow : Singleton<GradientPickWindow>
             }
         }
         int i = 0;
-        foreach (GradientInstance gradient in SessionsManipulator.Instance.Gradients.Gradients)
+        foreach (GradientInstance gradient in KineticFieldController.Instance.Session.Value.Gradients.Gradients)
         {
             CreateGradientBtn(gradient);
             i++;
@@ -94,13 +94,20 @@ public class GradientPickWindow : Singleton<GradientPickWindow>
         KineticFieldController.Instance.KeysEnabled = false;
         this.callback = callback;
         View.SetActive(true);
-        
+        CreateGradientBtns();
     }
 
     [ContextMenu("Hide")]
     public void Hide()
     {
         KineticFieldController.Instance.KeysEnabled = true;
+        foreach (Transform t in View.transform)
+        {
+            if (t.gameObject.name != "AddBtn")
+            {
+                Destroy(t.gameObject);
+            }
+        }
         View.SetActive(false);
     }
 
@@ -110,7 +117,6 @@ public class GradientPickWindow : Singleton<GradientPickWindow>
         GradientInstance newGradient = new GradientInstance(new Gradient());
         CreateGradientBtn(newGradient);
         selectedGradientId.SetState(newGradient.Id);
-        SessionsManipulator.Instance.Gradients.Gradients.Add(newGradient);
-        SessionsManipulator.Instance.SaveGradients();
+        KineticFieldController.Instance.Session.Value.Gradients.Gradients.Add(newGradient);
     }
 }

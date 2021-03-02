@@ -111,13 +111,10 @@ public class ModifyingParameter: ICloneable
 
     public object Clone()
     {
-
-        Debug.Log(SourceId.Value);
         ModifyingParameter mp = new ModifyingParameter(BaseValue.Value, MIN, MAX, Source);
 
         mp.Multiplicator.SetState(Multiplicator.Value);
         mp.BaseValue.SetState(BaseValue.Value);
-        Debug.Log("clone "+mp.Source+" "+ mp.SourceId.Value);
 
         mp.Init();
         return mp;

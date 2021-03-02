@@ -68,17 +68,7 @@ public class PresetsGrid : Singleton<PresetsGrid>
     {
         KineticPreset deletedPreset = SelectedPreset.Value;
 
-        for (int i = 0; i < KineticFieldController.Instance.Session.Value.PresetsGrid.GetLength(1); i++)
-        {
-            for (int j = 0; j < KineticFieldController.Instance.Session.Value.PresetsGrid.GetLength(0); j++)
-            {
-                if (KineticFieldController.Instance.Session.Value.PresetsGrid[i, j] == deletedPreset.Id)
-                {
-                    KineticFieldController.Instance.Session.Value.PresetsGrid[i, j] = null;
-                }
-            }
-        }
-
+     
         KineticFieldController.Instance.Session.Value.Presets.Remove(deletedPreset);
 
         Toggle();
@@ -94,11 +84,7 @@ public class PresetsGrid : Singleton<PresetsGrid>
             return;
         }
 
-        int y = presetSquare.transform.GetSiblingIndex() / KineticFieldController.Instance.Session.Value.PresetsGrid.GetLength(0);
-        int x = presetSquare.transform.GetSiblingIndex() % KineticFieldController.Instance.Session.Value.PresetsGrid.GetLength(0);
-
-        KineticFieldController.Instance.Session.Value.PresetsGrid[x, y] = DraggingPreset.Value.Id;
-
+      
         presetSquare.Init(DraggingPreset.Value);
 
         UpdatePreview();
@@ -142,13 +128,6 @@ public class PresetsGrid : Singleton<PresetsGrid>
                 CreatePresetPanel(preset);
             }
 
-            for (int i = 0; i < KineticFieldController.Instance.Session.Value.PresetsGrid.GetLength(0); i++)
-            {
-                for (int j = 0; j < KineticFieldController.Instance.Session.Value.PresetsGrid.GetLength(1); j++)
-                {
-                    CreatePresetRect(KineticFieldController.Instance.Session.Value.GetPresetByPosition(new Vector2Int(j,i)));
-                }
-            }
         }
         else
         {
@@ -178,9 +157,6 @@ public class PresetsGrid : Singleton<PresetsGrid>
 
         newRect.AddComponent<Button>().onClick.AddListener(()=>
         {
-            int y = newRect.transform.GetSiblingIndex()/KineticFieldController.Instance.Session.Value.PresetsGrid.GetLength(0);
-            int x = newRect.transform.GetSiblingIndex() % KineticFieldController.Instance.Session.Value.PresetsGrid.GetLength(0);
-            KineticFieldController.Instance.Session.Value.PresetsGrid[x,y] = null;
             newRect.GetComponent<PresetSquare>().Init(null);
             UpdatePreview();
         });

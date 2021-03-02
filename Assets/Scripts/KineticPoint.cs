@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using com.armatur.common.flags;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -43,7 +44,7 @@ public class KineticPoint : MonoBehaviour
             if (PresetsLerper.Instance.View.activeInHierarchy)
             {
 
-                return KineticFieldController.Instance.Session.Value.AveragePreset.Points[point.Id];
+                return KineticFieldController.Instance.Session.Value.AveragePreset.Points.FirstOrDefault(p => p.Id == point.Id);
             }
             
             return point;

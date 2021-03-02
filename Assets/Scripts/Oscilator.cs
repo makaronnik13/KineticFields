@@ -4,10 +4,11 @@ using UnityEngine;
 [Serializable]
 public class Oscilator : ISource
 {
-    public Oscilator(float multiplyer, int repeatRate)
+    public Oscilator(float multiplyer, int repeatRate, string curveId = "")
     {
         this.Multiplyer = multiplyer;
         this.RepeatRate = repeatRate;
+        this.curveId = curveId;
     }
 
     public Sprite Icon
@@ -55,7 +56,7 @@ public class Oscilator : ISource
     {
         get
         {
-            return SessionsManipulator.Instance.Curves.GetCurve(curveId);
+            return KineticFieldController.Instance.Session.Value.Curves.GetCurve(curveId);
         }
         set
         {

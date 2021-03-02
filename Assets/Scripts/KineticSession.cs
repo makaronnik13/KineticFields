@@ -8,6 +8,9 @@ using UnityEngine;
 [System.Serializable]
 public class KineticSession
 {
+    public CurvesStorage Curves;
+    public GradientStorage Gradients;
+
     public List<FrequencyGap> Gaps = new List<FrequencyGap>();
 
     public List<Oscilator> Oscilators = new List<Oscilator>();
@@ -16,11 +19,6 @@ public class KineticSession
 
     public GenericFlag<KineticPreset> ActivePreset = new GenericFlag<KineticPreset>("ActivePreset", null);
 
-    public string[,] PresetsGrid = new string[8, 8];
-
-    public SpectrumShot[,] SpectrumShots = new SpectrumShot[8, 8];
-
-    public GenericFlag<SerializedVector2Int> SelectedPresetPos = new GenericFlag<SerializedVector2Int>("SelectedPresetId", new SerializedVector2Int(0, 0));
 
     public List<KineticPreset> Presets = new List<KineticPreset>();
 
@@ -29,19 +27,7 @@ public class KineticSession
         return Presets.FirstOrDefault(p => p.Id == presetId);
     }
 
-    public KineticPreset GetPresetByPosition(Vector2Int pos)
-    {
-        string id = PresetsGrid[pos.x, pos.y];
-
-        if (id == null)
-        {
-            return null;
-        }
-
-        return GetPresetById(id);
-
-    }
-
+   
     [NonSerialized]
     public KineticPreset AveragePreset;
 
@@ -65,9 +51,12 @@ public class KineticSession
         Debug.Log("Create session");
         SessionName = sessionName;
         Presets.Clear();
-        Presets.Add(new KineticPreset("Preset_0"));
+        KineticPreset preset = new KineticPreset("Preset_0");
 
-        PresetsGrid[0, 0] = Presets[0].Id;
+        preset.Position = Vector2.up * 50f;
+
+        Presets.Add(preset);
+
 
         ActivePreset.SetState(Presets[0]);
 
@@ -76,13 +65,27 @@ public class KineticSession
         AddGap("Earth", 0.6f, 0.3f, Color.green, DefaultResources.GapSprites[3]);
         AddGap("Water", 0.9f, 0.3f, Color.blue, DefaultResources.GapSprites[4]);
 
-        AddOscilator(1, 0);
-        AddOscilator(2, 0);
-        AddOscilator(1, 1);
-        AddOscilator(1, 1);
-        AddOscilator(1, 2);
-        AddOscilator(1, 3);
-        AddOscilator(1, 4);
+        Gradients = new GradientStorage();
+        foreach (Gradient gr in DefaultResources.Settings.Gradients)
+        {
+            Gradients.Gradients.Add(new GradientInstance(gr));
+        }
+
+        Curves = new CurvesStorage();
+        foreach (AnimationCurve cu in DefaultResources.Settings.SizeCurves)
+        {
+            Curves.Curves.Add(new CurveInstance(cu));
+        }
+
+        AddOscilator(1, 0, Curves.Curves[3].Id);
+        AddOscilator(1, -1, Curves.Curves[13].Id);
+        AddOscilator(1, -2, Curves.Curves[14].Id);
+        AddOscilator(1, -2, Curves.Curves[22].Id);
+        AddOscilator(1, -3, Curves.Curves[8].Id);
+        AddOscilator(1, -3, Curves.Curves[11].Id);
+        AddOscilator(1, -4, Curves.Curves[12].Id);
+
+       
     }
 
     public void UpdateAveragePreset(Dictionary<KineticPreset, float> weihgts)
@@ -130,7 +133,12 @@ public class KineticSession
         AveragePreset.NearCutPlane.Value.SetState(nearPlane);
         AveragePreset.Lifetime.Value.SetState(lifetime);
         AveragePreset.ParticlesCount.Value.SetState(particlesCount);
-        AveragePreset.MeshId.SetState(meshesWeigth.OrderByDescending(p => p.Value).FirstOrDefault().Key);
+
+        if (meshesWeigth.Count>0)
+        {
+            AveragePreset.MeshId.SetState(meshesWeigth.OrderByDescending(p => p.Value).FirstOrDefault().Key);
+        }
+       
 
 
         for (int i = 0; i < 13; i++)
@@ -138,12 +146,11 @@ public class KineticSession
             Dictionary<KineticPointInstance, float> pointsWeigths = new Dictionary<KineticPointInstance, float>();
             foreach (KeyValuePair<KineticPreset, float> pair in weihgts)
             {
-                pointsWeigths.Add(pair.Key.Points[i], pair.Value);
+                pointsWeigths.Add(pair.Key.Points.FirstOrDefault(p => p.Id == i), pair.Value);
             }
 
-            InterpolatePoint(AveragePreset.Points[i], pointsWeigths);
+            InterpolatePoint(AveragePreset.Points.FirstOrDefault(p => p.Id == i), pointsWeigths);
         }
-
 
     }
 
@@ -202,36 +209,98 @@ public class KineticSession
         float radius = 0;
         float volume = 0;
 
-        Gradient gradient = pointsWeigths.FirstOrDefault().Key.Gradient.Gradient;
+        Gradient gradient = new Gradient();
+
+
         float weigth = pointsWeigths.FirstOrDefault().Value;
 
-       // float mult = 1;
+        // float mult = 1;
 
-        foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
+        if (averagePoint.ShowGradient)
         {
-            if (pair.Value>weigth)
-            {
-                weigth = pair.Value;
-                gradient = pair.Key.Gradient.Gradient;
-            }
-            /*
-            float w = weigth * mult;
+            List<GradientColorKey> keys = new List<GradientColorKey>();
 
-            if (w > pair.Value)
+            foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
             {
-                gradient = StaticTools.Lerp(gradient, pair.Key.Gradient.Gradient, pair.Value / w);
-            }
-            else
-            {
-                gradient = StaticTools.Lerp(pair.Key.Gradient.Gradient, gradient, w/ pair.Value);
+
+                foreach (GradientColorKey ck in pair.Key.Gradient.Gradient.colorKeys)
+                {
+                    List<GradientColorKey> colors = new List<GradientColorKey>();
+
+                    foreach (KeyValuePair<KineticPointInstance, float> p in pointsWeigths)
+                    {
+                        if (p.Key.ShowGradient)
+                        {
+                           // if (p.Value!=0)
+                           // {
+                                colors.Add(new GradientColorKey(p.Key.Gradient.Gradient.Evaluate(ck.time), p.Value));
+                           // }
+                            
+                        }
+                    }
+
+                    Color averageColor = InterpolateColor(colors);
+                    keys.Add(new GradientColorKey(averageColor, ck.time));
+                }
+
+
+
+
+                /*
+                float w = weigth * mult;
+
+                if (w > pair.Value)
+                {
+                    gradient = StaticTools.Lerp(gradient, pair.Key.Gradient.Gradient, pair.Value / w);
+                }
+                else
+                {
+                    gradient = StaticTools.Lerp(pair.Key.Gradient.Gradient, gradient, w/ pair.Value);
+                }
+
+                weigth = (weigth + pair.Value) / 2f;
+
+                mult += weigth;
+                */
             }
 
-            weigth = (weigth + pair.Value) / 2f;
 
-            mult += weigth;
-            */
+            while (keys.Count > 8)
+            {
+                GradientColorKey k1 = keys[0];
+                GradientColorKey k2 = keys[1];
+
+
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    for (int j = 0; j < keys.Count; j++)
+                    {
+                        if (i != j)
+                        {
+                            if (Mathf.Abs(k1.time - k2.time) > Mathf.Abs(keys[i].time - keys[j].time))
+                            {
+                                k1 = keys[i];
+                                k2 = keys[j];
+                            }
+                        }
+                    }
+                }
+
+
+                GradientColorKey average = new GradientColorKey(Color.Lerp(k1.color, k2.color, 0.5f), (k1.time + k2.time) / 2f);
+
+                keys.Remove(k1);
+                keys.Remove(k2);
+                keys.Add(average);
+            }
+            
+
+            gradient = pointsWeigths.OrderByDescending(v => v.Value).FirstOrDefault().Key.Gradient.Gradient;
+            gradient.SetKeys(keys.ToArray().ToArray(), new GradientAlphaKey[2] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
         }
 
+
+  
 
         foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
         {
@@ -270,12 +339,55 @@ public class KineticSession
 
 
         averagePoint.Volume.Value.SetState(volume);
-        averagePoint.TempGradient = new GradientInstance(gradient);
+
+        if (averagePoint.ShowGradient)
+        {
+            averagePoint.TempGradient = new GradientInstance(gradient); // pointsWeigths.OrderByDescending(p => p.Value).FirstOrDefault().Key.Gradient;//
+        }
+       
     }
 
-    private void AddOscilator(float multiplyer, int repeatRate)
+    private Color InterpolateColor(List<GradientColorKey> colors)
     {
-        Oscilators.Add(new Oscilator(multiplyer, repeatRate));
+        if (colors.Count == 1)
+        {
+            return colors[0].color;
+        }
+
+        float sum = colors.Select(p => p.time).Sum();
+
+
+        if (sum == 0)
+        {
+            return Color.black;
+        }
+        float r = 0;
+        foreach (GradientColorKey p in colors)
+        {
+            r += p.color.r * p.time;
+        }
+        r /= sum;
+
+        float g = 0;
+        foreach (GradientColorKey p in colors)
+        {
+            g += p.color.g * p.time;
+        }
+        g /= sum;
+
+        float b = 0;
+        foreach (GradientColorKey p in colors)
+        {
+            b += p.color.b * p.time;
+        }
+        b /= sum;
+
+        return new Color(r,g,b);
+    }
+
+    private void AddOscilator(float multiplyer, int repeatRate, string curveId)
+    {
+        Oscilators.Add(new Oscilator(multiplyer, repeatRate, curveId));
     }
 
     public FrequencyGap AddGap(string name, float pos, float size, Color color, Sprite sprite)
@@ -285,15 +397,12 @@ public class KineticSession
         return fg;
     }
 
-    public void LoadPreset(SerializedVector2Int pos)
+    public void LoadPreset(KineticPreset pr)
     {
-        Debug.Log(pos.x+"/"+pos.y);
-
-        KineticPreset pr = GetPresetByPosition(new Vector2Int(pos.y, pos.x));
         if (pr == null)
         {
             Debug.Log("null preset loaded!");
-           // return;
+            return;
             ///pr = Presets.FirstOrDefault();
         }
 
@@ -308,7 +417,6 @@ public class KineticSession
             ActivePreset.Value.MeshId.RemoveListener(MeshChanged);
         }
 
-        SelectedPresetPos.SetState(pos);
 
 
         ActivePreset.SetState(pr);

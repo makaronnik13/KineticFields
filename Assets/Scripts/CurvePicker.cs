@@ -20,7 +20,7 @@ public class CurvePicker : MonoBehaviour
             FindObjectOfType<CurvePickWindow>().Show(currentId, (v)=>
             {
                 OnCurvePicked(v);
-                SetValue(SessionsManipulator.Instance.Curves.GetCurve(v));
+                SetValue(KineticFieldController.Instance.Session.Value.Curves.GetCurve(v));
             });
         });
     }

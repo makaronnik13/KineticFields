@@ -30,6 +30,8 @@ public class PresetsLerper : Singleton<PresetsLerper>
 
     public GenericFlag<float> Radius = new GenericFlag<float>("Radius", 250);
 
+    public GenericFlag<KineticPreset> SelectedPreset = new GenericFlag<KineticPreset>("SelectedPreset", null);
+
     public RectTransform RadiusView;
 
     private int beats = 0;
@@ -43,10 +45,7 @@ public class PresetsLerper : Singleton<PresetsLerper>
             {
                 point.Volume.SetState(1f- Vector3.Distance(point.transform.position, RadiusView.transform.position)/Radius.Value);
                 weigths.Add(point.Preset, point.Volume.Value);
-            }
-
-            Debug.Log(weigths.Count);
- 
+            } 
 
             return weigths;
         }
@@ -58,12 +57,56 @@ public class PresetsLerper : Singleton<PresetsLerper>
         KineticFieldController.Instance.Session.AddListener(SessionChanged);
         Rate.AddListener(RateChanged);
         Radius.AddListener(RadiusChanged);
+        SelectedPreset.AddListener(SelectedPresetChanged);
+    }
+
+    private void Update()
+    {
+        if (View.activeInHierarchy && SelectedPreset.Value!=null && KineticFieldController.Instance.Session.Value.Presets.Count>1)
+        {
+            if (Input.GetKeyDown(KeyCode.Delete))
+            {
+                DeleteSelected();
+            }
+        }
+    }
+
+    private void DeleteSelected()
+    {
+        KineticPreset deletedPreset = SelectedPreset.Value;
+
+
+        KineticFieldController.Instance.Session.Value.Presets.Remove(deletedPreset);
+
+        PresetPoint point =  points.FirstOrDefault(p=>p.Preset == SelectedPreset.Value);
+
+        points.Remove(point);
+        Destroy(point.gameObject);
+        SelectedPreset.SetState(null);
+    }
+
+    private void SelectedPresetChanged(KineticPreset p)
+    {
+        SessionsManipulator.Instance.ActivePointChanged(null);
+        foreach (PresetPoint pp in points)
+        {
+            pp.SetSelected(pp.Preset == p);
+        }
     }
 
     private void RadiusChanged(float v)
     {
         RadiusView.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, v*2);
         RadiusView.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, v*2);
+    }
+
+    public void DuplicateSelected()
+    {
+        KineticPreset duplPreset = SelectedPreset.Value.Clone() as KineticPreset;
+        KineticFieldController.Instance.Session.Value.Presets.Add(duplPreset);
+        duplPreset.Position = SelectedPreset.Value.Position + Vector2.right * 25f;
+        CreatePoint(duplPreset);
+        SelectedPreset.SetState(duplPreset);
     }
 
     private void RateChanged(int v)
@@ -115,7 +158,7 @@ public class PresetsLerper : Singleton<PresetsLerper>
 
             foreach (KineticPreset preset in KineticFieldController.Instance.Session.Value.Presets)
             {
-                CreatePoint(preset, 360f/ KineticFieldController.Instance.Session.Value.Presets.Count*i);
+                CreatePoint(preset);
             }
         }
         else
@@ -125,18 +168,20 @@ public class PresetsLerper : Singleton<PresetsLerper>
                 Destroy(p.gameObject);
             }
             points.Clear();
+            SelectedPreset.SetState(null);
+            SessionsManipulator.Instance.ActivePointChanged(null);
         }
 
         PointsCamera.enabled = !v;
         PresetEditView.SetActive(!v);
     }
 
-    private void CreatePoint(KineticPreset preset, float angle)
+    private void CreatePoint(KineticPreset preset)
     {
         GameObject newPoint = Instantiate(PointPrefab);
         newPoint.transform.localScale = Vector3.one;
         newPoint.transform.SetParent(View.transform);
-        newPoint.transform.localPosition = new Vector3(120f*Mathf.Cos(angle*Mathf.Rad2Deg) , 120f * Mathf.Sin(angle * Mathf.Rad2Deg), 0);
+        newPoint.transform.localPosition = new Vector3(preset.X, preset.Y, 0);
         PresetPoint point = newPoint.GetComponent<PresetPoint>();
         point.Init(preset);
         points.Add(point);
@@ -164,5 +209,19 @@ public class PresetsLerper : Singleton<PresetsLerper>
         {
             Rate.SetState(0);
         }
+    }
+
+
+    public void CreateNewPreset()
+    {
+        Vector2 localpoint;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(GetComponent<RectTransform>(), Input.mousePosition, GetComponentInParent<Canvas>().worldCamera, out localpoint);
+        //Vector2 normalizedPoint = Rect.PointToNormalized(GetComponent<RectTransform>().rect, localpoint);
+
+        KineticPreset newPreset = new KineticPreset("Preset_" + KineticFieldController.Instance.Session.Value.Presets.Count);
+        newPreset.Position = new Vector2(localpoint.x, localpoint.y);
+        KineticFieldController.Instance.Session.Value.Presets.Add(newPreset);
+        CreatePoint(newPreset);
+        SelectedPreset.SetState(newPreset);
     }
 }
