@@ -8,6 +8,13 @@ public class KinectPointCloudMapped : MonoBehaviour
     public bool ManageSensor = true;
 
     private KinectSensor sensor;
+    public KinectSensor Sensor
+    {
+        get
+        {
+            return sensor;
+        }
+    }
     private DepthFrameReader depthFrameReader;
     private ushort[] depthFrameData;
     private int[] mapDimensions = new int[2];
@@ -19,13 +26,13 @@ public class KinectPointCloudMapped : MonoBehaviour
     {
      
         sensor = KinectSensor.GetDefault();
-        Debug.Log(sensor);
         if (sensor != null)
         {
             if (!sensor.IsOpen)
             {
                 sensor.Open();
             }
+  
             depthFrameReader = sensor.DepthFrameSource.OpenReader();
             depthFrameData = new ushort[sensor.DepthFrameSource.FrameDescription.LengthInPixels];
             cameraSpacePoints = new CameraSpacePoint[depthFrameData.Length];
@@ -39,6 +46,7 @@ public class KinectPointCloudMapped : MonoBehaviour
             var frame = depthFrameReader.AcquireLatestFrame();
             if (frame != null)
             {
+
                 frame.CopyFrameDataToArray(depthFrameData);
                 int frameWidth = frame.FrameDescription.Width;
                 int frameHeight = frame.FrameDescription.Height;

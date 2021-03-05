@@ -30,13 +30,18 @@ public class SettingsPanel : MonoBehaviour
         SourceDropdown.onValueChanged.AddListener(SorceChanged);
         VisualDropdown.onValueChanged.AddListener(VisualChanged);
 
-        
-        KinectSensor sensor = KinectSensor.GetDefault();
-      
-        if (sensor == null || !sensor.IsAvailable)
+
+        KinectSensor sensor = FindObjectOfType<KinectPointCloudMapped>().Sensor;
+
+
+        if (sensor == null)
         {
             Debug.Log("Mesh");
             VisualChanged(1);
+        }
+        else
+        {
+            VisualChanged(0);
         }
     }
 
@@ -49,10 +54,12 @@ public class SettingsPanel : MonoBehaviour
     {
         if (v==1)
         {
+            Debug.Log("mesh");
             Effect.visualEffectAsset = MeshAsset;
         }
         else
         {
+            Debug.Log("kinekt");
             Effect.visualEffectAsset = KinnectAsset;
         }
     }
