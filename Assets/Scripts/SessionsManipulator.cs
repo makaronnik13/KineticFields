@@ -96,7 +96,6 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
 
     public void Save(string name)
     {
-        Debug.Log("start save");
         if (KineticFieldController.Instance.Session.Value!=null)
         {
             KineticFieldController.Instance.Session.Value.SessionName = name;
@@ -110,13 +109,11 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
                 FileNames.Add(KineticFieldController.Instance.Session.Value.SessionName);
             }
         }
-        Debug.Log("stop save");
     }
 
     public void Load(string sessionName)
     {
         KineticFieldController.Instance.ActivePoint.SetState(null);
-       Debug.Log("start load");
         // Save(sessionName);
 
         BinaryFormatter bf = new BinaryFormatter();
@@ -131,7 +128,6 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
         KineticFieldController.Instance.LoadSession(KineticFieldController.Instance.Session.Value);
 
         SessionSelection.SetActive(false);
-        Debug.Log("stop load");
     }
 
     public void Open()
