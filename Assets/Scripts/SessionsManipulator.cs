@@ -26,16 +26,36 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
 
     private List<string> FileNames = new List<string>();
 
+    public List<TrackLib> TrackLibs = new List<TrackLib>();
 
     private void Start()
     {
         FileNames = Directory.GetFiles(Application.persistentDataPath, "*.kfs").ToList();
+
+        List<string> TrackLibsNames = Directory.GetFiles(Application.persistentDataPath, "*.kft").ToList();
 
         for (int i = 0; i < FileNames.Count; i++)
         {
             FileNames[i] = FileNames[i].Replace(Application.persistentDataPath, "");
             FileNames[i] = FileNames[i].Replace(".kfs", "");
             FileNames[i] = FileNames[i].Remove(0, 1);
+        }
+
+        for (int i = 0; i < TrackLibsNames.Count; i++)
+        {
+            TrackLibsNames[i] = TrackLibsNames[i].Replace(Application.persistentDataPath, "");
+            TrackLibsNames[i] = TrackLibsNames[i].Replace(".kft", "");
+            TrackLibsNames[i] = TrackLibsNames[i].Remove(0, 1);
+        }
+
+        foreach (string s in TrackLibsNames)
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(Application.persistentDataPath + "/" + s+ ".kft", FileMode.Open);
+
+            TrackLibs.Add((TrackLib)bf.Deserialize(file));
+
+            file.Close();
         }
 
         if (FileNames.Count == 0)
@@ -160,5 +180,18 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
         KineticFieldController.Instance.LoadSession(newSession);
         Save(newSession.SessionName);
         Load(newSession.SessionName);
+    }
+
+    public void SaveTrackLib(TrackLib lib)
+    {
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file = File.Create(Application.persistentDataPath + "/" + lib.Name + ".kft");
+        bf.Serialize(file, lib);
+        file.Close();
+
+        if (!TrackLibs.Contains(lib))
+        {
+            TrackLibs.Add(lib);
+        }
     }
 }

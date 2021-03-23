@@ -43,6 +43,14 @@ public static class DefaultResources
         }
     }
 
+    public static List<Sprite> TrackSprites
+    {
+        get
+        {
+            return PresetSprites;
+        }
+    }
+
     private static List<Sprite> oscilatorSprites;
     public static List<Sprite> OscilatorSprites
     {
