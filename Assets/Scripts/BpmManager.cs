@@ -313,7 +313,7 @@ public class BpmManager : AudioVisualizationEffect
                 //Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
             }
 
-            yield return null;
+            yield return new WaitForSeconds(0.1f);
         }
     }
 }

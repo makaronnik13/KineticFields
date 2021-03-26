@@ -8,22 +8,32 @@ public class PresetStepView: MonoBehaviour
 
     private PointTrack track;
 
+    [SerializeField]
+    private Image LeftOut, RightOut, LeftIn, RightIn, Center, Up, Down;
+
     public void Init(TrackStep step1, TrackStep step2, PointTrack track)
     {
         this.track = track;
+        if (s1!=null)
+        {
+            s1.HasKey.RemoveListener(StepKeyChanged);
+        }
+        if (s2 != null)
+        {
+            s2.HasKey.RemoveListener(StepKeyChanged);
+        }
+
         s1 = step1;
         s2 = step2;
 
         step1.HasKey.AddListener(StepKeyChanged);
         step2.HasKey.AddListener(StepKeyChanged);
 
-        GameObject left = transform.GetChild(0).gameObject;
-        GameObject right = transform.GetChild(2).gameObject;
-
-        right.GetComponent<Image>().color = new Color(track.MainColor.r, track.MainColor.g, track.MainColor.b, 0.5f);
-        right.transform.GetChild(0).GetComponent<Image>().color = track.SubColor;
-        left.GetComponent<Image>().color = new Color(track.MainColor.r, track.MainColor.g, track.MainColor.b, 0.5f);
-        left.transform.GetChild(0).GetComponent<Image>().color = track.SubColor;
+      
+        RightIn.color = new Color(track.MainColor.r, track.MainColor.g, track.MainColor.b, 0.5f);
+        RightOut.color = track.SubColor;
+        LeftIn.color = new Color(track.MainColor.r, track.MainColor.g, track.MainColor.b, 0.5f);
+        LeftOut.color = track.SubColor;
         UpdateView();
     }
 
@@ -70,15 +80,15 @@ public class PresetStepView: MonoBehaviour
 
         if (s1.HasKey.Value && s2.HasKey.Value)
         {
-            transform.GetChild(1).GetChild(0).GetComponent<Image>().color = track.SubColor;
-            transform.GetChild(1).GetChild(1).GetComponent<Image>().color = new Color(track.MainColor.r, track.MainColor.g, track.MainColor.b, 0.5f);
-            transform.GetChild(1).GetChild(2).GetComponent<Image>().color = track.SubColor;
+            Up.color = track.SubColor;
+           Center.color = new Color(track.MainColor.r, track.MainColor.g, track.MainColor.b, 0.5f);
+            Down.color = track.SubColor;
         }
         else
         {
-            transform.GetChild(1).GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0f);
-            transform.GetChild(1).GetChild(1).GetComponent<Image>().color = new Color(0.5f, 0.5f, 0.5f, 0.05f);
-            transform.GetChild(1).GetChild(2).GetComponent<Image>().color = new Color(1, 1, 1, 0f);
+            Up.color = new Color(1, 1, 1, 0f);
+            Center.color = new Color(0.5f, 0.5f, 0.5f, 0.05f);
+            Down.color = new Color(1, 1, 1, 0f);
         }
     }
 

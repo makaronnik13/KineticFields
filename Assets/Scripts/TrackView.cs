@@ -50,7 +50,7 @@ public class TrackView : Singleton<TrackView>
     }
 
     [SerializeField]
-    private List<PresetTrackView> trackViews = new List<PresetTrackView>();
+    private Dictionary< PresetTrackView, TrackInstance> trackViews = new Dictionary<PresetTrackView, TrackInstance>();
 
     private  TrackInstance currentTrack;
     private GenericFlag<float> timing = new GenericFlag<float>("timing", 0);
@@ -140,7 +140,7 @@ public class TrackView : Singleton<TrackView>
 
     private void Update()
     {
-        if (TracksManager.Instance.Playing.Value)
+        if (TracksManager.Instance.Playing.Value && TracksManager.Instance.CurrentTrack.Value!=null)
         {
             float v = Mathf.Lerp(Slider.value, timing.Value, Time.deltaTime * bpm * Scale);
 
@@ -149,11 +149,7 @@ public class TrackView : Singleton<TrackView>
 
         }
 
-        PresetTrackView mainTrack = trackViews.FirstOrDefault(t => t.Track.presetId == -1);
-        if (mainTrack)
-        {
-            mainTrack.transform.SetAsLastSibling();
-        }
+    
     }
 
     public void WritePoint(KineticPreset preset, Vector2 position, int offset = 0)
@@ -167,17 +163,28 @@ public class TrackView : Singleton<TrackView>
         {
             track = new PointTrack(id);
             track.OnTrackRemoved += TrackRemoved;
+            track.OnTrackChanged += onTrackChanged;
             pointsTracks.Add(track);
            
             track.OnTrackChanged += onTrackChanged;
             GameObject newTrackView = PoolManager.Instance.spawnObject(PresetTrackPrefab);
             newTrackView.transform.SetParent(PresetsTracksHub);
+
+            if (track.presetId == -1)
+            {
+                newTrackView.transform.SetAsLastSibling();
+            }
+            else
+            {
+                newTrackView.transform.SetAsFirstSibling();
+            }
+
             newTrackView.transform.localPosition = Vector3.zero;
             newTrackView.transform.localScale = Vector3.one;
             PresetTrackView trackView1 = newTrackView.GetComponent<PresetTrackView>();
             trackView1.Init(track);
             trackView1.name = "Track_"+track.presetId;
-            trackViews.Add(trackView1);
+            trackViews.Add(trackView1, currentTrack);
             
         }
 
@@ -192,13 +199,15 @@ public class TrackView : Singleton<TrackView>
             return;
         }
 
-        PresetTrackView view = trackViews.FirstOrDefault(v => v.Track == t);
+        PresetTrackView view = trackViews.FirstOrDefault(v => v.Key.Track == t).Key;
 
-            trackViews.Remove(view);
-            Debug.Log("destroy " + view);
+        trackViews.Remove(view);
+        Debug.Log("destroy " + view);
         PoolManager.ReleaseObject(view.gameObject);
 
-       
+
+        t.OnTrackRemoved += TrackRemoved;
+        t.OnTrackChanged += onTrackChanged;
 
         pointsTracks.Remove(t);
         UpdateTracks();
@@ -206,7 +215,7 @@ public class TrackView : Singleton<TrackView>
 
     private void TrackLineChanged(int id)
     {
-        PresetTrackView presetTrackView = trackViews.FirstOrDefault(p=>p.Track.presetId == id);
+        PresetTrackView presetTrackView = trackViews.FirstOrDefault(p=>p.Key.Track.presetId == id).Key;
         presetTrackView.UpdateTrack();
     }
 
@@ -248,7 +257,6 @@ public class TrackView : Singleton<TrackView>
         this.bpm = bpm;
         if (TracksManager.Instance.Playing.Value)
         {
-            Debug.Log("SWAP_BY_BPM");
             TrackChanged(TracksManager.CurrentTrack.Value);
         }
     }
@@ -256,7 +264,6 @@ public class TrackView : Singleton<TrackView>
     private void TrackChanged(TrackInstance track)
     {
 
-        Debug.Log("track changed");
         if (TracksManager.Instance.Playing.Value)
         {
             timing.SetState(0);
@@ -306,7 +313,7 @@ public class TrackView : Singleton<TrackView>
         TrackChanged(TracksManager.CurrentTrack.Value);
         UpdateView();
 
-        foreach (PresetTrackView tv in trackViews)
+        foreach (PresetTrackView tv in trackViews.Keys)
         {
             tv.UpdateTrack();
         }
@@ -334,35 +341,29 @@ public class TrackView : Singleton<TrackView>
 
     public void UpdateTracks()
     {
-        foreach (PresetTrackView tw in trackViews)
+
+        foreach (KeyValuePair<PresetTrackView, TrackInstance> pair in trackViews)
         {
-            tw.Track.OnTrackRemoved -= TrackRemoved;
-            tw.Track.OnTrackChanged -= onTrackChanged;
-            PoolManager.ReleaseObject(tw.gameObject);
+            pair.Key.gameObject.SetActive(currentTrack == pair.Value);
         }
 
-        trackViews.Clear();
-
+ 
         if (currentTrack != null)
         {
-
-            Debug.Log(currentTrack.PointsTracks.Count);
-
             for (int i = currentTrack.PointsTracks.Count-1; i >=0; i--)
             {
                 PointTrack track = currentTrack.PointsTracks[i];
-                track.OnTrackRemoved += TrackRemoved;
-                //pointsTracks.Add(track);
-                track.OnTrackChanged += onTrackChanged;
 
-
-                GameObject newTrackView = PoolManager.Instance.spawnObject(PresetTrackPrefab);
-                newTrackView.transform.SetParent(PresetsTracksHub);
-                newTrackView.transform.localPosition = Vector3.zero;
-                newTrackView.transform.localScale = Vector3.one;
-                PresetTrackView trackView1 = newTrackView.GetComponent<PresetTrackView>();
-                trackView1.Init(track);
-                trackViews.Add(trackView1);
+                if (trackViews.Keys.FirstOrDefault(v=>v.Track == track) == null)
+                {
+                    GameObject newTrackView = PoolManager.Instance.spawnObject(PresetTrackPrefab);
+                    newTrackView.transform.SetParent(PresetsTracksHub);
+                    newTrackView.transform.localPosition = Vector3.zero;
+                    newTrackView.transform.localScale = Vector3.one;
+                    PresetTrackView trackView1 = newTrackView.GetComponent<PresetTrackView>();
+                    trackView1.Init(track);
+                    trackViews.Add(trackView1, currentTrack);
+                }
             }
         }
     }

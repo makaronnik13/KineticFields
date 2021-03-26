@@ -27,6 +27,16 @@ public class SerializingCurve
         CreateCurve();
     }
 
+    public void Update(AnimationCurve c)
+    {
+        keys.Clear();
+        foreach (Keyframe kf in curve.keys)
+        {
+            keys.Add(new SerializingKeyframe(kf));
+        }
+        CreateCurve();
+    }
+
     private void CreateCurve()
     {
         curve = new AnimationCurve();

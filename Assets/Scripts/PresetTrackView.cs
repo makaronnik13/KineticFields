@@ -12,11 +12,9 @@ public class PresetTrackView : MonoBehaviour
 
     private List<PresetStepView> steps = new List<PresetStepView>();
 
-    public void Init(PointTrack track)
+    private void Start()
     {
-        Track = track;
-        //Track.OnTrackChanged += UpdateTrack;
-        for (int i = 0; i < 128-1; i++)
+        for (int i = 0; i < 128 - 1; i++)
         {
             GameObject ns = PoolManager.Instance.spawnObject(StepPrefab);
             ns.transform.SetParent(transform);
@@ -24,11 +22,23 @@ public class PresetTrackView : MonoBehaviour
             ns.transform.localScale = Vector3.one;
 
             PresetStepView view = ns.GetComponent<PresetStepView>();
-            view.Init(track.steps[i], track.steps[i+1], track);
+            
 
             steps.Add(view);
         }
+    }
 
+    public void Init(PointTrack track)
+    {
+        Track = track;
+        //Track.OnTrackChanged += UpdateTrack;
+
+        int i = 0;
+        foreach (PresetStepView view in steps)
+        {
+            view.Init(track.steps[i], track.steps[i + 1], track);
+            i++;
+        }
         UpdateTrack();
     }
 
@@ -40,10 +50,6 @@ public class PresetTrackView : MonoBehaviour
             steps[i].gameObject.SetActive(i < TracksManager.Instance.CurrentTrack.Value.Steps*4);
         }
 
-        foreach (PresetStepView step in steps)
-        {
-            step.UpdateView();
-        }
         /*
         Debug.Log("UPD");
         foreach (Transform t in transform)

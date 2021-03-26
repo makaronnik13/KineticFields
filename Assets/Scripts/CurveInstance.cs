@@ -18,7 +18,14 @@ public class CurveInstance
         }
         set
         {
-            curve = new SerializingCurve(value);
+            if (curve == null)
+            {
+                curve = new SerializingCurve(value);
+            }
+            else
+            {
+                curve.Update(value);
+            }
         }
     }
     public string Id;
@@ -28,5 +35,10 @@ public class CurveInstance
     {
         Id = System.Guid.NewGuid().ToString();
         Curve = curve;
+    }
+
+    public void Update(AnimationCurve pointCurve)
+    {
+        Curve = pointCurve;
     }
 }

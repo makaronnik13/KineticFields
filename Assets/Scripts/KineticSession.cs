@@ -89,7 +89,7 @@ public class KineticSession
         Curves = new CurvesStorage();
         foreach (AnimationCurve cu in DefaultResources.Settings.SizeCurves)
         {
-            Curves.Curves.Add(new CurveInstance(cu));
+            Curves.AddCurve(cu);
         }
 
         AddOscilator(1, 0, Curves.Curves[3].Id);
@@ -216,7 +216,14 @@ public class KineticSession
             pointCurve.AddKey(i / 100f, averageValue);
         }
 
-        averagePoint.TempCurve = new CurveInstance(pointCurve);
+        if (averagePoint.TempCurve == null)
+        {
+            averagePoint.TempCurve = new CurveInstance(pointCurve);
+        }
+        else
+        {
+            averagePoint.TempCurve.Update(pointCurve);
+        }
 
         float deep = 0;
         float x = 0;

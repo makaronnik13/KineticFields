@@ -26,13 +26,13 @@ public class FrequencyGapSlider : MonoBehaviour
 
     private void Start()
     {
-        FindObjectOfType<KineticFieldController>().ActiveGap.AddListener(ActiveGapChanged);
+        KineticFieldController.Instance.ActiveGap.AddListener(ActiveGapChanged);
         Slider.onValueChanged.AddListener(SliderValueChanged);
     }
 
     private void Update()
     {
-        if (FindObjectOfType<KineticFieldController>().ActiveGap.Value == gap)
+        if (KineticFieldController.Instance.ActiveGap.Value == gap)
         {
             gap.GapSize.SetState(Mathf.Clamp(gap.GapSize.Value+Time.deltaTime*Input.mouseScrollDelta.y ,0.01f,1f));
         }
@@ -47,7 +47,7 @@ public class FrequencyGapSlider : MonoBehaviour
     private void SliderValueChanged(float v)
     {
         gap.Position.SetState(v);
-        FindObjectOfType<KineticFieldController>().ActiveGap.SetState(gap);
+        KineticFieldController.Instance.ActiveGap.SetState(gap);
     }
 
     private void ActiveGapChanged(FrequencyGap fg)
@@ -76,14 +76,14 @@ public class FrequencyGapSlider : MonoBehaviour
 
     public void PushGapIcon()
     {
-        FindObjectOfType<KineticFieldController>().ActiveGap.SetState(gap);
+        KineticFieldController.Instance.ActiveGap.SetState(gap);
     }
 
     private void OnDestroy()
     {
-        if (FindObjectOfType<KineticFieldController>())
+        if (KineticFieldController.Instance)
         {
-            FindObjectOfType<KineticFieldController>().ActiveGap.RemoveListener(ActiveGapChanged);
+            KineticFieldController.Instance.ActiveGap.RemoveListener(ActiveGapChanged);
         }
        
     }

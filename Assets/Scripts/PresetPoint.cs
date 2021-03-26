@@ -48,6 +48,7 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
 
     private void OnDestroy()
     {
+        this.preset.OnPositionChanged -= PositionChanged;
         BpmManager.Instance.OnQuart -= Beat;
     }
 
@@ -92,7 +93,7 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
         /*Volume.SetState(Mathf.Lerp(1,0, Vector3.Distance(PresetsLerper.Instance.RadiusView.position, transform.position)/PresetsLerper.Instance.Radius.Value));
         */
 
-        Vector2 p1 = transform.InverseTransformPoint(FindObjectOfType<Center>().transform.position);
+        Vector2 p1 = transform.InverseTransformPoint(Center.Instance.transform.position);
         Vector2 p2 = Vector2.zero;
 
         Line.Points = new Vector2[2]

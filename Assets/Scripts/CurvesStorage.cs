@@ -7,14 +7,33 @@ public class CurvesStorage
 {
     public List<CurveInstance> Curves = new List<CurveInstance>();
 
+    private Dictionary<string, CurveInstance> dict = new Dictionary<string, CurveInstance>();
+
+    public CurvesStorage()
+    {
+        foreach (CurveInstance cI in Curves)
+        {
+            dict.Add(cI.Id, cI);
+        }
+    }
+
+
+
     public CurveInstance GetCurve(string id)
     {
-        CurveInstance curve = Curves.FirstOrDefault(c=>c.Id == id);
-        if (curve == null)
+        if (dict.ContainsKey(id))
         {
-            curve = Curves.FirstOrDefault();
+            return dict[id];
         }
 
-        return curve;
+        return Curves[0];
+    }
+
+    public void AddCurve(UnityEngine.AnimationCurve curve)
+    {
+        CurveInstance cI = new CurveInstance(curve);
+   
+        Curves.Add(cI);
+        dict.Add(cI.Id, cI);
     }
 }

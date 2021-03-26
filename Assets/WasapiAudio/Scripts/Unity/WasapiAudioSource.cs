@@ -63,6 +63,7 @@ namespace Assets.WasapiAudio.Scripts.Unity
 
         public float[] GetSpectrumData(AudioVisualizationStrategy strategy, bool smoothed, AudioVisualizationProfile profile)
         {
+
             var scaledSpectrumData = new float[SpectrumSize];
             var scaledMinMaxSpectrumData = new float[SpectrumSize];
 
