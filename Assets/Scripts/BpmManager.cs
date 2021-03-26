@@ -43,6 +43,7 @@ public class BpmManager : AudioVisualizationEffect
 
 
     public Action OnBeat = () => { };
+    public Action OnQuart = () => { };
 
     private List<float> beats = new List<float>();
 
@@ -139,6 +140,8 @@ public class BpmManager : AudioVisualizationEffect
 
         OnBeat.Invoke();
 
+        StartCoroutine(CountQuarts());
+
         if (Playing.Value)
         {
            // KineticFieldController.Instance.RandomSwap();
@@ -156,6 +159,21 @@ public class BpmManager : AudioVisualizationEffect
             osc.Beat();
         }
     }
+
+    private IEnumerator CountQuarts()
+    {
+        float timeGap = 15f / Bpm.Value;
+
+        OnQuart();
+        yield return new WaitForSeconds(timeGap);
+        OnQuart();
+        yield return new WaitForSeconds(timeGap);
+        OnQuart();
+        yield return new WaitForSeconds(timeGap);
+        OnQuart();
+
+    }
+
 
     /*
     private IEnumerator UpdateOscilators()

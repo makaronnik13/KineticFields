@@ -34,6 +34,8 @@ public class PresetsLerper : Singleton<PresetsLerper>
 
     public RectTransform RadiusView;
 
+    public Action<KineticPreset> OnPresetDeleted = (p) => { };
+
     private int beats = 0;
 
     public Dictionary<KineticPreset, float> Weigths
@@ -41,10 +43,15 @@ public class PresetsLerper : Singleton<PresetsLerper>
         get
         {
             Dictionary<KineticPreset, float> weigths = new Dictionary<KineticPreset, float>();
-            foreach (PresetPoint point in points.Where(p=>Vector3.Distance(p.transform.position, RadiusView.transform.position)<=Radius.Value))
+            foreach (PresetPoint point in points)
             {
                 point.Volume.SetState(1f- Vector3.Distance(point.transform.position, RadiusView.transform.position)/Radius.Value);
-                weigths.Add(point.Preset, point.Volume.Value);
+
+                if (point.Volume.Value>0)
+                {
+                    weigths.Add(point.Preset, point.Volume.Value);
+                }
+     
             } 
 
             return weigths;
@@ -73,8 +80,11 @@ public class PresetsLerper : Singleton<PresetsLerper>
 
     private void DeleteSelected()
     {
+
         KineticPreset deletedPreset = SelectedPreset.Value;
 
+
+        OnPresetDeleted(deletedPreset);
 
         KineticFieldController.Instance.Session.Value.Presets.Remove(deletedPreset);
 
@@ -92,6 +102,17 @@ public class PresetsLerper : Singleton<PresetsLerper>
         {
             pp.SetSelected(pp.Preset == p);
         }
+    }
+
+    public Vector2 GetPosition(KineticPreset preset)
+    {
+        PresetPoint po = points.FirstOrDefault(p => p.Preset == preset);
+
+        if (po == null)
+        {
+            return FindObjectOfType<Center>().transform.localPosition;
+        }
+        return (Vector2)po.transform.localPosition;
     }
 
     private void RadiusChanged(float v)

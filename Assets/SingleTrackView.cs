@@ -26,6 +26,15 @@ public class SingleTrackView : MonoBehaviour
         Background.color = new Color(track.Color.r, track.Color.g, track.Color.b, 0.1f);
     }
 
+    private void OnDestroy()
+    {
+        if (FindObjectOfType<TracksManager>()!=null)
+        {
+            FindObjectOfType<TracksManager>().CurrentTrack.RemoveListener(CurrentTrackChanged);
+        }
+       
+    }
+
     private void SizeChanged(int v)
     {
         Length.text = Mathf.Pow(2, 1 + v).ToString();
@@ -33,6 +42,8 @@ public class SingleTrackView : MonoBehaviour
 
     private void CurrentTrackChanged(TrackInstance track)
     {
+
+
         Animator.SetBool("Show", track == Track);
     }
 
@@ -49,11 +60,11 @@ public class SingleTrackView : MonoBehaviour
     {
         if (Animator.GetBool("Show"))
         {
-            TracksManager.Instance.CurrentTrack.SetState(null);
+            TracksManager.Instance.SetTrack(null);
         }
         else
         {
-            TracksManager.Instance.CurrentTrack.SetState(Track);
+            TracksManager.Instance.SetTrack(Track);
         }
     }
 }
