@@ -57,6 +57,9 @@ public class BpmManager : AudioVisualizationEffect
 
     public override void Awake()
     {
+        PoolManager.WarmPool(Marker, 25);
+        PoolManager.WarmPool(Circles, 5);
+
         Instance = this;
         base.Awake();
     }
@@ -89,7 +92,7 @@ public class BpmManager : AudioVisualizationEffect
 
     private void CreateMarker()
     {
-        GameObject newMarker = Instantiate(Marker);
+        GameObject newMarker = PoolManager.SpawnObject(Marker);
         newMarker.transform.SetParent(transform.GetChild(0));
         newMarker.GetComponent<RectTransform>().anchoredPosition = Vector3.zero;
     }
@@ -127,10 +130,12 @@ public class BpmManager : AudioVisualizationEffect
 
     public void Beat()
     {
-        GameObject circles = Instantiate(Circles);
+        GameObject circles = PoolManager.SpawnObject(Circles);
         circles.transform.SetParent(transform.GetChild(0));
         circles.transform.localPosition = Vector3.zero;
-        Destroy(circles, 1);
+
+    
+        StartCoroutine(DelayDestroy(circles, 1));
 
         //beats.Add(Time.timeSinceLevelLoad);
 
@@ -158,6 +163,12 @@ public class BpmManager : AudioVisualizationEffect
         {
             osc.Beat();
         }
+    }
+
+    private IEnumerator DelayDestroy(GameObject obj, int v)
+    {
+        yield return new WaitForSeconds(v);
+        PoolManager.ReleaseObject(obj);
     }
 
     private IEnumerator CountQuarts()

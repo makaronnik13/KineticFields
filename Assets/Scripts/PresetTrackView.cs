@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class PresetTrackView : MonoBehaviour
 {
     [SerializeField]
-    private GameObject StepPrefab;
+    public GameObject StepPrefab;
 
     public PointTrack Track;
 
@@ -18,7 +18,7 @@ public class PresetTrackView : MonoBehaviour
         //Track.OnTrackChanged += UpdateTrack;
         for (int i = 0; i < 128-1; i++)
         {
-            GameObject ns = Instantiate(StepPrefab);
+            GameObject ns = PoolManager.Instance.spawnObject(StepPrefab);
             ns.transform.SetParent(transform);
             ns.transform.localPosition = Vector3.zero;
             ns.transform.localScale = Vector3.one;
