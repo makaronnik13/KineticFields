@@ -13,7 +13,7 @@ public class PointTrack
     public int presetId;
 
     [NonSerialized]
-    public Action OnTrackChanged = () => { };
+    public Action<int> OnTrackChanged = (id) => { };
 
     [NonSerialized]
     public Action<PointTrack> OnTrackRemoved = (tr) => { };
@@ -64,6 +64,7 @@ public class PointTrack
 
     public void AddStep(float t, Vector2 pos)
     {
+    
 
         int stepId = Mathf.RoundToInt(t * 64f)-1;
 
@@ -73,6 +74,7 @@ public class PointTrack
         {
             return;
         }
+
 
         TrackStep step = steps[stepId];
 
@@ -85,7 +87,7 @@ public class PointTrack
             steps.Add(step);
 
  
-            OnTrackChanged();
+            OnTrackChanged(presetId);
         }
 
 
@@ -95,6 +97,9 @@ public class PointTrack
     public void RemoveStep(TrackStep s)
     {
         s.Position = Vector3.zero;
+        s.HasKey.SetState(false);
+
+
         if (steps.FirstOrDefault(st => st.HasKey.Value) == null)
         {
             OnTrackRemoved(this);
@@ -151,9 +156,7 @@ public class PointTrack
             }
             if (v<s2.Time.Value)
             {
-                Debug.Log(v+"/"+(dist-s1.Time.Value) +"/"+d);
- 
-                val =  s1.Time.Value - v;
+                val =  (dist- s1.Time.Value+v)*2f;
             }
         }
 

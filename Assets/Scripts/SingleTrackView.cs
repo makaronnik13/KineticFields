@@ -28,6 +28,7 @@ public class SingleTrackView : MonoBehaviour
 
     private void OnDestroy()
     {
+        Debug.Log("destr "+name);
         if (FindObjectOfType<TracksManager>()!=null)
         {
             FindObjectOfType<TracksManager>().CurrentTrack.RemoveListener(CurrentTrackChanged);

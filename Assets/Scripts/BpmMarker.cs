@@ -8,7 +8,13 @@ public class BpmMarker : MonoBehaviour
 
     private void Start()
     {
-        Destroy(gameObject, 5);
+        DelayDestroy(gameObject, 5);
+    }
+
+    private IEnumerator DelayDestroy(GameObject obj, int v)
+    {
+        yield return new WaitForSeconds(v);
+        PoolManager.ReleaseObject(obj);
     }
 
     // Update is called once per frame
