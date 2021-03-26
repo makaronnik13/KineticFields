@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Center : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     [SerializeField]
     private float Sensivity = 1f;

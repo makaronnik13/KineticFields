@@ -34,12 +34,19 @@ public class KineticPointInstance: ICloneable
     public string CurveId = "";
 
     [NonSerialized]
+    private KineticFieldController kfController;
+
+    [NonSerialized]
     public CurveInstance TempCurve;
     public CurveInstance Curve
     {
         get
         {
-            return KineticFieldController.Instance.Session.Value.Curves.GetCurve(CurveId);//DefaultResources.Settings.SizeCurves[CurveId];
+            if (kfController == null)
+            {
+                kfController = KineticFieldController.Instance;
+            }
+            return kfController.Session.Value.Curves.GetCurve(CurveId);//DefaultResources.Settings.SizeCurves[CurveId];
         }
         set
         {
