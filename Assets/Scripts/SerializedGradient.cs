@@ -33,7 +33,7 @@ public class SerializedGradient
 
         foreach (SerializedGradientKey key in keys)
         {
-            if (key.Color)
+            if (key.IsColor)
             {
                 cKeys.Add(new GradientColorKey(new Color(key.a, key.b, key.c), key.time));
             }

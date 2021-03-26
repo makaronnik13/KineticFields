@@ -15,9 +15,6 @@ public class TrackLib
     [SerializeField]
     public GenericFlag<int> ChangeRate = new GenericFlag<int>("ChangeRate", 0);
 
-    [SerializeField]
-    public GenericFlag<bool> Playing = new GenericFlag<bool>("Playing", false);
-
     public TrackLib()
     {
 

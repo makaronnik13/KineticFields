@@ -19,8 +19,12 @@ public class KineticPreset: ICloneable
         {
             X = value.x;
             Y = value.y;
+            OnPositionChanged(Position);
         }
     }
+
+    [NonSerialized]
+    public Action<Vector2> OnPositionChanged = (v) => { };
 
     public float X, Y;
 

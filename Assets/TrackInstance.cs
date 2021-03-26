@@ -1,5 +1,6 @@
 ﻿using com.armatur.common.flags;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -20,8 +21,9 @@ public class TrackInstance
         }
     }
 
+    public List<PointTrack> PointsTracks = new List<PointTrack>();
 
-    [SerializeField]
+   [SerializeField]
     private int _iconId = 0;
 
     public GenericFlag<int> Size = new GenericFlag<int>("Size", 0);
@@ -35,6 +37,14 @@ public class TrackInstance
         set
         {
             _iconId = DefaultResources.TrackSprites.IndexOf(value);
+        }
+    }
+
+    public int Steps
+    {
+        get
+        {
+            return Mathf.RoundToInt(Mathf.Pow(2, 1 + Size.Value));
         }
     }
 

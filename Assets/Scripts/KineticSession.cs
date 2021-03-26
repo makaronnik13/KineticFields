@@ -31,6 +31,21 @@ public class KineticSession
     [NonSerialized]
     public KineticPreset AveragePreset;
 
+    private KineticPreset mainPreset;
+    public KineticPreset MainPreset
+    {
+        get
+        {
+            if (mainPreset == null)
+            {
+                mainPreset = new KineticPreset("EmptyPreset");
+                mainPreset.Color = Color.white;
+                mainPreset.Color2 = Color.white;
+            }
+            return mainPreset;
+        }
+    }
+
     public KineticSession()
     {
 

@@ -32,6 +32,11 @@ public class TracksManager : Singleton<TracksManager>
     [SerializeField]
     private GameObject PlayStopBtn;
 
+    private TrackInstance nextTrack = null;
+
+    [SerializeField]
+    public GenericFlag<bool> Playing = new GenericFlag<bool>("Playing", false);
+
     //[SerializeField]
     //private TMPro.TextMeshProUGUI ChangeRate;
 
@@ -48,13 +53,56 @@ public class TracksManager : Singleton<TracksManager>
             CurrentLib.SetState(new TrackLib("NewTrackLib"));
         }
         CurrentLib.AddListener(LibChanged);
+        FindObjectOfType<BpmManager>().OnBeat += Beat;
+        Playing.AddListener(PlayingStateChanged);
+        PresetsLerper.Instance.OnPresetDeleted += PresetDeleted;
+    }
+
+    private void PresetDeleted(KineticPreset p)
+    {
+        int id = KineticFieldController.Instance.Session.Value.Presets.IndexOf(p);
+
+        for (int i = CurrentLib.Value.Tracks.Count-1; i>=0; i--)
+        {
+            PointTrack pTrack = CurrentLib.Value.Tracks[i].PointsTracks.FirstOrDefault(t => t.presetId == id);
+            if (pTrack != null)
+            {
+                pTrack.OnTrackRemoved(pTrack);
+            }
+        }
+
+    }
+
+    private void Beat()
+    {
+        if (nextTrack!=null)
+        {
+            CurrentTrack.SetState(nextTrack);
+        }
+    }
+
+    public void SetTrack(TrackInstance track)
+    {
+        if (track == null)
+        {
+            CurrentTrack.SetState(null);
+        }
+        nextTrack = track;
+  
     }
 
     private void LibChanged(TrackLib lib)
     {
+        Playing.SetState(false);
 
         if (lib.Tracks.Count>0)
         {
+            if (CurrentTrack.Value!=null)
+            {
+                Debug.Log(CurrentTrack.Value.PointsTracks.Count + "/" + CurrentTrack.Value.Color+" F");
+            }
+           
+
             CurrentTrack.SetState(lib.Tracks[0]);
         }
         else
@@ -71,7 +119,6 @@ public class TracksManager : Singleton<TracksManager>
             _lastLib = lib;
 
             _lastLib.ChangeRate.AddListener(LibRateChanged);
-            _lastLib.Playing.AddListener(LibPlayingStateChanged);
         }
 
         PlayStopBtn.SetActive(CurrentLib.Value.Tracks.Count>0);
@@ -82,9 +129,10 @@ public class TracksManager : Singleton<TracksManager>
        
     }
 
-    private void LibPlayingStateChanged(bool v)
+    private void PlayingStateChanged(bool v)
     {
         //PlayStopBtnAnimator.SetBool("Show", v);
+
         if (v)
         {
             PlayStopIcon.sprite = PlaySprte;
@@ -107,7 +155,7 @@ public class TracksManager : Singleton<TracksManager>
 
     private void OnDisable()
     {
-        
+        CurrentTrack.SetState(null);
     }
 
     public void DeleteCurrentTrack()
@@ -138,7 +186,27 @@ public class TracksManager : Singleton<TracksManager>
         newTrackBtn.transform.localPosition = Vector3.zero;
         newTrackBtn.transform.localScale = Vector3.one;
         newTrackBtn.GetComponent<SingleTrackView>().Init(newTrack);
-        newTrackBtn.transform.SetSiblingIndex(CurrentLib.Value.Tracks.Count+2);
+        newTrackBtn.transform.SetSiblingIndex(CurrentLib.Value.Tracks.Count+4);
+    }
+
+    public void RandomSwap()
+    {
+        int lastId = CurrentLib.Value.Tracks.IndexOf(CurrentTrack.Value);
+
+        if (lastId == -1)
+        {
+            lastId = UnityEngine.Random.Range(0, CurrentLib.Value.Tracks.Count-1);
+        }
+        else
+        {
+            lastId++;
+            if (lastId>= CurrentLib.Value.Tracks.Count)
+            {
+                lastId = 0;
+            }
+        }
+
+        CurrentTrack.SetState(CurrentLib.Value.Tracks[lastId]);
     }
 
     public void SaveClicked()
@@ -179,6 +247,6 @@ public class TracksManager : Singleton<TracksManager>
 
     public void TogglePlay()
     {
-        CurrentLib.Value.Playing.SetState(!CurrentLib.Value.Playing.Value);
+        Playing.SetState(!Playing.Value);
     }
 }
