@@ -122,7 +122,7 @@ public class KineticPreset: ICloneable
         NearCutPlane = new ModifyingParameter(0f, 0f, 8f);
         FarCutPlane = new ModifyingParameter(5f, 0f, 8f);
         Lifetime = new ModifyingParameter(1f, 0f, 10f);
-        ParticlesCount = new ModifyingParameter(100000, 1000, 1000000);
+        ParticlesCount = new ModifyingParameter(100000, 100, 500000);
         Gravity = new ModifyingParameter(0f, -1f, 1f);
         Speed = new ModifyingParameter(0f, 0f, 1f);
 

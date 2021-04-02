@@ -233,7 +233,7 @@ public class TracksManager : Singleton<TracksManager>
 
     public void RandomSwap()
     {
-        if (!Shufle.Value)
+        if (!Shufle.Value || TrackView.Instance.DraggingPresets.Count>0)
         {
             return;
         }

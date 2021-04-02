@@ -229,8 +229,7 @@ public class TrackView : Singleton<TrackView>
 
                 if (timing.Value >= 1f)
                 {
-                    timing.SetState(0);
-                    Slider.value = 0;
+                    ResetTime();
                 }
   
                 timing.SetState(timing.Value + 1f / Mathf.Pow(2, 3 + currentTrack.Size.Value));
@@ -250,6 +249,12 @@ public class TrackView : Singleton<TrackView>
         {
 
         }
+    }
+
+    public void ResetTime()
+    {
+        timing.SetState(0);
+        Slider.value = 0;
     }
 
     private void BpmChanged(int bpm)

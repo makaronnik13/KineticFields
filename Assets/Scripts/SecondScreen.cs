@@ -60,6 +60,10 @@ public class SecondScreen : MonoBehaviour
 
             FlipBtn.gameObject.SetActive(Display.displays.Length > 1);
         }
-      
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            transform.Rotate(transform.forward, 90f);
+        }
     }
 }
