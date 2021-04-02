@@ -109,6 +109,7 @@ public class BpmManager : AudioVisualizationEffect
 
     public void TestBeat()
     {
+
         if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count >= realTimeSpectralFluxAnalyzer.thresholdWindowSize)
         {
             if (Mathf.Abs(realTimeSpectralFluxAnalyzer.Bpm - Bpm.Value) > BeatTreshold)
@@ -123,7 +124,20 @@ public class BpmManager : AudioVisualizationEffect
                 //realTimeSpectralFluxAnalyzer.Reset();
             }
         }
-       
+        else
+        {
+            if (Bpm.Value!=120)
+            {
+                Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
+
+                if (spawnMarkerCoroutine != null)
+                {
+                    StopCoroutine(spawnMarkerCoroutine);
+                }
+                spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
+            }
+           
+        }
         //Tap();
         //Debug.Log(realTimeSpectralFluxAnalyzer.Bpm);
     }
@@ -211,6 +225,7 @@ public class BpmManager : AudioVisualizationEffect
 
             if (Input.GetMouseButtonDown(2))
             {
+                /*
                 Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
 
                 if (spawnMarkerCoroutine != null)
@@ -218,7 +233,8 @@ public class BpmManager : AudioVisualizationEffect
                     StopCoroutine(spawnMarkerCoroutine);
                 }
                 spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
-                //Tap();
+                */
+                Tap();
 
 
 
@@ -238,6 +254,10 @@ public class BpmManager : AudioVisualizationEffect
 
     public void Tap()
     {
+        Debug.Log("tap");
+        realTimeSpectralFluxAnalyzer.Reset();
+        Bpm.SetState(120);
+        /*
         if (tapDetectionCoroutine != null)
         {
             StopCoroutine(tapDetectionCoroutine);
@@ -262,6 +282,8 @@ public class BpmManager : AudioVisualizationEffect
             spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
         }
         // StartDetection();
+        */
+
     }
 
     private IEnumerator TapDetection()

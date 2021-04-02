@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,6 +8,10 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
 {
     [SerializeField]
     private float Sensivity = 1f;
+
+    private bool writing;
+
+    private int beatCount = 0;
 
     private KineticPreset Preset
     {
@@ -54,10 +59,34 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
     public void OnBeginDrag(PointerEventData eventData)
     {
         TrackView.Instance.DraggingPresets.Add(Preset);
+        BpmManager.Instance.OnBeat += Beat;
+    }
+
+    private void Beat()
+    {
+        TrackView.Instance.ResetTime();
+        writing = true;
+        BpmManager.Instance.OnBeat -= Beat;
+        BpmManager.Instance.OnBeat += Beat2;
+    }
+
+    private void Beat2()
+    {
+        beatCount++;
+        if (TracksManager.Instance.CurrentTrack.Value!=null && beatCount >= TracksManager.Instance.CurrentTrack.Value.Steps)
+        {
+            TrackView.Instance.DraggingPresets.Remove(Preset);
+           BpmManager.Instance.OnBeat -= Beat2;
+            writing = false;
+            beatCount = 0;
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        writing = false;
+        BpmManager.Instance.OnBeat -= Beat2;
+        BpmManager.Instance.OnBeat -= Beat;
         Preset.Position = new Vector2(transform.localPosition.x, transform.localPosition.y);
         TrackView.Instance.DraggingPresets.Remove(Preset);
     }

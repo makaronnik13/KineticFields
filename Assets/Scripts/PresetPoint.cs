@@ -74,6 +74,7 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
 
         Preset.Position = new Vector2(transform.localPosition.x, transform.localPosition.y);
 
+        /*
         if (!TracksManager.Instance.Playing.Value && TracksManager.Instance.CurrentTrack.Value!=null)
         {
             float step = Mathf.RoundToInt(TrackView.Instance.Slider.value * TracksManager.Instance.CurrentTrack.Value.Steps*4f) / (TracksManager.Instance.CurrentTrack.Value.Steps*4f);
@@ -81,6 +82,8 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
             TrackView.Instance.Slider.value = step;
             TrackView.Instance.WritePoint(Preset, transform.localPosition, 1);
         }
+        */
+
         //transform.localPosition = new Vector3(Mathf.Clamp(transform.localPosition.x, -150f, 150f), Mathf.Clamp(transform.localPosition.y, -150f, 150f), 0);
     }
 
