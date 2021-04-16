@@ -27,9 +27,25 @@ public class KineticSession
         return Presets.FirstOrDefault(p => p.Id == presetId);
     }
 
-   
-    [NonSerialized]
-    public KineticPreset AveragePreset;
+
+    private KineticPreset averagePreset;
+
+    public KineticPreset AveragePreset
+    {
+        get
+        {
+            if (averagePreset == null)
+            {
+                averagePreset = new KineticPreset("AveragePreset");
+            }
+
+            return averagePreset;
+        }
+        set
+        {
+            averagePreset = value;
+        }
+    }
 
     private KineticPreset mainPreset;
     public KineticPreset MainPreset
@@ -63,7 +79,6 @@ public class KineticSession
 
     public KineticSession(string sessionName)
     {
-        Debug.Log("Create session");
         SessionName = sessionName;
         Presets.Clear();
         KineticPreset preset = new KineticPreset("Preset_0");
@@ -87,6 +102,8 @@ public class KineticSession
         }
 
         Curves = new CurvesStorage();
+
+
         foreach (AnimationCurve cu in DefaultResources.Settings.SizeCurves)
         {
             Curves.AddCurve(cu);
@@ -105,6 +122,7 @@ public class KineticSession
 
     public void UpdateAveragePreset(Dictionary<KineticPreset, float> weihgts)
     {
+  
 
         float weigthsSum = weihgts.Select(p => p.Value).Sum();
 
@@ -179,17 +197,14 @@ public class KineticSession
         List<KineticPointInstance> points = new List<KineticPointInstance>();
         List<int> values = new List<int>();
 
-        string s = "";
 
         for (int i = 0; i < pointsWeigths.Count; i++)
         {
             KeyValuePair<KineticPointInstance, float> pair = pointsWeigths.ToList<KeyValuePair<KineticPointInstance, float>>()[i];
             if (!pair.Key.Active.Value && pair.Key.Id != 0)
             {
-                pointsWeigths[pair.Key] = 0;
-            }
-
-            s += pointsWeigths[pair.Key]+"/";    
+                //pointsWeigths[pair.Key] = 0;
+            } 
         }
 
 
@@ -200,7 +215,6 @@ public class KineticSession
             weigthsSum = 10000f;
         }
 
-
         averagePoint.Active.SetState(true);
 
         AnimationCurve pointCurve = new AnimationCurve();
@@ -210,7 +224,10 @@ public class KineticSession
             float averageValue = 0;
             foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
             {
-                averageValue += pair.Value * pair.Key.Curve.Curve.Evaluate(i / 100f);
+                if (pair.Key.Active.Value)
+                {
+                    averageValue += pair.Value * pair.Key.Curve.Curve.Evaluate(i / 100f);
+                }
             }
             averageValue /= weigthsSum;
             pointCurve.AddKey(i / 100f, averageValue);
@@ -253,37 +270,16 @@ public class KineticSession
                     {
                         if (p.Key.ShowGradient)
                         {
-                           // if (p.Value!=0)
-                           // {
+                            if (pair.Key.Active.Value)
+                            {
                                 colors.Add(new GradientColorKey(p.Key.Gradient.Gradient.Evaluate(ck.time), p.Value));
-                           // }
-                            
+                            }
                         }
                     }
 
                     Color averageColor = InterpolateColor(colors);
                     keys.Add(new GradientColorKey(averageColor, ck.time));
                 }
-
-
-
-
-                /*
-                float w = weigth * mult;
-
-                if (w > pair.Value)
-                {
-                    gradient = StaticTools.Lerp(gradient, pair.Key.Gradient.Gradient, pair.Value / w);
-                }
-                else
-                {
-                    gradient = StaticTools.Lerp(pair.Key.Gradient.Gradient, gradient, w/ pair.Value);
-                }
-
-                weigth = (weigth + pair.Value) / 2f;
-
-                mult += weigth;
-                */
             }
 
 
@@ -322,44 +318,50 @@ public class KineticSession
         }
 
 
-  
+        float summWithoutActive = pointsWeigths.Where(p=>p.Key.Active.Value).Select(p => p.Value).Sum();
+
+        if (summWithoutActive == 0)
+        {
+            summWithoutActive = 10000f;
+        }
 
         foreach (KeyValuePair<KineticPointInstance, float> pair in pointsWeigths)
         {
-            deep += pair.Value * pair.Key.Deep.Value.Value;
-            x += pair.Value * pair.Key.Position.x;
-            y += pair.Value * pair.Key.Position.y;
-            radius += pair.Value * pair.Key.Radius.Value.Value;
-            volume += pair.Value * pair.Key.Volume.Value.Value;
+            if (pair.Key.Active.Value)
+            {
+                deep += pair.Value * pair.Key.Deep.Value.Value;
+                x += pair.Value * pair.Key.Position.x;
+                y += pair.Value * pair.Key.Position.y;
+                radius += pair.Value * pair.Key.Radius.Value.Value;
+                volume += pair.Value * pair.Key.Volume.Value.Value;
+            }
         }
 
-        deep /= weigthsSum;
+
+        deep /= summWithoutActive;
 
 
 
-        x /= weigthsSum;
-        y /= weigthsSum;
+        x /= summWithoutActive;
+        y /= summWithoutActive;
 
 
    
 
-        radius /= weigthsSum;
+        radius /= summWithoutActive;
 
 
-        volume /= weigthsSum;
+        volume /= summWithoutActive;
+
 
         averagePoint.Deep.Value.SetState(deep);
         averagePoint.Position = new Vector3(x, y, deep);
 
-        if (averagePoint.Id == 0)
-        {
-          //  Debug.Log(radius + "!1");
-        }
 
         averagePoint.Radius.Value.SetState(radius);
 
 
-
+ 
         averagePoint.Volume.Value.SetState(volume);
 
         if (averagePoint.ShowGradient)
@@ -419,7 +421,7 @@ public class KineticSession
         return fg;
     }
 
-    public void LoadPreset(KineticPreset pr)
+    public void LoadPreset(KineticPreset pr, Action onLoad)
     {
         if (pr == null)
         {
@@ -456,7 +458,7 @@ public class KineticSession
         ActivePreset.Value.MeshId.AddListener(MeshChanged);
 
 
-        MainPointInspector.Instance.PresetChanged(ActivePreset.Value);
+        onLoad.Invoke();
     }
 
     private void MeshChanged(int meshId)

@@ -1,4 +1,6 @@
-﻿using Assets.WasapiAudio.Scripts.Unity;
+﻿using Assets.Scripts;
+using Assets.WasapiAudio.Scripts.Unity;
+using com.armatur.common.flags;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,8 +8,17 @@ using UnityEngine;
 using UnityEngine.VFX;
 using Windows.Kinect;
 
-public class SettingsPanel : MonoBehaviour
+public class SettingsPanel : Singleton<SettingsPanel>
 {
+    [SerializeField]
+    private BarSpectrum Bar;
+
+    [SerializeField]
+    private AudioProcessor Processor;
+
+    [SerializeField]
+    private AudioVisualizationProfile AudioProfile, MicProfile;
+
     [SerializeField]
     private GameObject View;
 
@@ -15,14 +26,13 @@ public class SettingsPanel : MonoBehaviour
     WasapiAudioSource source;
 
     [SerializeField]
-    TMPro.TMP_Dropdown SourceDropdown, VisualDropdown;
+    TMPro.TMP_Dropdown SourceDropdown, VisualDropdown, ModelDropdown;
 
     [SerializeField]
     private VisualEffect Effect;
 
-    [SerializeField]
-    private VisualEffectAsset KinnectAsset, MeshAsset;
-
+    public GenericFlag<KineticModel> ActiveModel = new GenericFlag<KineticModel>("ActiveModel", null);
+   
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +53,31 @@ public class SettingsPanel : MonoBehaviour
         {
             VisualChanged(0);
         }
+
+        ModelDropdown.options.Clear();
+
+        foreach (KineticModel km in DefaultResources.Models)
+        {
+            ModelDropdown.options.Add(new TMPro.TMP_Dropdown.OptionData(km.name));
+        }
+
+        ModelDropdown.onValueChanged.AddListener(ModelDropdownChanged);
+
+        ActiveModel.SetState(DefaultResources.Models[0]);
+        ActiveModel.AddListener(ModelChanged);
+        ModelDropdown.value = 0;
+     
+    }
+
+    private void ModelDropdownChanged(int v)
+    {
+        ActiveModel.SetState(DefaultResources.Models[v]);
+    }
+
+    private void ModelChanged(KineticModel model)
+    {
+        VisualChanged(VisualDropdown.value);
+        ModelDropdown.value = DefaultResources.Models.IndexOf(model);
     }
 
     public void Toggle()
@@ -52,15 +87,16 @@ public class SettingsPanel : MonoBehaviour
 
     private void VisualChanged(int v)
     {
-        if (v==1)
+        if (ActiveModel.Value)
         {
-            Debug.Log("mesh");
-            Effect.visualEffectAsset = MeshAsset;
-        }
-        else
-        {
-            Debug.Log("kinekt");
-            Effect.visualEffectAsset = KinnectAsset;
+            if (v == 1)
+            {
+                Effect.visualEffectAsset = ActiveModel.Value.AnimationGraph;
+            }
+            else
+            {
+                Effect.visualEffectAsset = ActiveModel.Value.KinectGraph;
+            }
         }
     }
 
@@ -69,10 +105,14 @@ public class SettingsPanel : MonoBehaviour
         if (v == 0)
         {
             source.SetSourceType(true);
+            Bar.Profile = MicProfile;
+            Processor.Profile = MicProfile;
         }
         else
         {
             source.SetSourceType(false);
+            Bar.Profile = AudioProfile;
+            Processor.Profile = AudioProfile;
         }
     }
 }

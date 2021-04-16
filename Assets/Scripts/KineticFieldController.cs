@@ -40,6 +40,9 @@ public class KineticFieldController : Singleton<KineticFieldController>
     [SerializeField]
     private float UpdateAveragePresetStep = 0.1f;
 
+    [SerializeField]
+    MainPointInspector MainPointInspector;
+
     public GenericFlag<KineticSession> Session = new GenericFlag<KineticSession>("CurrentSession", null);
     public GenericFlag<KineticPoint> ActivePoint = new GenericFlag<KineticPoint>("ActivePoint", null);
     public GenericFlag<FrequencyGap> ActiveGap = new GenericFlag<FrequencyGap>("ActiveGap", null);
@@ -88,24 +91,18 @@ public class KineticFieldController : Singleton<KineticFieldController>
     {
 
         Session.SetState(session);
-        LoadPreset(session.Presets.FirstOrDefault());
-        /*
-        int i = 1;
-        foreach (AnimationCurve curve in DefaultResources.Settings.SizeCurves)
+        if (session!=null)
         {
-            GameObject ng = new GameObject("Oscilator_" + i);
-            Oscilator osc = ng.AddComponent<Oscilator>();
-            osc.Curve = curve;
-            osc.icon = OscilatorSprites[i-1];
-            Oscilators.Add(osc);
-            i++;
-        }
-        */
+            LoadPreset(session.Presets.FirstOrDefault());
+        } 
     }
 
     private void SessionChanged(KineticSession session)
     {
-
+        if (session==null)
+        {
+            return;
+        }
 
         int i = 0;
         foreach (OscilatorView oscView in OscilatorsHub.GetComponentsInChildren<OscilatorView>())
@@ -115,7 +112,10 @@ public class KineticFieldController : Singleton<KineticFieldController>
         }
 
         PresetsLerper.Instance.SelectedPreset.AddListener(LoadPreset);
-        session.LoadPreset(session.Presets.FirstOrDefault());
+        session.LoadPreset(session.Presets.FirstOrDefault(), ()=> 
+        {
+            MainPointInspector.PresetChanged(Session.Value.ActivePreset.Value);
+        });
     }
 
     private void ActivePointChanged(KineticPoint obj)
@@ -150,14 +150,18 @@ public class KineticFieldController : Singleton<KineticFieldController>
         while (true)
         {
             yield return new WaitForSeconds(UpdateAveragePresetStep);
-            if (!PresetsLerper.Instance.View.activeInHierarchy)
+
+            if (Session.Value!=null)
             {
-                UpdateVisual(Session.Value.ActivePreset.Value);
-            }
-            else
-            {
-                Session.Value.UpdateAveragePreset(PresetsLerper.Instance.Weigths);
-                UpdateVisual(Session.Value.AveragePreset, true);
+                if (!PresetsLerper.Instance.View.activeInHierarchy)
+                {
+                    UpdateVisual(Session.Value.ActivePreset.Value);
+                }
+                else
+                {
+                    Session.Value.UpdateAveragePreset(PresetsLerper.Instance.Weigths);
+                    UpdateVisual(Session.Value.AveragePreset, true);
+                }
             }
         }
     }
@@ -181,65 +185,68 @@ public class KineticFieldController : Singleton<KineticFieldController>
             DraggingSource.SetState(null);
         }
 
-        List<float> d = SpectrumBar.GetSpectrumData().ToList();
-        foreach (FrequencyGap fg in Session.Value.Gaps)
+        if (Session.Value != null)
         {
-            int start = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.Start);
-            int end = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.End);
-            List<float> data = d.GetRange(start, end - start);
-            float dataAverage = data.Sum() / data.Count;
-            fg.UpdateFrequency(data);
-        }
-
-        if (ActivePoint.Value)
-        {
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            List<float> d = SpectrumBar.GetSpectrumData().ToList();
+            foreach (FrequencyGap fg in Session.Value.Gaps)
             {
-                if (Input.GetKeyDown(KeyCode.C))
+                int start = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.Start);
+                int end = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.End);
+                List<float> data = d.GetRange(start, end - start);
+                float dataAverage = data.Sum() / data.Count;
+                fg.UpdateFrequency(data);
+            }
+
+
+            if (ActivePoint.Value)
+            {
+                if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
                 {
-                    CoppyingPoint = ActivePoint.Value.Point;
-                }
-                if (CoppyingPoint != null && Input.GetKeyDown(KeyCode.V))
-                {
-                    ActivePoint.Value.Point.Active.SetState(CoppyingPoint.Active.Value);
-                    ActivePoint.Value.Point.Curve = CoppyingPoint.Curve;
-                    ActivePoint.Value.Point.Deep = CoppyingPoint.Deep.Clone() as ModifyingParameter;
-                    ActivePoint.Value.Point.Gradient = CoppyingPoint.Gradient;
-                    ActivePoint.Value.Point.Position = CoppyingPoint.Position;
-                    ActivePoint.Value.Point.Radius = CoppyingPoint.Radius.Clone() as ModifyingParameter;
-                    ActivePoint.Value.Point.Volume = CoppyingPoint.Volume.Clone() as ModifyingParameter;
+                    if (Input.GetKeyDown(KeyCode.C))
+                    {
+                        CoppyingPoint = ActivePoint.Value.Point;
+                    }
+                    if (CoppyingPoint != null && Input.GetKeyDown(KeyCode.V))
+                    {
+                        ActivePoint.Value.Point.Active.SetState(CoppyingPoint.Active.Value);
+                        ActivePoint.Value.Point.Curve = CoppyingPoint.Curve;
+                        ActivePoint.Value.Point.Deep = CoppyingPoint.Deep.Clone() as ModifyingParameter;
+                        ActivePoint.Value.Point.Gradient = CoppyingPoint.Gradient;
+                        ActivePoint.Value.Point.Position = CoppyingPoint.Position;
+                        ActivePoint.Value.Point.Radius = CoppyingPoint.Radius.Clone() as ModifyingParameter;
+                        ActivePoint.Value.Point.Volume = CoppyingPoint.Volume.Clone() as ModifyingParameter;
+                    }
                 }
             }
-        }
-        /*
-                if (KeysEnabled && EventSystem.current.currentSelectedGameObject == null)
-                {
-                    for (int i = 0; i < keyCodes.Count(); i++)
+            /*
+                    if (KeysEnabled && EventSystem.current.currentSelectedGameObject == null)
                     {
-                        if (Input.GetKey(KeyCode.LeftShift))
+                        for (int i = 0; i < keyCodes.Count(); i++)
                         {
-                            if (Input.GetKeyDown(keyCodes[i]))
+                            if (Input.GetKey(KeyCode.LeftShift))
                             {
-                                Session.Value.SavePreset(i);
+                                if (Input.GetKeyDown(keyCodes[i]))
+                                {
+                                    Session.Value.SavePreset(i);
+                                }
                             }
-                        }
-                        else
-                        {
-                            if (Input.GetKeyDown(keyCodes[i]))
+                            else
                             {
-                                LoadPreset(i);
+                                if (Input.GetKeyDown(keyCodes[i]))
+                                {
+                                    LoadPreset(i);
+                                }
                             }
                         }
                     }
-                }
-        */
+            */
 
 
-        if (Input.GetMouseButtonDown(1))
-        {
-            ActivePoint.SetState(null);
+            if (Input.GetMouseButtonDown(1))
+            {
+                ActivePoint.SetState(null);
+            }
         }
-
     }
 
     private void UpdateVisual(KineticPreset preset, bool useTemp = false)
@@ -299,7 +306,10 @@ public class KineticFieldController : Singleton<KineticFieldController>
 
         }
 
-        Session.Value.LoadPreset(preset);
+        Session.Value.LoadPreset(preset,()=> 
+        {
+            MainPointInspector.PresetChanged(Session.Value.ActivePreset.Value);
+        });
         GapEditor.Init(Session.Value);
 
         int j = 0;

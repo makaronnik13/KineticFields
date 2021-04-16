@@ -28,30 +28,25 @@ public class KineticPoint3dAnchor : MonoBehaviour
 
     void Update()
     {
-        if (Input.mouseScrollDelta.y!=0)
+        if (!PresetsLerper.Instance.Lerping.Value)
         {
-            BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.one*3, Time.deltaTime * 3);
-        }
-        else
-        {
-            BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.zero, Time.deltaTime*3);
-        }
-
-        if (KineticFieldController.Instance.ActivePoint.Value == Point2d)
-        {
-            Point2d.Point.Deep.SetValue(KineticFieldController.Instance.ActivePoint.Value.Point.Deep.BaseValue.Value - Input.mouseScrollDelta.y * 0.3f);
-         
-        }
-
-
-        if (Point2d)
-        {
-            if (Point2d.Point.Id == 0)
+            if (Input.mouseScrollDelta.y != 0)
             {
-                //                Debug.Log(Point2d.Point.Position);
-
-
+                BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.one * 3, Time.deltaTime * 3);
             }
+            else
+            {
+                BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.zero, Time.deltaTime * 3);
+            }
+
+            if (KineticFieldController.Instance.ActivePoint.Value == Point2d)
+            {
+                Point2d.Point.Deep.SetValue(KineticFieldController.Instance.ActivePoint.Value.Point.Deep.BaseValue.Value - Input.mouseScrollDelta.y * 0.3f);
+            }
+        }
+
+        if (Point2d && Point2d.Point!=null)
+        {
 
             transform.position = Vector3.Lerp(transform.position, Point2d.Point.Position, Time.deltaTime*2f);
 

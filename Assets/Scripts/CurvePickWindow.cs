@@ -41,7 +41,8 @@ public class CurvePickWindow : Singleton<CurvePickWindow>
 
     private void CreateBtns()
     {
-        Debug.Log("create btns");
+        StopAllCoroutines();
+
         foreach (Transform t in View.transform)
         {
             if (t.gameObject.name != "AddBtn")
@@ -50,12 +51,16 @@ public class CurvePickWindow : Singleton<CurvePickWindow>
             }
         }
 
-        int i = 0;
-        foreach (CurveInstance curve in KineticFieldController.Instance.Session.Value.Curves.Curves)
+        if (KineticFieldController.Instance.Session.Value!=null)
         {
-            StartCoroutine(CreateCurveBtn(curve, i * 0.05f));
-            i++;
+            int i = 0;
+            foreach (CurveInstance curve in KineticFieldController.Instance.Session.Value.Curves.Curves)
+            {
+                StartCoroutine(CreateCurveBtn(curve, i * 0.01f));
+                i++;
+            }
         }
+    
     }
 
     private void PointChanged(KineticPoint obj)
@@ -74,6 +79,7 @@ public class CurvePickWindow : Singleton<CurvePickWindow>
 
     public void SelectCurve(string id)
     {
+        Debug.Log(id);
         OnPicked(id);
         if (callback!=null)
         {
@@ -106,6 +112,6 @@ public class CurvePickWindow : Singleton<CurvePickWindow>
         CurveInstance newCurve = new CurveInstance(nc);
         StartCoroutine(CreateCurveBtn(newCurve, 0.05f));
         selectedCurveId.SetState(newCurve.Id);
-        KineticFieldController.Instance.Session.Value.Curves.Curves.Add(newCurve);
+        KineticFieldController.Instance.Session.Value.Curves.AddCurve(newCurve);
     }
 }

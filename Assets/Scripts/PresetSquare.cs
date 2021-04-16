@@ -67,9 +67,8 @@ public class PresetSquare : MonoBehaviour, IDragHandler, IBeginDragHandler, IDro
 
         preset.IconId.SetState(UnityEngine.Random.Range(0, DefaultResources.PresetSprites.Count-1));
         preset.Color = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.3f, 0.3f, 1f, 1f);
-
         preset.Color2 = UnityEngine.Random.ColorHSV(0f, 1f,1f, 1f, 1f, 1f, 1f, 1f);
-
+        SessionsManipulator.Instance.Autosave();
     }
 
     private void OnDestroy()

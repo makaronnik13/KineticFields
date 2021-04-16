@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 [Serializable]
 public class CurvesStorage
@@ -21,6 +22,7 @@ public class CurvesStorage
 
     public CurveInstance GetCurve(string id)
     {
+      
         if (dict.ContainsKey(id))
         {
             return dict[id];
@@ -32,8 +34,13 @@ public class CurvesStorage
     public void AddCurve(UnityEngine.AnimationCurve curve)
     {
         CurveInstance cI = new CurveInstance(curve);
-   
         Curves.Add(cI);
         dict.Add(cI.Id, cI);
+    }
+
+    public void AddCurve(CurveInstance newCurve)
+    {
+        Curves.Add(newCurve);
+        dict.Add(newCurve.Id, newCurve);
     }
 }

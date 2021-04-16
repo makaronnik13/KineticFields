@@ -129,6 +129,11 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
         {
             DuplicatePreset();
         }
+
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            PresetsLerper.Instance.Toggle();
+        }
     }
 
     private IEnumerator DoubleClick()
@@ -154,5 +159,6 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
     {
         Preset.Position = new Vector2(transform.localPosition.x, transform.localPosition.y);
         TrackView.Instance.DraggingPresets.Remove(Preset);
+        SessionsManipulator.Instance.Autosave();
     }
 }

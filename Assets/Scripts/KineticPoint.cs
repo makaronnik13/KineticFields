@@ -43,8 +43,14 @@ public class KineticPoint : MonoBehaviour
         {
             if (PresetsLerper.Instance.View.activeInHierarchy)
             {
-
-                return KineticFieldController.Instance.Session.Value.AveragePreset.Points.FirstOrDefault(p => p.Id == point.Id);
+                if (KineticFieldController.Instance.Session.Value!=null && point!=null)
+                {
+                    point = KineticFieldController.Instance.Session.Value.AveragePreset.Points.FirstOrDefault(p => p.Id == point.Id);
+                }
+                else
+                {
+                    return null;
+                }
             }
             
             return point;

@@ -30,7 +30,7 @@ public class SerializingCurve
     public void Update(AnimationCurve c)
     {
         keys.Clear();
-        foreach (Keyframe kf in curve.keys)
+        foreach (Keyframe kf in c.keys)
         {
             keys.Add(new SerializingKeyframe(kf));
         }

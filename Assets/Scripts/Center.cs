@@ -17,13 +17,20 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
     {
         get
         {
+            if (KineticFieldController.Instance.Session.Value == null)
+            {
+                return null;
+            }
             return KineticFieldController.Instance.Session.Value.MainPreset;
         }
     }
 
     void Start()
     {
-        Preset.OnPositionChanged += PositionChanged;
+        if (Preset!=null)
+        {
+            Preset.OnPositionChanged += PositionChanged;
+        }
     }
 
     private void PositionChanged(Vector2 p)
@@ -49,9 +56,12 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
 
     private void Update()
     {
-        float rad = PresetsLerper.Instance.Radius.Value + Input.mouseScrollDelta.y * Sensivity;
-        rad = Mathf.Clamp(rad, 50, 250);
-        PresetsLerper.Instance.Radius.SetState(rad);
+        if (PresetsLerper.Instance.Lerping.Value)
+        {
+            float rad = PresetsLerper.Instance.Radius.Value + Input.mouseScrollDelta.y * Sensivity;
+            rad = Mathf.Clamp(rad, 50, 250);
+            PresetsLerper.Instance.Radius.SetState(rad);
+        }
     }
 
 
@@ -59,7 +69,10 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
     public void OnBeginDrag(PointerEventData eventData)
     {
         TrackView.Instance.DraggingPresets.Add(Preset);
-        BpmManager.Instance.OnBeat += Beat;
+        if (TracksManager.Instance.Playing.Value)
+        {
+            BpmManager.Instance.OnBeat += Beat;
+        }
     }
 
     private void Beat()
@@ -87,7 +100,12 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
         writing = false;
         BpmManager.Instance.OnBeat -= Beat2;
         BpmManager.Instance.OnBeat -= Beat;
-        Preset.Position = new Vector2(transform.localPosition.x, transform.localPosition.y);
+        if (Preset!=null)
+        {
+            Preset.Position = new Vector2(transform.localPosition.x, transform.localPosition.y);
+        }
+
         TrackView.Instance.DraggingPresets.Remove(Preset);
+        SessionsManipulator.Instance.Autosave();
     }
 }
