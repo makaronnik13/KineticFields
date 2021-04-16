@@ -34,18 +34,19 @@ public class MainPointInspector : Singleton<MainPointInspector>
 
     public void PresetChanged(KineticPreset preset)
     {
+        if (KineticFieldController.Instance.ActivePoint.Value && preset!=null && preset.MainPoint!=null)
+        {
+            Curve.SetValue(preset.MainPoint.Curve);
+            Gradient.SetValue(preset.MainPoint.Gradient);
+            Mesh.SetValue(preset.MeshId.Value);
+            Count.Init(preset.ParticlesCount);
+            Size.Init(preset.MainPoint.Deep);
+            NearCutPlane.Init(preset.NearCutPlane);
+            FarCutPlane.Init(preset.FarCutPlane);
+            LifetimeSlider.Init(preset.Lifetime);
+        }
+
         preset = KineticFieldController.Instance.Session.Value.ActivePreset.Value;
-
-
-        Curve.SetValue(preset.MainPoint.Curve);
-        Gradient.SetValue(preset.MainPoint.Gradient);
-        Mesh.SetValue(preset.MeshId.Value);
-        Count.Init(preset.ParticlesCount);
-        Size.Init(preset.MainPoint.Deep);
-        NearCutPlane.Init(preset.NearCutPlane);
-        FarCutPlane.Init(preset.FarCutPlane);
-        LifetimeSlider.Init(preset.Lifetime);
-       
     }
 
     private void GradientChanged(string gradientId)

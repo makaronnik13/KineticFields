@@ -7,7 +7,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class BpmManager : AudioVisualizationEffect
+public class BpmManager : MonoBehaviour
 {
     [SerializeField]
     private int BeatTreshold = 15;
@@ -52,35 +52,29 @@ public class BpmManager : AudioVisualizationEffect
     private float sinceLastBeat = 0;
     private float lastClickTime;
  
-
-    //private Coroutine oscilatorsCoroutine;
-
-    public override void Awake()
+    public void Awake()
     {
-        PoolManager.WarmPool(Marker, 25);
-        PoolManager.WarmPool(Circles, 5);
-
         Instance = this;
-        base.Awake();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        //processor.onBeat.AddListener(Beat);
+        processor.onBeat.AddListener(TestBeat);
         Bpm.AddListener(BpmChanged);
 
         realTimeSpectralFluxAnalyzer = new SpectralFluxAnalyzer(Samples, WindowSize, PeakCoef);
 
         spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
-
-        StartDetection();
     }
+
+ 
 
     private IEnumerator SpawnMarker()
     {
         while (true)
         {
+   
             if (Bpm.Value>0)
             {
                 CreateMarker();
@@ -92,19 +86,27 @@ public class BpmManager : AudioVisualizationEffect
 
     private void CreateMarker()
     {
-        GameObject newMarker = PoolManager.SpawnObject(Marker);
+
+        GameObject newMarker = Marker.Spawn(transform.GetChild(0), Vector3.zero);
+        newMarker.name = transform.GetChild(0).childCount + "_marker";
         newMarker.transform.SetParent(transform.GetChild(0));
-        newMarker.GetComponent<RectTransform>().anchoredPosition = Vector3.zero;
+        newMarker.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        newMarker.GetComponent<BpmMarker>().Reset();
+        StartCoroutine(DelayDestroy(newMarker, 200f/Bpm.Value));
     }
 
     private void BpmChanged(int v)
     {
         BpmLable.text = v + "bpm";
-        foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
+
+        if (KineticFieldController.Instance.Session.Value!=null)
         {
-            osc.Reset();
+            foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
+            {
+                osc.Reset();
+            }
         }
-        //Debug.Log(v);
+        
     }
 
     public void TestBeat()
@@ -121,14 +123,13 @@ public class BpmManager : AudioVisualizationEffect
                     StopCoroutine(spawnMarkerCoroutine);
                 }
                 spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
-                //realTimeSpectralFluxAnalyzer.Reset();
             }
         }
         else
         {
             if (Bpm.Value!=120)
             {
-                Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
+                Bpm.SetState(120);
 
                 if (spawnMarkerCoroutine != null)
                 {
@@ -136,53 +137,36 @@ public class BpmManager : AudioVisualizationEffect
                 }
                 spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
             }
-           
         }
-        //Tap();
-        //Debug.Log(realTimeSpectralFluxAnalyzer.Bpm);
     }
 
     public void Beat()
     {
-        GameObject circles = PoolManager.SpawnObject(Circles);
+        GameObject circles = Circles.Spawn();
         circles.transform.SetParent(transform.GetChild(0));
         circles.transform.localPosition = Vector3.zero;
 
     
-        StartCoroutine(DelayDestroy(circles, 1));
-
-        //beats.Add(Time.timeSinceLevelLoad);
-
-        //beats.RemoveAll(b=>Time.timeSinceLevelLoad-b>DetectionTimeGap);
-
-        //bpm.SetState(beats.Count/Mathf.Min(DetectionTimeGap, Time.timeSinceLevelLoad) *60f);
+        StartCoroutine(DelayDestroy(circles, 1f));
 
         OnBeat.Invoke();
 
         StartCoroutine(CountQuarts());
 
-        if (Playing.Value)
+        if (KineticFieldController.Instance.Session.Value!=null)
         {
-           // KineticFieldController.Instance.RandomSwap();
-        }
-
-        /*if (oscilatorsCoroutine!=null)
-        {
-            StopCoroutine(oscilatorsCoroutine);
-        }*/
-
-        //oscilatorsCoroutine = StartCoroutine(UpdateOscilators());
-
-        foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
-        {
-            osc.Beat();
+            foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
+            {
+                osc.Beat();
+            }
         }
     }
 
-    private IEnumerator DelayDestroy(GameObject obj, int v)
+    private IEnumerator DelayDestroy(GameObject obj, float v)
     {
         yield return new WaitForSeconds(v);
-        PoolManager.ReleaseObject(obj);
+
+        obj.Recycle();
     }
 
     private IEnumerator CountQuarts()
@@ -200,142 +184,29 @@ public class BpmManager : AudioVisualizationEffect
     }
 
 
-    /*
-    private IEnumerator UpdateOscilators()
-    {
-        float gap = 60f / Bpm.Value;
-        float time = gap;
-        while (time >= 0)
-        {
-            foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
-            {
-                osc.UpdateOscilator(1f-time/gap, beatId);
-            }
-            time -= Time.deltaTime;
-            yield return null;
-        }
-    }
-    */
 
     void Update()
     {
+        realTimeSpectralFluxAnalyzer.analyzeSpectrum(processor.GetSpectrumData().Take(Samples).ToArray(), Time.timeSinceLevelLoad);
 
-        if (KineticFieldController.Instance.KeysEnabled && EventSystem.current.currentSelectedGameObject == null)
+        if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count>realTimeSpectralFluxAnalyzer.thresholdWindowSize*1000f)
         {
-
-            if (Input.GetMouseButtonDown(2))
-            {
-                /*
-                Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
-
-                if (spawnMarkerCoroutine != null)
-                {
-                    StopCoroutine(spawnMarkerCoroutine);
-                }
-                spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
-                */
-                Tap();
-
-
-
-            }
-
-            if (Input.GetMouseButtonUp(2))
-            {
-                // StopDetection();
-            }
+            realTimeSpectralFluxAnalyzer.Reset();
         }
 
-        foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
+        if (KineticFieldController.Instance.Session.Value!=null)
         {
-            osc.UpdateOscilator();
+            foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
+            {
+                osc.UpdateOscilator();
+            }
         }
     }
 
-    public void Tap()
+
+    public void ResetBpm()
     {
-        Debug.Log("tap");
         realTimeSpectralFluxAnalyzer.Reset();
-        Bpm.SetState(120);
-        /*
-        if (tapDetectionCoroutine != null)
-        {
-            StopCoroutine(tapDetectionCoroutine);
-        }
-        tapDetectionCoroutine = StartCoroutine(TapDetection());
-        beats.Add(Time.timeSinceLevelLoad);
-
-        if (beats.Count > 1)
-        {
-            float newBpm = 0;
-
-            newBpm = beats[beats.Count - 1] - beats[0];
-
-            newBpm /= beats.Count - 1f;
-
-            Bpm.SetState(Mathf.RoundToInt(60f / newBpm));
-
-            if (spawnMarkerCoroutine != null)
-            {
-                StopCoroutine(spawnMarkerCoroutine);
-            }
-            spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
-        }
-        // StartDetection();
-        */
-
-    }
-
-    private IEnumerator TapDetection()
-    {
-        yield return new WaitForSeconds(2f);
-        beats.Clear();
-    }
-
-    public void StartDetection()
-    {
-        if (detectionCoroutine!=null)
-        {
-            StopCoroutine(detectionCoroutine);
-        }
-
-       
-        detectionCoroutine = StartCoroutine(DetectionCoroutine());
-    }
-
-    public void StopDetection()
-    {
-        if (detectionCoroutine != null)
-        {
-            StopCoroutine(detectionCoroutine);
-        }
-
-        realTimeSpectralFluxAnalyzer = new SpectralFluxAnalyzer(Samples, WindowSize, PeakCoef);
-
-        if (spawnMarkerCoroutine != null)
-        {
-            StopCoroutine(spawnMarkerCoroutine);
-        }
-
-        spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
-
-        Debug.Log("!"+Bpm.Value+"!");
-    }
-
-    private IEnumerator DetectionCoroutine()
-    {
-        while (true)
-        {
-            realTimeSpectralFluxAnalyzer.analyzeSpectrum(GetSpectrumData().Take(Samples).ToArray(), Time.timeSinceLevelLoad);
-
-            //bpm.SetState(Mathf.Lerp(bpm.Value, realTimeSpectralFluxAnalyzer.Bpm, 0.2f));
-
-            if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count>=WindowSize)
-            {
-                //Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
-            }
-
-            yield return new WaitForSeconds(0.1f);
-        }
+        TestBeat();
     }
 }

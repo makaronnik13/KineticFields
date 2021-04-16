@@ -24,7 +24,23 @@ public class KineticPreset: ICloneable
     }
 
     [NonSerialized]
-    public Action<Vector2> OnPositionChanged = (v) => { };
+    private Action<Vector2> onPositionChanged;
+
+    public Action<Vector2> OnPositionChanged
+    {
+        get
+        {
+            if (onPositionChanged == null)
+            {
+                onPositionChanged = (v) => { };
+            }
+            return onPositionChanged;
+        }
+        set
+        {
+            onPositionChanged = value;
+        }
+    }
 
     public float X, Y;
 
@@ -106,7 +122,7 @@ public class KineticPreset: ICloneable
 
     public KineticPreset()
     {
-     
+        OnPositionChanged = (v) => { };
     }
 
     public KineticPreset(string presetName)
@@ -146,7 +162,8 @@ public class KineticPreset: ICloneable
 
         Points.Add(new KineticPointInstance(3, "Непонятные искажения", new Vector3(-0.25f, -0.5f, 0)));
         Points.Add(new KineticPointInstance(9, "Искажение простое", new Vector3(0f, -0.5f, 0)));
-        Points.Add(new KineticPointInstance(8, "Отталкивающая сила", new Vector3(0.25f, -0.5f, 0)));   
+        Points.Add(new KineticPointInstance(8, "Отталкивающая сила", new Vector3(0.25f, -0.5f, 0)));
+        OnPositionChanged = (v) => { };
     }
 
      

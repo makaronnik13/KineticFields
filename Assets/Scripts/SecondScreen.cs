@@ -1,4 +1,5 @@
-﻿using System;
+﻿using com.armatur.common.flags;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,9 +7,6 @@ using UnityEngine.UI;
 
 public class SecondScreen : MonoBehaviour
 {
-    [SerializeField]
-    private TMPro.TextMeshProUGUI DisplaysCount;
-
     [SerializeField]
     private GameObject Camera;
 
@@ -18,8 +16,11 @@ public class SecondScreen : MonoBehaviour
     [SerializeField]
     private Toggle FlipBtn;
 
-    private int lastDisplaysCount = 0;
+    [SerializeField]
+    private GameObject CameraPrefab;
 
+
+    private GenericFlag<int> screensCount = new GenericFlag<int>("screens", 1);
 
     private void Start()
     {
@@ -42,23 +43,15 @@ public class SecondScreen : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (lastDisplaysCount!= Display.displays.Length)
+        while (screensCount.Value < Display.displays.Length)
         {
-            DisplaysCount.text = Display.displays.Length.ToString();
-
-            if (Display.displays.Length > 1)
-            {
-                Camera.SetActive(true);
-                Display.displays[1].Activate();
-            }
-            else
-            {
-                Camera.SetActive(false);
-            }
-
-            lastDisplaysCount = Display.displays.Length;
-
-            FlipBtn.gameObject.SetActive(Display.displays.Length > 1);
+            Display.displays[screensCount.Value].Activate();
+            screensCount.SetState(screensCount.Value+1);
+            GameObject newCamera = Instantiate(CameraPrefab);
+            newCamera.transform.SetParent(transform.GetChild(0));
+            newCamera.transform.localPosition = Vector3.zero;
+            newCamera.transform.localScale = Vector3.one;
+            newCamera.GetComponent<Camera>().targetDisplay = screensCount.Value;
         }
 
         if (Input.GetKeyDown(KeyCode.R))

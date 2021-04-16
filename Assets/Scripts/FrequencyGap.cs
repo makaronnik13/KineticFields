@@ -169,7 +169,10 @@ public class FrequencyGap: ISource, ICloneable
 
         value = diff * Multiplyer.Value + BaseValue.Value;
 
-        OnValueChanged(value);
+        if (onValueChanged!=null)
+        {
+            OnValueChanged(value);
+        }
     }
 
     public object Clone()

@@ -36,8 +36,25 @@ public class KineticPointInstance: ICloneable
     [NonSerialized]
     private KineticFieldController kfController;
 
-    [NonSerialized]
-    public CurveInstance TempCurve;
+    private CurveInstance tempCurve;
+
+    public CurveInstance TempCurve
+    {
+        get
+        {
+            if (tempCurve == null)
+            {
+                tempCurve = new CurveInstance(Curve.Curve);
+            }
+            return tempCurve;
+        }
+        set
+        {
+            tempCurve = value;
+        }
+    }
+
+
     public CurveInstance Curve
     {
         get
@@ -57,8 +74,24 @@ public class KineticPointInstance: ICloneable
 
     public string gradientId = "";
 
-    [NonSerialized]
-    public GradientInstance TempGradient;
+
+    private GradientInstance tempGradient;
+
+    public GradientInstance TempGradient
+    {
+        get
+        {
+            if (tempGradient == null)
+            {
+                tempGradient = new GradientInstance(Gradient.Gradient);
+            }
+            return tempGradient;
+        }
+        set
+        {
+            tempGradient = value;
+        }
+    }
 
     public GradientInstance Gradient
     {

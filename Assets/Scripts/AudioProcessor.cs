@@ -72,7 +72,7 @@ public class AudioProcessor : AudioVisualizationEffect
 		spectrum = new float[bufferSize];
 		averages = new float[12];
 		acVals = new float[maxlag];
-		alph = 100 * gThresh;
+		alph = 100f * gThresh;
 	}
 
 	// Use this for initialization
@@ -159,7 +159,7 @@ public class AudioProcessor : AudioVisualizationEffect
 			float smax = -999999;
 			int smaxix = 0;
 			// weight can be varied dynamically with the mouse
-			alph = 100 * gThresh;
+			alph = 100f * gThresh;
 			// consider all possible preceding beat times from 0.5 to 2.0 x current tempo period
 			for (int i = tempopd / 2; i < System.Math.Min (colmax, 2 * tempopd); ++i) {
 				// objective function - this beat's cost + score to last beat + transition penalty

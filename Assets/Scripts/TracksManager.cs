@@ -9,6 +9,9 @@ using UnityEngine.UI;
 public class TracksManager : Singleton<TracksManager>
 {
     [SerializeField]
+    private GameObject View;
+
+    [SerializeField]
     private GameObject SavePanel, LoadPanel;
 
     [SerializeField]
@@ -23,8 +26,8 @@ public class TracksManager : Singleton<TracksManager>
     [SerializeField]
     private Sprite PlaySprte, StopSprite, ShuffleSprite, LoopSprite;
 
-    [SerializeField]
-    private TMPro.TMP_InputField LibNameInput;
+    //[SerializeField]
+    //private TMPro.TMP_InputField LibNameInput;
 
     [SerializeField]
     private Transform LibsHub;
@@ -62,6 +65,12 @@ public class TracksManager : Singleton<TracksManager>
         Playing.AddListener(PlayingStateChanged);
         Shufle.AddListener(ShufleStateChanged);
         PresetsLerper.Instance.OnPresetDeleted += PresetDeleted;
+       
+    }
+
+    private void Start()
+    {
+        CurrentLib.SetState(null);    
     }
 
     private void ShufleStateChanged(bool v)
@@ -78,26 +87,24 @@ public class TracksManager : Singleton<TracksManager>
 
     private void PresetDeleted(KineticPreset p)
     {
-        int id = KineticFieldController.Instance.Session.Value.Presets.IndexOf(p);
-
-        for (int i = CurrentLib.Value.Tracks.Count-1; i>=0; i--)
+        if (CurrentLib.Value!=null && KineticFieldController.Instance.Session.Value!=null)
         {
-            PointTrack pTrack = CurrentLib.Value.Tracks[i].PointsTracks.FirstOrDefault(t => t.presetId == id);
-            if (pTrack != null)
+            int id = KineticFieldController.Instance.Session.Value.Presets.IndexOf(p);
+
+
+            for (int i = CurrentLib.Value.Tracks.Count - 1; i >= 0; i--)
             {
-                pTrack.OnTrackRemoved(pTrack);
+                PointTrack pTrack = CurrentLib.Value.Tracks[i].PointsTrack;
+                if (pTrack != null)
+                {
+                    pTrack.OnTrackRemoved(pTrack);
+                }
             }
         }
+     
 
     }
 
-    public void CreateNew()
-    {
-        LibNameInput.text = CurrentLib.Value.Name;
-        SaveLib();
-
-        CurrentLib.SetState(new TrackLib("NewTrackLib_"+(SessionsManipulator.Instance.TrackLibs.Count+1)));
-    }
 
     private void Beat()
     {
@@ -120,7 +127,10 @@ public class TracksManager : Singleton<TracksManager>
 
     private void LibChanged(TrackLib lib)
     {
-        PlayStopBtn.SetActive(CurrentLib.Value.Tracks.Count > 0);
+        View.SetActive(lib!=null);
+
+        
+        PlayStopBtn.SetActive(lib!=null && CurrentLib.Value.Tracks.Count > 0);
 
         if (_lastLib==lib)
         {
@@ -129,12 +139,9 @@ public class TracksManager : Singleton<TracksManager>
 
         Playing.SetState(false);
 
-        if (lib.Tracks.Count>0)
+        if (lib!=null && lib.Tracks.Count>0)
         {
-            if (CurrentTrack.Value!=null)
-            {
-                Debug.Log(CurrentTrack.Value.PointsTracks.Count + "/" + CurrentTrack.Value.Color+" F");
-            }
+
            
 
             CurrentTrack.SetState(lib.Tracks[0]);
@@ -151,14 +158,23 @@ public class TracksManager : Singleton<TracksManager>
         }
 
         trackBtns.Clear();
-        foreach (TrackInstance track in lib.Tracks)
+
+        if (lib!=null)
         {
-            CreateTrackBtn(track);
+            foreach (TrackInstance track in lib.Tracks)
+            {
+                CreateTrackBtn(track);
+            }
+
         }
 
-            _lastLib = lib;
+        _lastLib = lib;
 
+        if (_lastLib!=null)
+        {
             _lastLib.ChangeRate.AddListener(LibRateChanged);
+        }
+            
    
 
       
@@ -185,13 +201,6 @@ public class TracksManager : Singleton<TracksManager>
         }
     }
 
-    public void OnEnable()
-    {
-        if (CurrentLib.Value == null)
-        {
-            CurrentLib.SetState(new TrackLib("NewTrackLib"));
-        }
-    }
 
     private void OnDisable()
     {
@@ -224,7 +233,7 @@ public class TracksManager : Singleton<TracksManager>
     {
         GameObject newTrackBtn = Instantiate(TrackBtnPrefab);
         trackBtns.Add(newTrackBtn);
-        newTrackBtn.transform.SetParent(transform);
+        newTrackBtn.transform.SetParent(View.transform);
         newTrackBtn.transform.localPosition = Vector3.zero;
         newTrackBtn.transform.localScale = Vector3.one;
         newTrackBtn.GetComponent<SingleTrackView>().Init(newTrack);
@@ -238,6 +247,18 @@ public class TracksManager : Singleton<TracksManager>
             return;
         }
 
+        Debug.Log("!");
+        
+        if (CurrentTrack.Value!=null && CurrentTrack.Value.CurrentRepeat.Value<CurrentTrack.Value.RepeatCount.Value-1)
+        {
+            CurrentTrack.Value.CurrentRepeat.SetState(CurrentTrack.Value.CurrentRepeat.Value+1);
+            return;
+        }
+
+        if (CurrentTrack.Value!=null)
+        {
+            CurrentTrack.Value.CurrentRepeat.SetState(0);
+        }
         int lastId = CurrentLib.Value.Tracks.IndexOf(CurrentTrack.Value);
 
         if (lastId == -1)
@@ -259,7 +280,7 @@ public class TracksManager : Singleton<TracksManager>
     public void SaveClicked()
     {
         SavePanel.SetActive(true);
-        LibNameInput.text = CurrentLib.Value.Name;
+        //LibNameInput.text = CurrentLib.Value.Name;
     }
 
     public void LoadClicked()
@@ -286,11 +307,6 @@ public class TracksManager : Singleton<TracksManager>
         //fill 
     }
 
-    public void SaveLib()
-    {
-        CurrentLib.Value.Name = LibNameInput.text;
-        SessionsManipulator.Instance.SaveTrackLib(CurrentLib.Value);
-    }
 
     public void TogglePlay()
     {

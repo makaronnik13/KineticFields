@@ -32,9 +32,12 @@ public class FrequencyGapSlider : MonoBehaviour
 
     private void Update()
     {
-        if (KineticFieldController.Instance.ActiveGap.Value == gap)
+        if (!PresetsLerper.Instance.Lerping.Value)
         {
-            gap.GapSize.SetState(Mathf.Clamp(gap.GapSize.Value+Time.deltaTime*Input.mouseScrollDelta.y ,0.01f,1f));
+            if (KineticFieldController.Instance.ActiveGap.Value == gap)
+            {
+                gap.GapSize.SetState(Mathf.Clamp(gap.GapSize.Value + Time.deltaTime * Input.mouseScrollDelta.y, 0.01f, 1f));
+            }
         }
     }
 

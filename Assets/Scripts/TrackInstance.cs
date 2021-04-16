@@ -8,7 +8,10 @@ public class TrackInstance
 {
     [SerializeField]
     private SerializedGradientKey _color;
-    
+
+    [SerializeField]
+    public GenericFlag<int> CurrentRepeat = new GenericFlag<int>("CurrentRepeat", 0);
+
     public Color Color
     {
         get
@@ -21,12 +24,14 @@ public class TrackInstance
         }
     }
 
-    public List<PointTrack> PointsTracks = new List<PointTrack>();
+    public PointTrack PointsTrack;
 
    [SerializeField]
     private int _iconId = 0;
 
     public GenericFlag<int> Size = new GenericFlag<int>("Size", 0);
+    public GenericFlag<int> RepeatCount = new GenericFlag<int>("RepeatCount", 1);
+
 
     public Sprite Icon
     {
@@ -50,12 +55,14 @@ public class TrackInstance
 
     public TrackInstance()
     {
-
+        CurrentRepeat = new GenericFlag<int>("CurrentRepeat", 0);
     }
 
     public TrackInstance(Color color, Sprite icon)
     {
+        CurrentRepeat = new GenericFlag<int>("CurrentRepeat", 0);
         Color = color;
         Icon = icon;
+        PointsTrack = new PointTrack(-1);
     }
 }

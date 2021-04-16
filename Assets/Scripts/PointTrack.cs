@@ -7,7 +7,11 @@ using UnityEngine;
 public class PointTrack
 {
     [SerializeField]
-    public List<TrackStep> steps = new List<TrackStep>();
+    public List<TrackStep> PositionSteps = new List<TrackStep>();
+
+    [SerializeField]
+    public List<TrackStep> RadiusSteps = new List<TrackStep>();
+
 
     [SerializeField]
     public int presetId;
@@ -46,37 +50,48 @@ public class PointTrack
         }
     }
 
-    public TrackStep GetStep(float v)
+    /*
+    public Vector3 GetPosition(float time)
+    {
+        
+    }
+
+    public float GetRadius(float time)
+    {
+
+    }
+    */
+
+    public TrackStep GetStep(float v, bool pos = true)
     {
         //Debug.Log(v+"/"+steps.FirstOrDefault(s => s.Time.Value == v));
+        if (pos)
+        {
+            return PositionSteps.FirstOrDefault(s => Mathf.Abs(s.Time.Value - v) <= 0.01f);
+        }
 
-        return steps.FirstOrDefault(s=> Mathf.Abs(s.Time.Value - v)<=0.01f);
+        return RadiusSteps.FirstOrDefault(s=> Mathf.Abs(s.Time.Value - v)<=0.01f);
     }
 
     public PointTrack(int presetId)
     {
         this.presetId = presetId;
-        for (int i = 0; i < 128; i++)
+        /*(for (int i = 0; i < 128; i++)
         {
-            steps.Add(new TrackStep(i/128f, Vector3.zero));
-        }
+            //PositionSteps.Add(new TrackStep(i/128f, Vector3.zero));
+        }*/
     }
 
     public void AddStep(float t, Vector2 pos)
     {
     
-
-        int stepId = Mathf.RoundToInt(t * 64f)-1;
-
-
-
-        if (t<0 || t>=steps.Count|| stepId<0)
+        if (t<0 || t>=PositionSteps.Count)
         {
             return;
         }
 
 
-        TrackStep step = steps[stepId];
+        TrackStep step = PositionSteps[Mathf.RoundToInt(t)];
 
 
 
@@ -84,7 +99,7 @@ public class PointTrack
         {
 
             step = new TrackStep(t, pos);
-            steps.Add(step);
+            PositionSteps.Add(step);
 
  
             OnTrackChanged(presetId);
@@ -100,24 +115,24 @@ public class PointTrack
         s.HasKey.SetState(false);
 
 
-        if (steps.FirstOrDefault(st => st.HasKey.Value) == null)
+        if (PositionSteps.FirstOrDefault(st => st.HasKey.Value) == null)
         {
             OnTrackRemoved(this);
         }
     }
 
-    public Vector2 GetPosition(float v)
+    public bool GetPosition(float v, out Vector2 pos)
     {
 
         v /= 2f;
 
-        List<TrackStep> avaliableSteps = steps.Where(s => s.HasKey.Value && Mathf.RoundToInt(s.Time.Value * 64f) <= TracksManager.Instance.CurrentTrack.Value.Steps*2).ToList() ;
+        List<TrackStep> avaliableSteps = PositionSteps.Where(s => s.HasKey.Value && Mathf.RoundToInt(s.Time.Value * 64f) <= TracksManager.Instance.CurrentTrack.Value.Steps*2).ToList() ;
 
         TrackStep s1 = avaliableSteps.OrderByDescending(s=>s.Time.Value).FirstOrDefault(s=>s.Time.Value<=v && s.HasKey.Value);
         TrackStep s2 = avaliableSteps.OrderBy(s => s.Time.Value).FirstOrDefault(s => s.Time.Value >= v && s.HasKey.Value);
 
 
-     
+        
      
 
         if (s1 == null)
@@ -130,7 +145,11 @@ public class PointTrack
             s2 = avaliableSteps.OrderBy(s => s.Time.Value).FirstOrDefault();
         }
 
-
+        if (s1 == null || s2 == null)
+        {
+            pos = Vector3.zero;
+            return false;
+        }
 
         float dist = 0;
         float val = 0;
@@ -160,7 +179,7 @@ public class PointTrack
             }
         }
 
-            Vector2 pos = Vector2.Lerp(s1.Position, s2.Position, val/dist);
+            pos = Vector2.Lerp(s1.Position, s2.Position, val/dist);
             if (s2 == s1)
             {
                 pos = s1.Position;
@@ -170,6 +189,6 @@ public class PointTrack
 
        
 
-        return pos;
+        return true;
     }
 }

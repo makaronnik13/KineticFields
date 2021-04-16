@@ -59,37 +59,39 @@ public class FrequencyGapEditor : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetAxis("Mouse X") == 0 && Input.GetAxis("Mouse Y") == 0 && Input.mouseScrollDelta.magnitude == 0 && !Input.anyKey)
+        if (!PresetsLerper.Instance.Lerping.Value)
         {
-            if (hideCoroutine == null)
+            if (Input.GetAxis("Mouse X") == 0 && Input.GetAxis("Mouse Y") == 0 && Input.mouseScrollDelta.magnitude == 0 && !Input.anyKey)
             {
-               // hideCoroutine = StartCoroutine(Hide(HideTime)); //hide ui
+                if (hideCoroutine == null)
+                {
+                    // hideCoroutine = StartCoroutine(Hide(HideTime)); //hide ui
+                }
+            }
+            else
+            {
+                if (hideCoroutine != null)
+                {
+                    StopCoroutine(hideCoroutine);
+                    hideCoroutine = null;
+                    foreach (Transform t in transform)
+                    {
+                        t.gameObject.SetActive(true);
+                    }
+                    foreach (MeshRenderer mr in PointsVisual3d.GetComponentsInChildren<MeshRenderer>())
+                    {
+                        mr.enabled = true;
+                    }
+                    foreach (SpriteRenderer sr in PointsVisual2d.GetComponentsInChildren<SpriteRenderer>())
+                    {
+                        sr.enabled = true;
+                    }
+                    // FindObjectOfType<PointInspector>().TryShow();
+                    // FindObjectOfType<MainPointInspector>().TryShow();
+                }
+
             }
         }
-        else
-        {
-            if (hideCoroutine!=null)
-            {
-                StopCoroutine(hideCoroutine);
-                hideCoroutine = null;
-                foreach (Transform t in transform)
-                {
-                    t.gameObject.SetActive(true);
-                }
-                foreach (MeshRenderer mr in PointsVisual3d.GetComponentsInChildren<MeshRenderer>())
-                {
-                    mr.enabled = true;
-                }
-                foreach (SpriteRenderer sr in PointsVisual2d.GetComponentsInChildren<SpriteRenderer>())
-                {
-                    sr.enabled = true;
-                }
-               // FindObjectOfType<PointInspector>().TryShow();
-               // FindObjectOfType<MainPointInspector>().TryShow();
-            }
-           
-        }
-        
     }
 
     private IEnumerator Hide(float hideTime)

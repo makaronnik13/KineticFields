@@ -16,7 +16,7 @@ public class PresetTrackView : MonoBehaviour
     {
         for (int i = 0; i < 128 - 1; i++)
         {
-            GameObject ns = PoolManager.Instance.spawnObject(StepPrefab);
+            GameObject ns = StepPrefab.Spawn();
             ns.transform.SetParent(transform);
             ns.transform.localPosition = Vector3.zero;
             ns.transform.localScale = Vector3.one;
@@ -36,7 +36,7 @@ public class PresetTrackView : MonoBehaviour
         int i = 0;
         foreach (PresetStepView view in steps)
         {
-            view.Init(track.steps[i], track.steps[i + 1], track);
+            view.Init(track.PositionSteps[i], track.PositionSteps[i + 1], track);
             i++;
         }
         UpdateTrack();

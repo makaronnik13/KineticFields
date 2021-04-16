@@ -8,6 +8,15 @@ using UnityEngine;
 public class PresetsLerper : Singleton<PresetsLerper>
 {
     [SerializeField]
+    private float MoveSensivity, ScaleSensivity;
+
+    [SerializeField]
+    private Transform PointsHub;
+
+    [SerializeField]
+    private GameObject BackBtn;
+
+    [SerializeField]
     private GameObject PresetEditView;
 
     [SerializeField]
@@ -36,6 +45,8 @@ public class PresetsLerper : Singleton<PresetsLerper>
 
     public Action<KineticPreset> OnPresetDeleted = (p) => { };
 
+    public GenericFlag<bool> Lerping = new GenericFlag<bool>("lerping", true);
+
     private int beats = 0;
 
     public Dictionary<KineticPreset, float> Weigths
@@ -61,20 +72,37 @@ public class PresetsLerper : Singleton<PresetsLerper>
     // Start is called before the first frame update
     void Start()
     {
-        KineticFieldController.Instance.Session.AddListener(SessionChanged);
         Rate.AddListener(RateChanged);
         Radius.AddListener(RadiusChanged);
         SelectedPreset.AddListener(SelectedPresetChanged);
+        PresetEditView.SetActive(false);
+        KineticFieldController.Instance.Session.AddListener(SessionChanged);
     }
 
     private void Update()
     {
-        if (View.activeInHierarchy && SelectedPreset.Value!=null && KineticFieldController.Instance.Session.Value.Presets.Count>1)
+        if (KineticFieldController.Instance.Session.Value!=null)
         {
-            if (Input.GetKeyDown(KeyCode.Delete))
+            if (View.activeInHierarchy && SelectedPreset.Value != null && KineticFieldController.Instance.Session.Value.Presets.Count > 1)
             {
-                DeleteSelected();
+                if (Input.GetKeyDown(KeyCode.Delete))
+                {
+                    DeleteSelected();
+                }
             }
+        }
+
+        if (!View.activeInHierarchy && Input.GetKeyDown(KeyCode.Escape))
+        {
+            SetState(true);
+        }
+
+        if (Lerping.Value)
+        {
+            PointsHub.Translate(Vector3.down * Input.GetAxis("Vertical") * Time.deltaTime * MoveSensivity);
+            PointsHub.Translate(Vector3.left * Input.GetAxis("Horizontal") * Time.deltaTime * MoveSensivity);
+            PointsHub.transform.localScale -= Vector3.one * Input.GetAxis("Deep") * Time.deltaTime * ScaleSensivity;
+            PointsHub.transform.localScale = Vector3.one * Mathf.Clamp(PointsHub.transform.localScale.x, 0.2f, 3f);
         }
     }
 
@@ -93,6 +121,7 @@ public class PresetsLerper : Singleton<PresetsLerper>
         points.Remove(point);
         Destroy(point.gameObject);
         SelectedPreset.SetState(null);
+        SessionsManipulator.Instance.Autosave();
     }
 
     private void SelectedPresetChanged(KineticPreset p)
@@ -128,6 +157,7 @@ public class PresetsLerper : Singleton<PresetsLerper>
         duplPreset.Position = SelectedPreset.Value.Position + Vector2.right * 25f;
         CreatePoint(duplPreset);
         SelectedPreset.SetState(duplPreset);
+        SessionsManipulator.Instance.Autosave();
     }
 
     private void RateChanged(int v)
@@ -163,6 +193,8 @@ public class PresetsLerper : Singleton<PresetsLerper>
     private void SessionChanged(KineticSession session)
     {
         this.Session = session;
+        SetState(false);
+        SetState(true);
     }
 
     public void Toggle()
@@ -173,13 +205,18 @@ public class PresetsLerper : Singleton<PresetsLerper>
     public void SetState(bool v)
     {
         View.SetActive(v);
+        BackBtn.SetActive(!v);
+
         if (v)
         {
-            int i = 0;
-
-            foreach (KineticPreset preset in KineticFieldController.Instance.Session.Value.Presets)
+            if (KineticFieldController.Instance.Session.Value!=null)
             {
-                CreatePoint(preset);
+                int i = 0;
+
+                foreach (KineticPreset preset in KineticFieldController.Instance.Session.Value.Presets)
+                {
+                    CreatePoint(preset);
+                }
             }
         }
         else
@@ -195,13 +232,14 @@ public class PresetsLerper : Singleton<PresetsLerper>
 
         PointsCamera.enabled = !v;
         PresetEditView.SetActive(!v);
+        Lerping.SetState(v);
     }
 
     private void CreatePoint(KineticPreset preset)
     {
         GameObject newPoint = Instantiate(PointPrefab);
         newPoint.transform.localScale = Vector3.one;
-        newPoint.transform.SetParent(View.transform);
+        newPoint.transform.SetParent(PointsHub.transform);
         newPoint.transform.localPosition = new Vector3(preset.X, preset.Y, 0);
         PresetPoint point = newPoint.GetComponent<PresetPoint>();
         point.Init(preset);
@@ -235,6 +273,10 @@ public class PresetsLerper : Singleton<PresetsLerper>
 
     public void CreateNewPreset()
     {
+        if (KineticFieldController.Instance.Session.Value==null)
+        {
+            return;
+        }
         Vector2 localpoint;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(GetComponent<RectTransform>(), Input.mousePosition, GetComponentInParent<Canvas>().worldCamera, out localpoint);
         //Vector2 normalizedPoint = Rect.PointToNormalized(GetComponent<RectTransform>().rect, localpoint);

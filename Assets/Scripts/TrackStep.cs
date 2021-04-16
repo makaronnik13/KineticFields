@@ -23,12 +23,15 @@ public class TrackStep
         }
     }
 
+    public float Scale;
+
     public GenericFlag<float> Time = new GenericFlag<float>("Time", 0);
     public GenericFlag<bool> HasKey = new GenericFlag<bool>("HasKey", false);
 
 
-    public TrackStep(float time, Vector2 position)
+    public TrackStep(float time, Vector2 position, float scale = 1f)
     {
+        Scale = scale;
         Position = position;
         Time.SetState(time);
     }

@@ -10,8 +10,6 @@ public class LerperBackground : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("click");
-
         if (doubleClickCoroutine == null)
         {
             doubleClickCoroutine = StartCoroutine(DoubleClick());

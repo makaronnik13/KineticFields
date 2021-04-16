@@ -6,6 +6,7 @@ using CSCore.CoreAudioAPI;
 using CSCore.DSP;
 using CSCore.SoundIn;
 using CSCore.Streams;
+using UnityEngine;
 
 namespace Assets.WasapiAudio.Scripts.Wasapi
 {
@@ -51,8 +52,9 @@ namespace Assets.WasapiAudio.Scripts.Wasapi
                     MMDevice defaultMicrophone;
                     using (var deviceEnumerator = new MMDeviceEnumerator())
                     {
-                        defaultMicrophone = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+                        defaultMicrophone = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia);
                     }
+                    Debug.Log(defaultMicrophone);
                     _wasapiCapture = new WasapiCapture();
                     _wasapiCapture.Device = defaultMicrophone;
                     break;

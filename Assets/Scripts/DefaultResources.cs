@@ -17,6 +17,19 @@ public static class DefaultResources
         }
     }
 
+    private static List<KineticModel> models;
+    public static List<KineticModel> Models
+    {
+        get
+        {
+            if (models == null)
+            {
+                models = Resources.LoadAll<KineticModel>("Scriptable/Models").ToList();
+            }
+            return models;
+        }
+    }
+
     private static List<Sprite> gapSprites;
     public static List<Sprite> GapSprites
     {

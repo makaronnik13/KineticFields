@@ -9,16 +9,35 @@ public class PresetLable : MonoBehaviour
     [SerializeField]
     private BpmManager BpmManager;
 
-
+    [SerializeField]
+    private PresetSquare Sqare;
 
     [SerializeField]
-    private TMPro.TextMeshProUGUI Lable;
-
+    private TMPro.TMP_InputField Lable;
+    
 
     // Start is called before the first frame update
     void Start()
     {
         KineticFieldController.Instance.Session.AddListener(SessionChanged);
+        Lable.onValueChanged.AddListener(PresetNameChanged);
+        PresetsLerper.Instance.Lerping.AddListener(LerpingChanged);
+    }
+
+    private void LerpingChanged(bool v)
+    {
+        gameObject.SetActive(!v);
+        if (KineticFieldController.Instance.Session.Value!=null)
+        {
+            PresetChanged(KineticFieldController.Instance.Session.Value.ActivePreset.Value);
+        }
+      
+    }
+
+    private void PresetNameChanged(string pName)
+    {
+        KineticFieldController.Instance.Session.Value.ActivePreset.Value.PresetName = pName;
+        SessionsManipulator.Instance.Autosave();
     }
 
     private void SessionChanged(KineticSession session)
@@ -34,23 +53,11 @@ public class PresetLable : MonoBehaviour
         if (preset!=null)
         {
             Lable.text = preset.PresetName;
-            StartCoroutine(HideLable());
         }
         else
         {
             Lable.text = string.Empty;
         }
-    }
-
-    private IEnumerator HideLable()
-    {
-        Lable.color = Color.white;
-        float t = 2f;
-        while (t>0)
-        {
-            Lable.color = Color.Lerp(new Color(1,1,1,0), Color.white, t /2f);
-            t -= Time.deltaTime;
-            yield return null;
-        }
+        Sqare.Init(preset);
     }
 }

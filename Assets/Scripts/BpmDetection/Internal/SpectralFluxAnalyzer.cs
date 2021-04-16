@@ -37,11 +37,11 @@ public class SpectralFluxAnalyzer
         get
         {
 
-                List<SpectralFluxInfo> info = spectralFluxSamples;
+                List<SpectralFluxInfo> info = spectralFluxSamples.Where(i=>spectralFluxSamples[0].time - i.time<60f).OrderByDescending(i=>i.time).ToList();
 
-                float timeDelta = (info[info.Count - 1].time - info[0].time);
+                float timeDelta = (info[0].time- info[info.Count - 1].time);
 
-                float bpm = info.Where(i => i.isPeak).Count() / timeDelta * 60;
+                float bpm = info.Where(i => i.isPeak).Count() / timeDelta * 60f;
                 return Mathf.RoundToInt(bpm);
 
         }
@@ -49,7 +49,7 @@ public class SpectralFluxAnalyzer
     
     public void Reset()
     {
-        spectralFluxSamples = spectralFluxSamples.Take(Mathf.Min(spectralFluxSamples.Count, thresholdWindowSize)).ToList();
+        spectralFluxSamples = spectralFluxSamples.OrderByDescending(s=>s.time).Take(Mathf.Min(spectralFluxSamples.Count, thresholdWindowSize)).ToList();
         indexToProcess = spectralFluxSamples.Count / 2;
     }
 
@@ -98,7 +98,8 @@ public class SpectralFluxAnalyzer
 
 			bool curPeak = isPeak (indexToDetectPeak);
 
-			if (curPeak) {
+			if (curPeak)
+            {
 				spectralFluxSamples [indexToDetectPeak].isPeak = true;
 			}
 			indexToProcess++;

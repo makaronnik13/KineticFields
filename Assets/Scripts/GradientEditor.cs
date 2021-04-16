@@ -56,6 +56,7 @@ public class GradientEditor : Singleton<GradientEditor>
 
         gradient.Gradient = finishedGradient;
         transform.GetChild(0).gameObject.SetActive(false);
+        Debug.Log("E1");
         gradient.OnEdited();
     }
 }

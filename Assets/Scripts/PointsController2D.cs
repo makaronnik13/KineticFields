@@ -92,7 +92,15 @@ public class PointsController2D : MonoBehaviour
             this.session.ActivePreset.RemoveListener(PresetChanged);
         }
 
-        session.ActivePreset.AddListener(PresetChanged);
+        if (session!=null)
+        {
+            session.ActivePreset.AddListener(PresetChanged);
+        }
+
+        foreach (Transform t in transform)
+        {
+            t.gameObject.SetActive(session!=null);
+        }
     }
 
     private void PresetChanged(KineticPreset preset)
