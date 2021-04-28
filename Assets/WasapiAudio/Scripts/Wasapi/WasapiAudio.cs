@@ -15,7 +15,7 @@ namespace Assets.WasapiAudio.Scripts.Wasapi
         private const FftSize CFftSize = FftSize.Fft4096;
         private const float MaxAudioValue = 1.0f;
 
-        private readonly WasapiCaptureType _captureType;
+        private WasapiCaptureType _captureType;
         private readonly int _spectrumSize;
         private readonly ScalingStrategy _scalingStrategy;
         private readonly int _minFrequency;
@@ -41,22 +41,21 @@ namespace Assets.WasapiAudio.Scripts.Wasapi
             _receiveAudio = receiveAudio;
         }
 
-        public void StartListen()
+        public void StartListen(MMDevice microphone)
         {
+            if (microphone == null)
+            {
+                _captureType = WasapiCaptureType.Loopback;
+            }
+
             switch (_captureType)
             {
                 case WasapiCaptureType.Loopback:
                     _wasapiCapture = new WasapiLoopbackCapture();
                     break;
                 case WasapiCaptureType.Microphone:
-                    MMDevice defaultMicrophone;
-                    using (var deviceEnumerator = new MMDeviceEnumerator())
-                    {
-                        defaultMicrophone = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia);
-                    }
-                    Debug.Log(defaultMicrophone);
                     _wasapiCapture = new WasapiCapture();
-                    _wasapiCapture.Device = defaultMicrophone;
+                    _wasapiCapture.Device = microphone;
                     break;
                 default:
                     throw new InvalidOperationException("Unhandled WasapiCaptureType");
@@ -125,13 +124,13 @@ namespace Assets.WasapiAudio.Scripts.Wasapi
 
         public void StopListen()
         {
-            _singleBlockNotificationStream.SingleBlockRead -= SingleBlockNotificationStream_SingleBlockRead;
 
-            _soundInSource.Dispose();
-            _realtimeSource.Dispose();
-            _receiveAudio = null;
-            _wasapiCapture.Stop();
-            _wasapiCapture.Dispose();
+                _singleBlockNotificationStream.SingleBlockRead -= SingleBlockNotificationStream_SingleBlockRead;
+                _soundInSource.Dispose();
+                _realtimeSource.Dispose();
+                _receiveAudio = null;
+                _wasapiCapture.Stop();
+                _wasapiCapture.Dispose();
         }
 
         private void SingleBlockNotificationStream_SingleBlockRead(object sender, SingleBlockReadEventArgs e)

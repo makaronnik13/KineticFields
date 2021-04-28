@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Assets.WasapiAudio.Scripts.Core;
 using Assets.WasapiAudio.Scripts.Wasapi;
+using CSCore.CoreAudioAPI;
 using UnityEngine;
 
 namespace Assets.WasapiAudio.Scripts.Unity
@@ -30,15 +31,16 @@ namespace Assets.WasapiAudio.Scripts.Unity
                 _spectrumData = spectrumData;
             });
 
-            _wasapiAudio.StartListen();
+            _wasapiAudio.StartListen(null);
         }
 
-        public void SetSourceType(bool mic)
+        public void SetSourceType(MMDevice microphone)
         {
+            Debug.Log("listen "+microphone);
             _wasapiAudio.StopListen();
             WasapiCaptureType wct = WasapiCaptureType.Loopback;
 
-            if (mic)
+            if (microphone!=null)
             {
                 wct = WasapiCaptureType.Microphone;
             }
@@ -50,7 +52,7 @@ namespace Assets.WasapiAudio.Scripts.Unity
                 _spectrumData = spectrumData;
             });
 
-            _wasapiAudio.StartListen();
+            _wasapiAudio.StartListen(microphone);
         }
 
         public void Update()
@@ -73,9 +75,11 @@ namespace Assets.WasapiAudio.Scripts.Unity
             var scaledTotal = 0.0f;
             var scaleStep = 1.0f / SpectrumSize;
 
+
             // 2: Scaled. Scales against animation curve
             for (int i = 0; i < SpectrumSize; i++)
             {
+
                 var scaledValue = profile.ScaleCurve.Evaluate(scaleStep * i) * _spectrumData[i];
                 scaledSpectrumData[i] = scaledValue;
 

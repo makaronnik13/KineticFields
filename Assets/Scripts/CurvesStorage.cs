@@ -22,7 +22,7 @@ public class CurvesStorage
 
     public CurveInstance GetCurve(string id)
     {
-      
+        //Debug.Log(dict.ContainsKey(id));
         if (dict.ContainsKey(id))
         {
             return dict[id];

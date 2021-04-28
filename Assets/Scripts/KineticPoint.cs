@@ -159,9 +159,6 @@ public class KineticPoint : MonoBehaviour
 
         Selector.SetActive(point.Deep.Source == source || point.Radius.Source == source || point.Volume.Source == source);
 
-        Debug.Log(point.Id+"/"+(point.Deep.Source == source) +"/"+ (point.Radius.Source == source) +"/"+ (point.Volume.Source == source));
-        Debug.Log(Selector.activeInHierarchy);
-
         if (point == KineticFieldController.Instance.Session.Value.ActivePreset.Value.MainPoint)
         {
             Selector.SetActive(Selector.activeInHierarchy 

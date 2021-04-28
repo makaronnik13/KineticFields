@@ -75,6 +75,7 @@ public class ModifyingParameter: ICloneable
     public void SliderValueChanged(float v)
     {
         BaseValue.SetState(v);
+        UpdateValue();
     }
 
     public void SetSource(ISource source)

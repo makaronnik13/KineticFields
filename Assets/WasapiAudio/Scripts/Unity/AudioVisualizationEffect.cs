@@ -31,6 +31,7 @@ namespace Assets.WasapiAudio.Scripts.Unity
                 return null;
             }
 
+
             return WasapiAudioSource.GetSpectrumData(Strategy, Smoothed, Profile);
         }
     }

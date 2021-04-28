@@ -91,7 +91,7 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
     {
    
 
-        float dist = Vector3.Distance(transform.position, PresetsLerper.Instance.RadiusView.position);
+        float dist = Vector3.Distance(transform.position, Center.Instance.transform.position);
 
         /*Volume.SetState(Mathf.Lerp(1,0, Vector3.Distance(PresetsLerper.Instance.RadiusView.position, transform.position)/PresetsLerper.Instance.Radius.Value));
         */

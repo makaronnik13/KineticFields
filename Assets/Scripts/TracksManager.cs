@@ -63,9 +63,7 @@ public class TracksManager : Singleton<TracksManager>
         CurrentLib.AddListener(LibChanged);
         FindObjectOfType<BpmManager>().OnBeat += Beat;
         Playing.AddListener(PlayingStateChanged);
-        Shufle.AddListener(ShufleStateChanged);
-        PresetsLerper.Instance.OnPresetDeleted += PresetDeleted;
-       
+        Shufle.AddListener(ShufleStateChanged);       
     }
 
     private void Start()
@@ -83,26 +81,6 @@ public class TracksManager : Singleton<TracksManager>
         {
             ShuffleIcon.sprite = LoopSprite;
         }
-    }
-
-    private void PresetDeleted(KineticPreset p)
-    {
-        if (CurrentLib.Value!=null && KineticFieldController.Instance.Session.Value!=null)
-        {
-            int id = KineticFieldController.Instance.Session.Value.Presets.IndexOf(p);
-
-
-            for (int i = CurrentLib.Value.Tracks.Count - 1; i >= 0; i--)
-            {
-                PointTrack pTrack = CurrentLib.Value.Tracks[i].PointsTrack;
-                if (pTrack != null)
-                {
-                    pTrack.OnTrackRemoved(pTrack);
-                }
-            }
-        }
-     
-
     }
 
 
@@ -127,7 +105,7 @@ public class TracksManager : Singleton<TracksManager>
 
     private void LibChanged(TrackLib lib)
     {
-        View.SetActive(lib!=null);
+        View.SetActive(lib!=null && KineticFieldController.Instance.Session.Value!=null);
 
         
         PlayStopBtn.SetActive(lib!=null && CurrentLib.Value.Tracks.Count > 0);
@@ -246,8 +224,6 @@ public class TracksManager : Singleton<TracksManager>
         {
             return;
         }
-
-        Debug.Log("!");
         
         if (CurrentTrack.Value!=null && CurrentTrack.Value.CurrentRepeat.Value<CurrentTrack.Value.RepeatCount.Value-1)
         {

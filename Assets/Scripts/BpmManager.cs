@@ -187,7 +187,7 @@ public class BpmManager : MonoBehaviour
 
     void Update()
     {
-        realTimeSpectralFluxAnalyzer.analyzeSpectrum(processor.GetSpectrumData().Take(Samples).ToArray(), Time.timeSinceLevelLoad);
+        realTimeSpectralFluxAnalyzer.analyzeSpectrum(processor.Spectrum.GetSpectrumData().Take(Samples).ToArray(), Time.timeSinceLevelLoad);
 
         if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count>realTimeSpectralFluxAnalyzer.thresholdWindowSize*1000f)
         {

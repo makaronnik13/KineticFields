@@ -26,6 +26,9 @@ public class KineticFieldController : Singleton<KineticFieldController>
     };
 
     [SerializeField]
+    private GameObject OscSyncBtns;
+
+    [SerializeField]
     private Transform OscilatorsHub;
 
     [SerializeField]
@@ -42,6 +45,9 @@ public class KineticFieldController : Singleton<KineticFieldController>
 
     [SerializeField]
     MainPointInspector MainPointInspector;
+
+    [SerializeField]
+    ModifiyngParameterView AnchorView, ScaleView;
 
     public GenericFlag<KineticSession> Session = new GenericFlag<KineticSession>("CurrentSession", null);
     public GenericFlag<KineticPoint> ActivePoint = new GenericFlag<KineticPoint>("ActivePoint", null);
@@ -74,19 +80,6 @@ public class KineticFieldController : Singleton<KineticFieldController>
         }
     }
 
-
-    private void FixedUpdate()
-    {
-        /*
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            if (ActivePoint.Value)
-            {
-                ActivePoint.Value.Point.Active.SetState(!ActivePoint.Value.Point.Active.Value);
-            }
-        }*/
-    }
-
     public void LoadSession(KineticSession session)
     {
 
@@ -99,6 +92,7 @@ public class KineticFieldController : Singleton<KineticFieldController>
 
     private void SessionChanged(KineticSession session)
     {
+        OscSyncBtns.SetActive(session!=null);
         if (session==null)
         {
             return;
@@ -116,6 +110,9 @@ public class KineticFieldController : Singleton<KineticFieldController>
         {
             MainPointInspector.PresetChanged(Session.Value.ActivePreset.Value);
         });
+
+        AnchorView.Init(session.GeneralAnchor);
+        ScaleView.Init(session.GeneralScale);
     }
 
     private void ActivePointChanged(KineticPoint obj)
@@ -218,29 +215,6 @@ public class KineticFieldController : Singleton<KineticFieldController>
                     }
                 }
             }
-            /*
-                    if (KeysEnabled && EventSystem.current.currentSelectedGameObject == null)
-                    {
-                        for (int i = 0; i < keyCodes.Count(); i++)
-                        {
-                            if (Input.GetKey(KeyCode.LeftShift))
-                            {
-                                if (Input.GetKeyDown(keyCodes[i]))
-                                {
-                                    Session.Value.SavePreset(i);
-                                }
-                            }
-                            else
-                            {
-                                if (Input.GetKeyDown(keyCodes[i]))
-                                {
-                                    LoadPreset(i);
-                                }
-                            }
-                        }
-                    }
-            */
-
 
             if (Input.GetMouseButtonDown(1))
             {
@@ -252,8 +226,8 @@ public class KineticFieldController : Singleton<KineticFieldController>
     private void UpdateVisual(KineticPreset preset, bool useTemp = false)
     {
 
-        Visual.SetFloat("FrontCutPlane", preset.NearCutPlane.Value.Value);
-        Visual.SetFloat("BackCutPlane", preset.FarCutPlane.Value.Value);
+        Visual.SetFloat("FrontCutPlane", preset.NearCutPlane.Value.Value + Session.Value.GeneralAnchor.Value.Value-4f);
+        Visual.SetFloat("BackCutPlane", preset.FarCutPlane.Value.Value * Session.Value.GeneralScale.Value.Value);
         Visual.SetMesh("ParticleMesh", DefaultResources.Settings.Meshes[preset.MeshId.Value]);
         Visual.SetFloat("Lifetime", preset.Lifetime.Value.Value);
         Visual.SetInt("Rate", Mathf.RoundToInt(preset.ParticlesCount.Value.Value));
@@ -266,8 +240,12 @@ public class KineticFieldController : Singleton<KineticFieldController>
         {
             if (preset.Points.FirstOrDefault(p => p.Id == i).Active.Value || useTemp)
             {
-
-                Visual.SetFloat("P" + i + "Radius", preset.Points.FirstOrDefault(p => p.Id == i).Radius.Value.Value);
+                float rad = preset.Points.FirstOrDefault(p => p.Id == i).Radius.Value.Value;
+                if (i!=0)
+                {
+                    rad *= Session.Value.GeneralScale.Value.Value;
+                }
+                Visual.SetFloat("P" + i + "Radius", rad);
                 Visual.SetFloat("P" + i + "Value", preset.Points.FirstOrDefault(p => p.Id == i).Volume.Value.Value);
             }
             else
@@ -322,9 +300,12 @@ public class KineticFieldController : Singleton<KineticFieldController>
 
     public void SyncOsc()
     {
-        foreach (Oscilator o in Session.Value.Oscilators)
+        if (Session.Value!=null)
         {
-            o.Reset();
+            foreach (Oscilator o in Session.Value.Oscilators)
+            {
+                o.Reset();
+            }
         }
     }
 

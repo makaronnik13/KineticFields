@@ -2,30 +2,35 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MultiplyerSlider : MonoBehaviour
 {
-    [SerializeField]
-    private Slider Slider;
 
     [SerializeField]
     private BarSpectrum SpectrumBar;
 
-    [SerializeField]
-    private TMPro.TextMeshProUGUI Text;
+    public float scale = 1f;
 
-    // Start is called before the first frame update
-    void Start()
+
+
+    private void Update()
     {
-        Slider.onValueChanged.AddListener(SliderValueChanged);
+        float max = SpectrumBar.GetSpectrumData().ToList().Max();
+        if (max*scale>0.12f)
+        {
+            scale = Mathf.Lerp(scale, 0, Time.deltaTime*0.3f);
+        }
+        else if(max*scale<0.05f)
+        {
+            scale = Mathf.Lerp(scale, 2, Time.deltaTime*0.3f);
+        }
+
+        SpectrumBar.AudioScale = 1000f * scale;
+
     }
 
-    private void SliderValueChanged(float v)
-    {
-        SpectrumBar.AudioScale = v;
-        Text.text = Mathf.RoundToInt(((v-Slider.minValue)/(Slider.maxValue-Slider.minValue))*100).ToString();
-    }
 
 }

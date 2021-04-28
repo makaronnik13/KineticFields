@@ -75,7 +75,7 @@ public class FrequencyGap: ISource, ICloneable
     {
         get
         {
-            return value;
+            return value*3f;
         }
     }
 

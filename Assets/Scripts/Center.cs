@@ -9,29 +9,47 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
     [SerializeField]
     private float Sensivity = 1f;
 
+    [SerializeField]
+    private RectTransform RadiusView;
+
     private bool writing;
 
     private int beatCount = 0;
 
-    private KineticPreset Preset
-    {
-        get
-        {
-            if (KineticFieldController.Instance.Session.Value == null)
-            {
-                return null;
-            }
-            return KineticFieldController.Instance.Session.Value.MainPreset;
-        }
-    }
+    private KineticPreset Preset;
 
     void Start()
     {
-        if (Preset!=null)
-        {
-            Preset.OnPositionChanged += PositionChanged;
-        }
+        KineticFieldController.Instance.Session.AddListener(SessionChanged);
+        PresetsLerper.Instance.Radius.AddListener(RadiusChanged);
     }
+
+    private void SessionChanged(KineticSession session)
+    {
+        if (session == null)
+        {
+            return;
+        }
+
+        if (Preset!=session.MainPreset)
+        {
+            if (Preset!=null)
+            {
+                Preset.OnPositionChanged -= PositionChanged;
+            }
+        }
+
+        Preset = session.MainPreset;
+
+        Preset.OnPositionChanged += PositionChanged;
+    }
+
+    private void RadiusChanged(float v)
+    {
+        RadiusView.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, v * 2);
+        RadiusView.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, v * 2);
+    }
+
 
     private void PositionChanged(Vector2 p)
     {
@@ -42,25 +60,21 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
     public void OnDrag(PointerEventData eventData)
     {
         transform.position = eventData.position;
-        if (!TracksManager.Instance.Playing.Value && TracksManager.Instance.CurrentTrack.Value != null)
+        if (TracksManager.Instance.CurrentTrack.Value != null)
         {
-   
-
-            float step = Mathf.RoundToInt(TrackView.Instance.Slider.value * TracksManager.Instance.CurrentTrack.Value.Steps*4)/ (TracksManager.Instance.CurrentTrack.Value.Steps*4f);
-
-
-            TrackView.Instance.Slider.value = step;
-            TrackView.Instance.WritePoint(Preset, transform.localPosition, 1);
+            TrackView.Instance.WritePosition(transform.localPosition, 1);
         }
     }
 
     private void Update()
     {
-        if (PresetsLerper.Instance.Lerping.Value)
+        if (PresetsLerper.Instance.Lerping.Value && Mathf.Abs(Input.mouseScrollDelta.y)!=0 && KineticFieldController.Instance.Session.Value!=null && TracksManager.Instance.CurrentLib.Value!=null)
         {
             float rad = PresetsLerper.Instance.Radius.Value + Input.mouseScrollDelta.y * Sensivity;
             rad = Mathf.Clamp(rad, 50, 250);
             PresetsLerper.Instance.Radius.SetState(rad);
+            TrackView.Instance.WriteRadius(PresetsLerper.Instance.Radius.Value, 1);
+
         }
     }
 
