@@ -42,11 +42,8 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
 
         for (int i = 0; i < SessionNames.Count; i++)
         {
-            Debug.Log(SessionNames[i]);
             SessionNames[i] = SessionNames[i].Replace(Application.persistentDataPath, "");
-            Debug.Log(SessionNames[i]);
             SessionNames[i] = SessionNames[i].Replace(".kfs", "");
-            Debug.Log(SessionNames[i]);
             SessionNames[i] = SessionNames[i].Remove(0, 1);
         }
 
@@ -325,4 +322,8 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
         Autosave();
     }
 
+    public void Exit()
+    {
+        Application.Quit();
+    }
 }

@@ -19,20 +19,22 @@ public class TrackStep
 
             x = value.x;
             y = value.y;
-            HasKey.SetState(Position!=Vector2.zero);
         }
     }
 
-    public float Scale;
+    public float Radius;
 
     public GenericFlag<float> Time = new GenericFlag<float>("Time", 0);
-    public GenericFlag<bool> HasKey = new GenericFlag<bool>("HasKey", false);
 
-
-    public TrackStep(float time, Vector2 position, float scale = 1f)
+    public TrackStep(float time, Vector2 position)
     {
-        Scale = scale;
         Position = position;
+        Time.SetState(time);
+    }
+
+    public TrackStep(float time, float scale)
+    {
+        Radius = scale;
         Time.SetState(time);
     }
 }

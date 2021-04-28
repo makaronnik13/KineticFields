@@ -19,6 +19,8 @@ public class KineticSession
 
     public GenericFlag<KineticPreset> ActivePreset = new GenericFlag<KineticPreset>("ActivePreset", null);
 
+    public ModifyingParameter GeneralAnchor;
+    public ModifyingParameter GeneralScale;
 
     public List<KineticPreset> Presets = new List<KineticPreset>();
 
@@ -103,21 +105,25 @@ public class KineticSession
 
         Curves = new CurvesStorage();
 
+        Debug.Log(DefaultResources.Settings.SizeCurves.Count);
 
         foreach (AnimationCurve cu in DefaultResources.Settings.SizeCurves)
         {
             Curves.AddCurve(cu);
         }
 
-        AddOscilator(1, 0, Curves.Curves[3].Id);
-        AddOscilator(1, -1, Curves.Curves[13].Id);
-        AddOscilator(1, -2, Curves.Curves[14].Id);
-        AddOscilator(1, -2, Curves.Curves[22].Id);
-        AddOscilator(1, -3, Curves.Curves[8].Id);
-        AddOscilator(1, -3, Curves.Curves[11].Id);
-        AddOscilator(1, -4, Curves.Curves[12].Id);
+        Debug.Log(Curves.Curves.Count);
 
-       
+        AddOscilator(3, 0, Curves.Curves[3].Id);
+        AddOscilator(3, -1, Curves.Curves[13].Id);
+        AddOscilator(3, -2, Curves.Curves[14].Id);
+        AddOscilator(3, -2, Curves.Curves[22].Id);
+        AddOscilator(3, -3, Curves.Curves[8].Id);
+        AddOscilator(3, -3, Curves.Curves[11].Id);
+        AddOscilator(3, -4, Curves.Curves[12].Id);
+
+        GeneralAnchor = new ModifyingParameter(4f, 2f, 8f);
+        GeneralScale = new ModifyingParameter(1f, 0.1f, 3f);
     }
 
     public void UpdateAveragePreset(Dictionary<KineticPreset, float> weihgts)

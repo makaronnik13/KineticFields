@@ -1,10 +1,12 @@
-﻿using Assets.WasapiAudio.Scripts.Unity;
+﻿using Assets.Scripts;
+using Assets.WasapiAudio.Scripts.Unity;
 using System.Linq;
 using UnityEngine;
 
 
-public class AudioProcessor : AudioVisualizationEffect
+public class AudioProcessor: MonoBehaviour
 {
+    public BarSpectrum Spectrum;
 
 	private long lastT, nowT, diff, entries, sum;
 
@@ -104,7 +106,7 @@ public class AudioProcessor : AudioVisualizationEffect
 
 		int average = (int)(sum / entries);
 
-		Debug.Log ("average = " + average);
+		
 	}
 
 	double[] toDoubleArray (float[] arr)
@@ -123,7 +125,7 @@ public class AudioProcessor : AudioVisualizationEffect
 	void Update ()
 	{
 		
-            spectrum = GetSpectrumData().Take(bufferSize).ToArray();
+            spectrum = Spectrum.GetSpectrumData().Take(bufferSize).ToArray();
 			computeAverages (spectrum);
 			onSpectrum.Invoke (averages);
 
@@ -195,9 +197,12 @@ public class AudioProcessor : AudioVisualizationEffect
 			++sinceLast;
 			// if current value is largest in the array, probably means we're on a beat
 			if (smaxix == now) {
-				//tapTempo();
+
 				// make sure the most recent beat wasn't too recently
-				if (sinceLast > tempopd / 4) {
+				if (sinceLast > tempopd / 4)
+                {
+                    tapTempo();
+
 					onBeat.Invoke ();			
 					blipDelay [0] = 1;
 					// record that we did actually mark a beat this frame
@@ -211,10 +216,11 @@ public class AudioProcessor : AudioVisualizationEffect
 			if (++now == colmax)
 				now = 0;
 
-			//Debug.Log(System.Math.Round(60 / (tempopd * framePeriod)) + " bpm");
-			//Debug.Log(System.Math.Round(auco.avgBpm()) + " bpm");
-	
-	}
+        //Debug.Log(System.Math.Round(60 / (tempopd * framePeriod)) + " bpm");
+        //Debug.Log(System.Math.Round(auco.avgBpm()) + " bpm");
+
+        Debug.Log(auco.avgBpm().ToString());
+    }
 
 
 
@@ -307,6 +313,7 @@ public class AudioProcessor : AudioVisualizationEffect
 
 		public Autoco (int len, float alpha, float framePeriod, float bandwidth)
 		{
+            Debug.Log("!  "+len+"  !");
 			woctavewidth = bandwidth;
 			decay = alpha;
 			del_length = len;
@@ -318,8 +325,8 @@ public class AudioProcessor : AudioVisualizationEffect
 			bpms = new float[del_length];
 			rweight = new float[del_length];
 			for (int i = 0; i < del_length; ++i) {
-				bpms [i] = 60.0f / (framePeriod * (float)i);
-				//Debug.Log(bpms[i]);
+				bpms [i] = 60.0f / (framePeriod * ((float)i+1f));
+			
 				// weighting is Gaussian on log-BPM axis, centered at wmidbpm, SD = woctavewidth octaves
 				rweight [i] = (float)System.Math.Exp (-0.5f * System.Math.Pow (System.Math.Log (bpms [i] / wmidbpm) / System.Math.Log (2.0f) / woctavewidth, 2.0f));
 			}
@@ -349,10 +356,13 @@ public class AudioProcessor : AudioVisualizationEffect
 
 		public float avgBpm ()
 		{
+
 			float sum = 0;
 			for (int i = 0; i < bpms.Length; ++i) {
 				sum += bpms [i];
 			}
+
+
 			return sum / del_length;
 		}
 	}

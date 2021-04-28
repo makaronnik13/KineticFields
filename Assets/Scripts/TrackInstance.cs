@@ -24,7 +24,8 @@ public class TrackInstance
         }
     }
 
-    public PointTrack PointsTrack;
+    public PointTrack PositionTrack;
+    public PointTrack RadiusTrack;
 
    [SerializeField]
     private int _iconId = 0;
@@ -63,6 +64,7 @@ public class TrackInstance
         CurrentRepeat = new GenericFlag<int>("CurrentRepeat", 0);
         Color = color;
         Icon = icon;
-        PointsTrack = new PointTrack(-1);
+        PositionTrack = new PointTrack(PointTrack.TrackType.Position);
+        RadiusTrack = new PointTrack(PointTrack.TrackType.Radius);
     }
 }

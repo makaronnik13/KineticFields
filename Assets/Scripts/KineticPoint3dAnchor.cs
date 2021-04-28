@@ -47,8 +47,15 @@ public class KineticPoint3dAnchor : MonoBehaviour
 
         if (Point2d && Point2d.Point!=null)
         {
+            //Debug.Log(KineticFieldController.Instance.Session.Value.GeneralAnchor.Value.Value - 4f);
+            Vector3 newPos = Point2d.Point.Position;
+            if (Point2d.Point.Id!=0)
+            {
+                newPos = new Vector3(newPos.x, newPos.y, newPos.z* KineticFieldController.Instance.Session.Value.GeneralScale.Value.Value);
 
-            transform.position = Vector3.Lerp(transform.position, Point2d.Point.Position, Time.deltaTime*2f);
+                newPos += Vector3.forward * (KineticFieldController.Instance.Session.Value.GeneralAnchor.Value.Value - 4f);
+            }
+            transform.position = Vector3.Lerp(transform.position, newPos, Time.deltaTime*5f);
 
           
             transform.localScale = Vector3.one * Point2d.Point.Radius.Value.Value;

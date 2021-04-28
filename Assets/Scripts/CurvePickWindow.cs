@@ -79,7 +79,6 @@ public class CurvePickWindow : Singleton<CurvePickWindow>
 
     public void SelectCurve(string id)
     {
-        Debug.Log(id);
         OnPicked(id);
         if (callback!=null)
         {

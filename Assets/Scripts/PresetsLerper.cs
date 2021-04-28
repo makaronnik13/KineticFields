@@ -41,7 +41,7 @@ public class PresetsLerper : Singleton<PresetsLerper>
 
     public GenericFlag<KineticPreset> SelectedPreset = new GenericFlag<KineticPreset>("SelectedPreset", null);
 
-    public RectTransform RadiusView;
+
 
     public Action<KineticPreset> OnPresetDeleted = (p) => { };
 
@@ -56,7 +56,7 @@ public class PresetsLerper : Singleton<PresetsLerper>
             Dictionary<KineticPreset, float> weigths = new Dictionary<KineticPreset, float>();
             foreach (PresetPoint point in points)
             {
-                point.Volume.SetState(1f- Vector3.Distance(point.transform.position, RadiusView.transform.position)/Radius.Value);
+                point.Volume.SetState(1f- Vector3.Distance(point.transform.position, Center.Instance.transform.position)/Radius.Value);
 
                 if (point.Volume.Value>0)
                 {
@@ -73,7 +73,6 @@ public class PresetsLerper : Singleton<PresetsLerper>
     void Start()
     {
         Rate.AddListener(RateChanged);
-        Radius.AddListener(RadiusChanged);
         SelectedPreset.AddListener(SelectedPresetChanged);
         PresetEditView.SetActive(false);
         KineticFieldController.Instance.Session.AddListener(SessionChanged);
@@ -142,12 +141,6 @@ public class PresetsLerper : Singleton<PresetsLerper>
             return FindObjectOfType<Center>().transform.localPosition;
         }
         return (Vector2)po.transform.localPosition;
-    }
-
-    private void RadiusChanged(float v)
-    {
-        RadiusView.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, v*2);
-        RadiusView.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, v*2);
     }
 
     public void DuplicateSelected()

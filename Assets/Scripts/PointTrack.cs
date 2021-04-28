@@ -12,15 +12,16 @@ public class PointTrack
     [SerializeField]
     public List<TrackStep> RadiusSteps = new List<TrackStep>();
 
-
-    [SerializeField]
-    public int presetId;
-
     [NonSerialized]
-    public Action<int> OnTrackChanged = (id) => { };
+    public Action OnTrackChanged = () => { };
 
-    [NonSerialized]
-    public Action<PointTrack> OnTrackRemoved = (tr) => { };
+    public enum TrackType
+    {
+        Position,
+        Radius
+    }
+
+    private TrackType TType = TrackType.Position;
 
     public Color SubColor
     {
@@ -42,29 +43,24 @@ public class PointTrack
     {
         get
         {
-            if (presetId == -1)
-            {
-                return KineticFieldController.Instance.Session.Value.MainPreset;
-            }
-            return KineticFieldController.Instance.Session.Value.Presets[presetId];
+            return KineticFieldController.Instance.Session.Value.MainPreset;
         }
     }
 
-    /*
-    public Vector3 GetPosition(float time)
+    public List<TrackStep> Steps
     {
-        
+        get
+        {
+            if (TType == TrackType.Radius)
+            {
+                return RadiusSteps;
+            }
+            return PositionSteps;
+        }
     }
-
-    public float GetRadius(float time)
-    {
-
-    }
-    */
 
     public TrackStep GetStep(float v, bool pos = true)
     {
-        //Debug.Log(v+"/"+steps.FirstOrDefault(s => s.Time.Value == v));
         if (pos)
         {
             return PositionSteps.FirstOrDefault(s => Mathf.Abs(s.Time.Value - v) <= 0.01f);
@@ -73,77 +69,152 @@ public class PointTrack
         return RadiusSteps.FirstOrDefault(s=> Mathf.Abs(s.Time.Value - v)<=0.01f);
     }
 
-    public PointTrack(int presetId)
+    public PointTrack(TrackType tType)
     {
-        this.presetId = presetId;
-        /*(for (int i = 0; i < 128; i++)
-        {
-            //PositionSteps.Add(new TrackStep(i/128f, Vector3.zero));
-        }*/
+        TType = tType;
     }
 
-    public void AddStep(float t, Vector2 pos)
+    public void AddStep(float t, float radius)
     {
-    
-        if (t<0 || t>=PositionSteps.Count)
+        if (t<0)
         {
             return;
         }
 
+        TrackStep step = RadiusSteps.FirstOrDefault(s => Mathf.Abs(s.Time.Value - t) <= 1f / 256f);
 
-        TrackStep step = PositionSteps[Mathf.RoundToInt(t)];
+        if (step == null)
+        {
+            step = new TrackStep(t, radius);
+            RadiusSteps.Add(step);
+        }
 
+        step.Radius = radius;
+        OnTrackChanged();
+    }
 
+    public void AddStep(float t, Vector2 pos)
+    {
+
+        if (t < 0)
+        {
+            return;
+        }
+
+        TrackStep step = PositionSteps.FirstOrDefault(s => Mathf.Abs(s.Time.Value - t)<= 1f/256f);
 
         if (step == null)
         {
 
             step = new TrackStep(t, pos);
             PositionSteps.Add(step);
-
- 
-            OnTrackChanged(presetId);
         }
 
-
         step.Position = pos;
+        OnTrackChanged();
     }
 
     public void RemoveStep(TrackStep s)
     {
-        s.Position = Vector3.zero;
-        s.HasKey.SetState(false);
-
-
-        if (PositionSteps.FirstOrDefault(st => st.HasKey.Value) == null)
+        if (RadiusSteps.Contains(s))
         {
-            OnTrackRemoved(this);
+            RadiusSteps.Remove(s);
         }
+
+        if (PositionSteps.Contains(s))
+        {
+            PositionSteps.Remove(s);
+        }
+
+        OnTrackChanged();
+    }
+
+
+    public bool GetRadius(float v, out float radius)
+    {
+        v += 2f / 128f;
+
+        List<TrackStep> avaliableSteps = RadiusSteps.Where(s => Mathf.FloorToInt(s.Time.Value * 64f) <= TracksManager.Instance.CurrentTrack.Value.Steps * 4f).ToList();
+
+        TrackStep s1 = avaliableSteps.OrderBy(s => s.Time.Value).LastOrDefault(s => s.Time.Value <= v);
+        TrackStep s2 = avaliableSteps.OrderBy(s => s.Time.Value).FirstOrDefault(s => s.Time.Value >= v);
+
+        if (s1 == null)
+        {
+            s1 = avaliableSteps.OrderByDescending(s => s.Time.Value).FirstOrDefault();
+        }
+
+
+        if (s2 == null)
+        {
+
+            s2 = avaliableSteps.OrderBy(s => s.Time.Value).FirstOrDefault();
+        }
+
+
+        if (s1 == null || s2 == null)
+        {
+            radius = 0;
+            return false;
+        }
+
+        float dist = 0;
+        float val = 0;
+
+        if (s1.Time.Value < s2.Time.Value)
+        {
+            dist = s2.Time.Value - s1.Time.Value;
+            val = v - s1.Time.Value;
+        }
+        else
+        {
+            dist = 2f * (TracksManager.Instance.CurrentTrack.Value.Steps / 32f) - s1.Time.Value + s2.Time.Value;
+
+
+            if (v > s1.Time.Value)
+            {
+
+                val = v - s1.Time.Value;
+            }
+            if (v < s2.Time.Value)
+            {
+                val = 2f * (TracksManager.Instance.CurrentTrack.Value.Steps / 32f) - s1.Time.Value + v;
+            }
+        }
+
+        radius = Mathf.Lerp(s1.Radius, s2.Radius, val / dist);
+        if (s2 == s1)
+        {
+            radius = s1.Radius;
+        }
+
+        return true;
     }
 
     public bool GetPosition(float v, out Vector2 pos)
     {
 
-        v /= 2f;
+        v += 2f / 128f;
 
-        List<TrackStep> avaliableSteps = PositionSteps.Where(s => s.HasKey.Value && Mathf.RoundToInt(s.Time.Value * 64f) <= TracksManager.Instance.CurrentTrack.Value.Steps*2).ToList() ;
+        List<TrackStep> avaliableSteps = PositionSteps.Where(s => Mathf.FloorToInt(s.Time.Value * 64f) <= TracksManager.Instance.CurrentTrack.Value.Steps*4f).ToList();
 
-        TrackStep s1 = avaliableSteps.OrderByDescending(s=>s.Time.Value).FirstOrDefault(s=>s.Time.Value<=v && s.HasKey.Value);
-        TrackStep s2 = avaliableSteps.OrderBy(s => s.Time.Value).FirstOrDefault(s => s.Time.Value >= v && s.HasKey.Value);
+        TrackStep s1 = avaliableSteps.OrderBy(s=>s.Time.Value).LastOrDefault(s=>s.Time.Value<=v);
+        TrackStep s2 = avaliableSteps.OrderBy(s => s.Time.Value).FirstOrDefault(s => s.Time.Value >= v);
 
-
-        
      
 
         if (s1 == null)
         {
             s1 = avaliableSteps.OrderByDescending(s=>s.Time.Value).FirstOrDefault();
         }
+        
 
         if (s2 == null)
         {
+
             s2 = avaliableSteps.OrderBy(s => s.Time.Value).FirstOrDefault();
         }
+
 
         if (s1 == null || s2 == null)
         {
@@ -161,34 +232,33 @@ public class PointTrack
         }
         else
         {
+            dist = 2f* (TracksManager.Instance.CurrentTrack.Value.Steps/32f) - s1.Time.Value + s2.Time.Value;
 
-
-            float d = TracksManager.Instance.CurrentTrack.Value.Steps*4f - s1.Time.Value * 128 + s2.Time.Value * 128;
-         
-
-            dist = d/64f;
 
             if (v>s1.Time.Value)
             {
                
-                val = (v - s1.Time.Value)*2;
+                val = v - s1.Time.Value;
             }
             if (v<s2.Time.Value)
             {
-                val =  (dist- s1.Time.Value+v)*2f;
+                val =  2f * (TracksManager.Instance.CurrentTrack.Value.Steps / 32f) - s1.Time.Value + v;
             }
         }
+
+       
 
             pos = Vector2.Lerp(s1.Position, s2.Position, val/dist);
             if (s2 == s1)
             {
                 pos = s1.Position;
             }
-        
- 
 
-       
+
+
+
 
         return true;
     }
+
 }

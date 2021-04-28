@@ -25,6 +25,8 @@ public class SecondScreen : MonoBehaviour
     private void Start()
     {
         FlipBtn.onValueChanged.AddListener(ToggleFlip);
+        Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+        Screen.fullScreen = true;
     }
 
     private void ToggleFlip(bool v)
@@ -57,6 +59,8 @@ public class SecondScreen : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             transform.Rotate(transform.forward, 90f);
+            Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+            Screen.fullScreen = true;
         }
     }
 }
