@@ -41,7 +41,13 @@ public class TrackView : Singleton<TrackView>
 
     private  TrackInstance currentTrack;
     private GenericFlag<float> timing = new GenericFlag<float>("timing", 0);
-    private int bpm;
+    private int bpm
+    {
+        get
+        {
+            return BpmManager.Instance.Bpm.Value;
+        }
+    }
 
     public List<KineticPreset> DraggingPresets = new List<KineticPreset>();
 
@@ -56,7 +62,6 @@ public class TrackView : Singleton<TrackView>
     {
         TracksManager.CurrentTrack.AddListener(TrackChanged);
         FindObjectOfType<BpmManager>().OnQuart += Beat;
-        FindObjectOfType<BpmManager>().Bpm.AddListener(BpmChanged);
         TracksManager.Instance.Playing.AddListener(PlayingStateChanged);
 
         RepeatCount.onValueChanged.AddListener(RepeatCountChanged);
@@ -140,7 +145,7 @@ public class TrackView : Singleton<TrackView>
         if (TracksManager.Instance.Playing.Value && TracksManager.Instance.CurrentTrack.Value!=null)
         {
             float v = Mathf.Lerp(Slider.value, timing.Value, Time.deltaTime * bpm * Scale);
-
+            Debug.Log(bpm +"/"+ Scale);
 
             Slider.value = v;
 
@@ -175,6 +180,7 @@ public class TrackView : Singleton<TrackView>
 
             if (currentTrack != null)
             {
+
                 timing.SetState(timing.Value + 1f / Mathf.Pow(2, 3 + currentTrack.Size.Value));
             }
         }
@@ -186,9 +192,8 @@ public class TrackView : Singleton<TrackView>
         Slider.value = 0;
     }
 
-    private void BpmChanged(int bpm)
+    public void ResetTrack()
     {
-        this.bpm = bpm;
         if (TracksManager.Instance.Playing.Value)
         {
             TrackChanged(TracksManager.CurrentTrack.Value);

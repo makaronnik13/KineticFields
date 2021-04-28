@@ -10,6 +10,7 @@ public class CurvesStorage
 
     private Dictionary<string, CurveInstance> dict = new Dictionary<string, CurveInstance>();
 
+
     public CurvesStorage()
     {
         foreach (CurveInstance cI in Curves)
@@ -22,7 +23,14 @@ public class CurvesStorage
 
     public CurveInstance GetCurve(string id)
     {
-        //Debug.Log(dict.ContainsKey(id));
+        if (dict.Keys.Count == 0)
+        {
+            foreach (CurveInstance cI in Curves)
+            {
+                dict.Add(cI.Id, cI);
+            }
+        }
+
         if (dict.ContainsKey(id))
         {
             return dict[id];

@@ -40,7 +40,6 @@ namespace Assets.Scripts
 
 
             _spectrumCaps = GetSpectrumData();
-            Debug.Log("get caps");
         }
 
         public void Update()

@@ -36,7 +36,6 @@ namespace Assets.WasapiAudio.Scripts.Unity
 
         public void SetSourceType(MMDevice microphone)
         {
-            Debug.Log("listen "+microphone);
             _wasapiAudio.StopListen();
             WasapiCaptureType wct = WasapiCaptureType.Loopback;
 
