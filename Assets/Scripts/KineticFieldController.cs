@@ -190,7 +190,7 @@ public class KineticFieldController : Singleton<KineticFieldController>
                 int start = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.Start);
                 int end = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.End);
                 List<float> data = d.GetRange(start, end - start);
-                float dataAverage = data.Sum() / data.Count;
+                float dataAverage = FindObjectOfType<MultiplyerSlider>().scale * data.Sum() / data.Count;
                 fg.UpdateFrequency(data);
             }
 
@@ -307,6 +307,8 @@ public class KineticFieldController : Singleton<KineticFieldController>
                 o.Reset();
             }
         }
+
+        TrackView.Instance.ResetTrack();
     }
 
 }

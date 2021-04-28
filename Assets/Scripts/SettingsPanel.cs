@@ -77,11 +77,9 @@ public class SettingsPanel : Singleton<SettingsPanel>
 
     private IEnumerator ProfileSmooth()
     {
-        Debug.Log("set profile 1");
         MicProfile.AudioSmoothingIterations = 1;
         AudioProfile.AudioSmoothingIterations = 1;
         yield return null;
-        Debug.Log("set profile 2");
         MicProfile.AudioSmoothingIterations = 2;
         AudioProfile.AudioSmoothingIterations = 2;
     }

@@ -60,7 +60,7 @@ public class BpmManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        processor.onBeat.AddListener(TestBeat);
+        //processor.onBeat.AddListener(TestBeat);
         Bpm.AddListener(BpmChanged);
 
         realTimeSpectralFluxAnalyzer = new SpectralFluxAnalyzer(Samples, WindowSize, PeakCoef);
@@ -74,13 +74,24 @@ public class BpmManager : MonoBehaviour
     {
         while (true)
         {
-   
+
             if (Bpm.Value>0)
             {
                 CreateMarker();
             }
 
-            yield return new WaitForSeconds(60f/Bpm.Value);
+            for (int i = 0; i < 4; i++)
+            {
+                float t = 0;
+                OnQuart();
+                while (t< 15f / Bpm.Value)
+                {
+                    t += Time.deltaTime;
+                    yield return null;
+                }
+            }
+            OnBeat();
+
         }
     }
 
@@ -103,7 +114,7 @@ public class BpmManager : MonoBehaviour
         {
             foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
             {
-                osc.Reset();
+               // osc.Reset();
             }
         }
         
@@ -118,11 +129,13 @@ public class BpmManager : MonoBehaviour
             {
                 Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
 
+                /*
                 if (spawnMarkerCoroutine != null)
                 {
                     StopCoroutine(spawnMarkerCoroutine);
                 }
                 spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
+                */
             }
         }
         else
@@ -131,11 +144,15 @@ public class BpmManager : MonoBehaviour
             {
                 Bpm.SetState(120);
 
+                /*
                 if (spawnMarkerCoroutine != null)
                 {
                     StopCoroutine(spawnMarkerCoroutine);
                 }
                 spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
+                */
+
+
             }
         }
     }
@@ -151,7 +168,6 @@ public class BpmManager : MonoBehaviour
 
         OnBeat.Invoke();
 
-        StartCoroutine(CountQuarts());
 
         if (KineticFieldController.Instance.Session.Value!=null)
         {
@@ -169,25 +185,11 @@ public class BpmManager : MonoBehaviour
         obj.Recycle();
     }
 
-    private IEnumerator CountQuarts()
-    {
-        float timeGap = 15f / Bpm.Value;
-
-        OnQuart();
-        yield return new WaitForSeconds(timeGap);
-        OnQuart();
-        yield return new WaitForSeconds(timeGap);
-        OnQuart();
-        yield return new WaitForSeconds(timeGap);
-        OnQuart();
-
-    }
-
 
 
     void Update()
     {
-        realTimeSpectralFluxAnalyzer.analyzeSpectrum(processor.Spectrum.GetSpectrumData().Take(Samples).ToArray(), Time.timeSinceLevelLoad);
+        realTimeSpectralFluxAnalyzer.analyzeSpectrum(processor.spectrumBar.GetSpectrumData().Take(Samples).ToArray(), Time.timeSinceLevelLoad);
 
         if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count>realTimeSpectralFluxAnalyzer.thresholdWindowSize*1000f)
         {
@@ -201,6 +203,8 @@ public class BpmManager : MonoBehaviour
                 osc.UpdateOscilator();
             }
         }
+
+        TestBeat();
     }
 
 
