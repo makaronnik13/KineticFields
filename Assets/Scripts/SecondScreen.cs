@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SecondScreen : MonoBehaviour
+public class SecondScreen : Singleton<SecondScreen>
 {
     [SerializeField]
     private GameObject Camera;
@@ -19,6 +19,7 @@ public class SecondScreen : MonoBehaviour
     [SerializeField]
     private GameObject CameraPrefab;
 
+    public List<GameObject> Cameras = new List<GameObject>();
 
     private GenericFlag<int> screensCount = new GenericFlag<int>("screens", 1);
 
@@ -47,13 +48,15 @@ public class SecondScreen : MonoBehaviour
     {
         while (screensCount.Value < Display.displays.Length)
         {
-            Display.displays[screensCount.Value].Activate();
+           // Display.displays[screensCount.Value].Activate();
             screensCount.SetState(screensCount.Value+1);
             GameObject newCamera = Instantiate(CameraPrefab);
             newCamera.transform.SetParent(transform.GetChild(0));
             newCamera.transform.localPosition = Vector3.zero;
             newCamera.transform.localScale = Vector3.one;
-            newCamera.GetComponent<Camera>().targetDisplay = screensCount.Value;
+            //newCamera.GetComponent<Camera>().targetDisplay = screensCount.Value;
+            newCamera.gameObject.SetActive(false);
+            Cameras.Add(newCamera);
         }
 
         if (Input.GetKeyDown(KeyCode.R))
