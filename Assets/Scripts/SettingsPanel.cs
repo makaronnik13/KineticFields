@@ -7,11 +7,24 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.VFX;
 using Windows.Kinect;
 
 public class SettingsPanel : Singleton<SettingsPanel>
 {
+    [SerializeField]
+    private GameObject ScreenTogglePrefab;
+
+    [SerializeField]
+    private Transform ScreensHub;
+
+    [SerializeField]
+    private GameObject Resolink;
+
+    [SerializeField]
+    private Toggle ResolinkToggle;
+
     [SerializeField]
     private BarSpectrum Bar;
 
@@ -37,6 +50,8 @@ public class SettingsPanel : Singleton<SettingsPanel>
 
     private MMDeviceCollection devices = null;
     private MMDevice soundSourceDdevice = null;
+
+    private List<ScreenToggle> screenToggles = new List<ScreenToggle>();
 
     // Start is called before the first frame update
     void Start()
@@ -72,7 +87,13 @@ public class SettingsPanel : Singleton<SettingsPanel>
 
 
         StartCoroutine(ProfileSmooth());
-       
+
+        ResolinkToggle.onValueChanged.AddListener(ToggleResolink);
+    }
+
+    private void ToggleResolink(bool v)
+    {
+        Resolink.gameObject.SetActive(v);
     }
 
     private IEnumerator ProfileSmooth()
@@ -152,6 +173,23 @@ public class SettingsPanel : Singleton<SettingsPanel>
     public void Toggle()
     {
         View.SetActive(!View.activeInHierarchy);
+        if (View.activeInHierarchy)
+        {
+            int i = 0;
+            foreach (GameObject go in SecondScreen.Instance.Cameras)
+            {
+                if (screenToggles.FirstOrDefault(s=>s.Camera == go)==null)
+                {
+                    GameObject newScreenToggle = Instantiate(ScreenTogglePrefab);
+                    newScreenToggle.transform.SetParent(ScreensHub);
+                    newScreenToggle.transform.localPosition = Vector3.zero;
+                    newScreenToggle.transform.localScale = Vector3.one;
+                    newScreenToggle.GetComponent<ScreenToggle>().Init(go, i);
+                    screenToggles.Add(newScreenToggle.GetComponent<ScreenToggle>());
+                }
+                i++;
+            }
+        }
     }
 
     private void VisualChanged(int v)

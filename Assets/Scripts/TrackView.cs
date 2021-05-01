@@ -145,7 +145,6 @@ public class TrackView : Singleton<TrackView>
         if (TracksManager.Instance.Playing.Value && TracksManager.Instance.CurrentTrack.Value!=null)
         {
             float v = Mathf.Lerp(Slider.value, timing.Value, Time.deltaTime * bpm * Scale);
-            Debug.Log(bpm +"/"+ Scale);
 
             Slider.value = v;
 
