@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Resolink
 {
@@ -7,7 +8,10 @@ namespace Resolink
         [SerializeField]
         float m_Bpm = 144;
         public float BPM => m_Bpm;
-        
+
+        public Action<int> BpmChanged = (bpm) => { };
+
+
         bool m_PauseQueued;
         bool m_UnpauseQueued;
         bool m_Paused;
@@ -72,6 +76,8 @@ namespace Resolink
                 m_PreviousTimeScale = Time.timeScale;
                 m_PreviousEventValue = eventValue;
             }
+
+            BpmChanged.Invoke(Mathf.RoundToInt(BPM));
         }
     }
 }

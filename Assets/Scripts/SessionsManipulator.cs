@@ -16,7 +16,6 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
     [SerializeField]
     private TMPro.TMP_Dropdown TracksDropdown, SessionsDropdown;
 
-
     [SerializeField]
     private TMPro.TMP_InputField SessionName;
 
@@ -86,6 +85,32 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
         KineticFieldController.Instance.Session.AddListener(SessionChanged);
         TracksManager.Instance.CurrentLib.AddListener(TrackLibChanged);
 
+        if (PlayerPrefs.HasKey("last_session"))
+        {
+            KineticSession session = Sessions.FirstOrDefault(s => s.SessionName == PlayerPrefs.GetString("last_session"));
+            if (session!=null) 
+            {
+                SessionsDropdown.SetValueWithoutNotify(Sessions.IndexOf(session)+1);
+                Load(session);
+            } 
+        }
+
+        if (PlayerPrefs.HasKey("last_track_lib"))
+        {
+            Debug.Log("load track lib");
+
+            Debug.Log(PlayerPrefs.GetString("last_track_lib"));
+            TrackLib trackLib = TrackLibs.FirstOrDefault(s => s.Name == PlayerPrefs.GetString("last_track_lib"));
+            if (trackLib != null)
+            {
+                Debug.Log(trackLib.Name);
+                Debug.Log(TrackLibs.IndexOf(trackLib) + 1);
+                TracksManager.Instance.CurrentLib.SetState(trackLib);
+                TracksDropdown.SetValueWithoutNotify(TrackLibs.IndexOf(trackLib)+1);
+            }
+        }
+
+
     }
 
     private void TrackLibChanged(TrackLib lib)
@@ -95,11 +120,14 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
         {
             TrackNameInput.SetTextWithoutNotify(lib.Name);
         }
+        UpdateTrackLibsDropdown();
+        Autosave();
     }
 
     private void SessionChanged(KineticSession session)
     {
         SessionNameInput.gameObject.SetActive(session != null);
+
         if (session != null)
         {
             SessionNameInput.SetTextWithoutNotify(session.SessionName);
@@ -118,7 +146,7 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
         UpdateSessionsDropdown();
         SessionsDropdown.SetValueWithoutNotify(Sessions.IndexOf(KineticFieldController.Instance.Session.Value)+1);
         SessionsDropdown.RefreshShownValue();
-
+ 
         File.Delete(Application.persistentDataPath + "/" + delitingSessionName + ".kfs");
     }
 
@@ -136,9 +164,10 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
         TracksDropdown.RefreshShownValue();
 
         File.Delete(Application.persistentDataPath + "/" + delitingTrackName + ".kft");
+       
     }
 
-  
+  /*
     private void CurrentLibChanged(TrackLib lib)
     {
         if (!TrackLibs.Contains(lib) && lib!=null)
@@ -146,9 +175,14 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
             TrackLibs.Add(lib);
             UpdateTrackLibsDropdown();
             TracksDropdown.SetValueWithoutNotify(TrackLibs.IndexOf(lib));
+            PlayerPrefs.SetString("last_track_lib", lib.Name);
+        }
+        else
+        {
+            PlayerPrefs.SetString("last_track_lib", string.Empty);
         }
        
-    }
+    }*/
 
     private void UpdateSessionsDropdown()
     {
@@ -231,6 +265,8 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
 
         PresetsLerper.Instance.SetState(false);
         PresetsLerper.Instance.SetState(true);
+
+        UpdateSessionsDropdown();
     }
 
     public void Open()
@@ -309,12 +345,17 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
         if (TracksManager.Instance.CurrentLib.Value!=null)
         {
             SaveTrackLib(TracksManager.Instance.CurrentLib.Value);
+            Debug.Log(TracksManager.Instance.CurrentLib.Value.Name);
+            PlayerPrefs.SetString("last_track_lib", TracksManager.Instance.CurrentLib.Value.Name);
         }
 
         if (KineticFieldController.Instance.Session.Value!=null)
         {
             SaveToFile(KineticFieldController.Instance.Session.Value);
+            PlayerPrefs.SetString("last_session", KineticFieldController.Instance.Session.Value.SessionName);
         }
+
+        PlayerPrefs.Save();
     }
 
     private void OnApplicationQuit()

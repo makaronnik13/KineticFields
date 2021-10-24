@@ -6,6 +6,7 @@ using UnityEngine;
 [Serializable]
 public class PointTrack
 {
+
     [SerializeField]
     public List<TrackStep> PositionSteps = new List<TrackStep>();
 

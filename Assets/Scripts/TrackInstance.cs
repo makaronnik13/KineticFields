@@ -24,6 +24,10 @@ public class TrackInstance
         }
     }
 
+    [SerializeField]
+    public PresetPath Path;
+
+
     public PointTrack PositionTrack;
     public PointTrack RadiusTrack;
 
@@ -57,6 +61,7 @@ public class TrackInstance
     public TrackInstance()
     {
         CurrentRepeat = new GenericFlag<int>("CurrentRepeat", 0);
+
     }
 
     public TrackInstance(Color color, Sprite icon)
@@ -66,5 +71,9 @@ public class TrackInstance
         Icon = icon;
         PositionTrack = new PointTrack(PointTrack.TrackType.Position);
         RadiusTrack = new PointTrack(PointTrack.TrackType.Radius);
+        Path = new PresetPath( new List<Vector2>(){
+            KineticFieldController.Instance.Session.Value.MainPreset.Position,
+            KineticFieldController.Instance.Session.Value.MainPreset.Position
+        });
     }
 }
