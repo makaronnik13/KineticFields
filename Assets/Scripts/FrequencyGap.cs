@@ -75,7 +75,7 @@ public class FrequencyGap: ISource, ICloneable
     {
         get
         {
-            return value*0.3f;
+            return value*DefaultResources.Settings.FrequencyGapMiultiplyer;
         }
     }
 

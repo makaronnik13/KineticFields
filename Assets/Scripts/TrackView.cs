@@ -9,6 +9,10 @@ using UnityEngine.UI;
 
 public class TrackView : Singleton<TrackView>
 {
+    private PresetPathView pathView;
+    [SerializeField]
+    private GameObject PresetPathPrefab;
+       
     [SerializeField]
     private TMPro.TextMeshProUGUI Length;
 
@@ -63,7 +67,6 @@ public class TrackView : Singleton<TrackView>
         TracksManager.CurrentTrack.AddListener(TrackChanged);
         FindObjectOfType<BpmManager>().OnQuart += Beat;
         TracksManager.Instance.Playing.AddListener(PlayingStateChanged);
-
         RepeatCount.onValueChanged.AddListener(RepeatCountChanged);
     }
 
@@ -234,6 +237,23 @@ public class TrackView : Singleton<TrackView>
             }
             UpdateView();
         }
+
+        if (pathView != null)
+        {
+            Destroy(pathView.gameObject);
+            pathView = null;
+        }
+
+        /*
+        if (track!=null)
+        {
+            
+            pathView = Instantiate(PresetPathPrefab).GetComponent<PresetPathView>();
+                pathView.Init(TracksManager.Instance.CurrentTrack.Value.Path);
+                pathView.transform.SetParent(PresetsLerper.Instance.View.transform);
+                pathView.transform.localPosition = Vector3.zero;
+        }*/
+        
 
         View.SetActive(track!=null);
     }

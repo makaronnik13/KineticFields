@@ -20,7 +20,7 @@ public class SettingsPanel : Singleton<SettingsPanel>
     private Transform ScreensHub;
 
     [SerializeField]
-    private GameObject Resolink;
+    public GameObject Resolink;
 
     [SerializeField]
     private Toggle ResolinkToggle;
@@ -50,6 +50,8 @@ public class SettingsPanel : Singleton<SettingsPanel>
 
     private MMDeviceCollection devices = null;
     private MMDevice soundSourceDdevice = null;
+
+    public Action<bool> OnResolinkStateChanged = (v) => { };
 
     private List<ScreenToggle> screenToggles = new List<ScreenToggle>();
 
@@ -94,6 +96,7 @@ public class SettingsPanel : Singleton<SettingsPanel>
     private void ToggleResolink(bool v)
     {
         Resolink.gameObject.SetActive(v);
+        OnResolinkStateChanged(v);
     }
 
     private IEnumerator ProfileSmooth()

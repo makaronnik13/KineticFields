@@ -41,13 +41,14 @@ public class PresetsLerper : Singleton<PresetsLerper>
 
     public GenericFlag<KineticPreset> SelectedPreset = new GenericFlag<KineticPreset>("SelectedPreset", null);
 
-
+ 
 
     public Action<KineticPreset> OnPresetDeleted = (p) => { };
 
     public GenericFlag<bool> Lerping = new GenericFlag<bool>("lerping", true);
 
     private int beats = 0;
+
 
     public Dictionary<KineticPreset, float> Weigths
     {

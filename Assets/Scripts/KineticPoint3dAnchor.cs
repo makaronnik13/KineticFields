@@ -5,6 +5,14 @@ using UnityEngine;
 
 public class KineticPoint3dAnchor : MonoBehaviour
 {
+    public float LerpSpeed
+    {
+        get
+        {
+            return DefaultResources.Settings.PointsLerpSpeed3d;
+        }
+    } 
+
     [SerializeField]
     private KineticPoint Point2d;
 
@@ -55,10 +63,12 @@ public class KineticPoint3dAnchor : MonoBehaviour
 
                 newPos += Vector3.forward * (KineticFieldController.Instance.Session.Value.GeneralAnchor.Value.Value - 4f);
             }
-            transform.position = Vector3.Lerp(transform.position, newPos, Time.deltaTime*5f);
+
+
+            transform.position = Vector3.Lerp(transform.position, newPos, Time.deltaTime*LerpSpeed);
 
           
-            transform.localScale = Vector3.one * Point2d.Point.Radius.Value.Value;
+            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * Point2d.Point.Radius.Value.Value,Time.deltaTime*LerpSpeed);
         }
 
         Point2d.transform.position = Camera.main.transform.position - (Camera.main.transform.position - transform.position).normalized;
