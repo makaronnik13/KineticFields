@@ -2,11 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts;
+using Zenject;
 
-public class AudioProcessor : MonoBehaviour
+public class AudioProcessor
 {
-    public BarSpectrum spectrumBar;
-
     private long lastT, nowT, diff, entries, sum;
 
     public int bufferSize = 1024;
@@ -58,6 +57,25 @@ public class AudioProcessor : MonoBehaviour
     public OnSpectrumEventHandler onSpectrum;
 
     //////////////////////////////////
+
+    [Inject]    
+    public void Construct()
+    {
+        Debug.Log("Construct audio processor");
+        initArrays(); 
+
+        framePeriod = (float)bufferSize / (float)samplingRate;
+
+        //initialize record of previous spectrum
+        spec = new float[nBand];
+        for (int i = 0; i < nBand; ++i)
+            spec[i] = 100.0f;
+
+        auco = new Autoco(maxlag, decay, framePeriod, getBandWidth());
+
+        lastT = getCurrentTimeMillis();
+    }
+
     private long getCurrentTimeMillis()
     {
         long milliseconds = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond;
@@ -74,25 +92,6 @@ public class AudioProcessor : MonoBehaviour
         averages = new float[12];
         acVals = new float[maxlag];
         alph = 100 * gThresh;
-    }
-
-    // Use this for initialization
-    void Start()
-    {
-        initArrays();
-
-       
-
-        framePeriod = (float)bufferSize / (float)samplingRate;
-
-        //initialize record of previous spectrum
-        spec = new float[nBand];
-        for (int i = 0; i < nBand; ++i)
-            spec[i] = 100.0f;
-
-        auco = new Autoco(maxlag, decay, framePeriod, getBandWidth());
-
-        lastT = getCurrentTimeMillis();
     }
 
     public void tapTempo()
@@ -124,7 +123,6 @@ public class AudioProcessor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         spectrum = spectrumBar.GetSpectrumData();
             computeAverages(spectrum);
             onSpectrum.Invoke(averages);

@@ -4,6 +4,8 @@ using Assets.WasapiAudio.Scripts.Core;
 using Assets.WasapiAudio.Scripts.Wasapi;
 using CSCore.CoreAudioAPI;
 using UnityEngine;
+using Zenject;
+using UniRx;
 
 namespace Assets.WasapiAudio.Scripts.Unity
 {
@@ -16,17 +18,38 @@ namespace Assets.WasapiAudio.Scripts.Unity
         private float[] _spectrumData;
 
         // Inspector Properties
-        public WasapiCaptureType CaptureType = WasapiCaptureType.Loopback;
-        public int SpectrumSize = 32;
+        public ReactiveProperty<WasapiCaptureType> CaptureType = new ReactiveProperty<WasapiCaptureType>(WasapiCaptureType.Loopback);
+
+        
+        private int SpectrumSize = 512;
+
+
         public ScalingStrategy ScalingStrategy = ScalingStrategy.Sqrt;
         public int MinFrequency = 100;
         public int MaxFrequency = 20000;
         public WasapiAudioFilter[] Filters;
 
-        public void Awake()
+        private ProjectSettings settings;
+
+        [Inject]
+        public void Construct(ProjectSettings settings)
         {
+            this.settings = settings;
+
+            Debug.Log("construct WAS");
+        }
+
+
+
+
+        private void StartListen(WasapiCaptureType captureType)
+        {
+            if (_wasapiAudio != null)
+            {
+                _wasapiAudio.StopListen();
+            }
             // Setup loopback audio and start listening
-            _wasapiAudio = new Wasapi.WasapiAudio(CaptureType, SpectrumSize, ScalingStrategy, MinFrequency, MaxFrequency, Filters, spectrumData =>
+            _wasapiAudio = new Wasapi.WasapiAudio(captureType, SpectrumSize, ScalingStrategy, MinFrequency, MaxFrequency, Filters, spectrumData =>
             {
                 _spectrumData = spectrumData;
             });
@@ -44,7 +67,7 @@ namespace Assets.WasapiAudio.Scripts.Unity
                 wct = WasapiCaptureType.Microphone;
             }
 
-            CaptureType = wct;
+            CaptureType.Value = wct;
 
             _wasapiAudio = new Wasapi.WasapiAudio(wct, SpectrumSize, ScalingStrategy, MinFrequency, MaxFrequency, Filters, spectrumData =>
             {
