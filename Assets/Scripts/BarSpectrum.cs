@@ -2,6 +2,7 @@
 using System.Collections;
 using Assets.WasapiAudio.Scripts.Unity;
 using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts
 {
@@ -19,7 +20,8 @@ namespace Assets.Scripts
         public float AudioScale;
         public float Power;
 
-        public void Start()
+        [Inject]
+        public void Construct(AudioProcessor processor)
         {
             _spectrumBars = new GameObject[SpectrumSize];
             _originalPositions = new Vector3[SpectrumSize];

@@ -9,6 +9,8 @@ public class ProjectSettings: ScriptableObject
     public List<AnimationCurve> SizeCurves;
     public List<Mesh> Meshes;
 
+    public LoopBackSettings LoopBack;
+
     public AnimationCurve PointsCountCurve;
 
 

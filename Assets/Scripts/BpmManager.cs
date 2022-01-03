@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Zenject;
 
 public class BpmManager : MonoBehaviour
 {
@@ -52,7 +53,15 @@ public class BpmManager : MonoBehaviour
 
     private float sinceLastBeat = 0;
     private float lastClickTime;
- 
+
+    private AudioDecorator audio;
+
+    [Inject]
+    public void Construct(AudioDecorator audio)
+    {
+        this.audio = audio;
+    }
+
     public void Awake()
     {
         Instance = this;
@@ -214,7 +223,7 @@ public class BpmManager : MonoBehaviour
 
     void Update()
     {
-        realTimeSpectralFluxAnalyzer.analyzeSpectrum(processor.spectrumBar.GetSpectrumData().Take(Samples).ToArray(), Time.timeSinceLevelLoad);
+        realTimeSpectralFluxAnalyzer.analyzeSpectrum(audio.Spectrum.Take(Samples).ToArray(), Time.timeSinceLevelLoad);
 
         if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count>realTimeSpectralFluxAnalyzer.thresholdWindowSize*1000f)
         {
