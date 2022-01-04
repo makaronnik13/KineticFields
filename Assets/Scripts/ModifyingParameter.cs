@@ -14,7 +14,7 @@ public class ModifyingParameter: ICloneable
 
     public GenericFlag<int> SourceId = new GenericFlag<int>("SourceId", -1);
 
-    public ISource Source
+    public Source Source
     {
         get
         {
@@ -43,7 +43,7 @@ public class ModifyingParameter: ICloneable
 
     }
 
-    public ModifyingParameter(float value, float min, float max, ISource source = null)
+    public ModifyingParameter(float value, float min, float max, Source source = null)
     {
         MIN = min;
         MAX = max;
@@ -61,7 +61,7 @@ public class ModifyingParameter: ICloneable
         float v = BaseValue.Value;
         if (Source != null)
         {
-            v += Source.SourceValue * Multiplicator.Value;
+            v += Source.Value.Value * Multiplicator.Value;
         }
         v = Mathf.Clamp(v, MIN, MAX*2f);
         Value.SetState(v);
@@ -78,20 +78,17 @@ public class ModifyingParameter: ICloneable
         UpdateValue();
     }
 
-    public void SetSource(ISource source)
+    public void SetSource(Source source)
     {
-
         if (this.Source != null)
         {
-            this.Source.OnValueChanged -= SourceValueChanged;
+            //this.Source.Value.uns -= SourceValueChanged;
         }
         SourceId.SetState(KineticFieldController.Instance.Sources.IndexOf(source));
         if (this.Source!= null)
         {
-            this.Source.OnValueChanged += SourceValueChanged;
+           // this.Source.OnValueChanged += SourceValueChanged;
         }
-
-
     }
 
     private void SourceValueChanged(float v)

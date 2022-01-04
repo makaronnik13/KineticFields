@@ -21,7 +21,7 @@ namespace Assets.WasapiAudio.Scripts.Unity
         public ReactiveProperty<WasapiCaptureType> CaptureType = new ReactiveProperty<WasapiCaptureType>(WasapiCaptureType.Loopback);
 
         
-        private int SpectrumSize = 512;
+        public int SpectrumSize = 512;
 
 
         public ScalingStrategy ScalingStrategy = ScalingStrategy.Sqrt;

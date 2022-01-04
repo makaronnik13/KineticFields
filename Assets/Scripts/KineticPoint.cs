@@ -145,7 +145,7 @@ public class KineticPoint : MonoBehaviour
         GetComponent<Collider2D>().enabled = p != this;
     }
 
-    private void SourceChanged(ISource source)
+    private void SourceChanged(Source source)
     {
         if (point == null)
         {

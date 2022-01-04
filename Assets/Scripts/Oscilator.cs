@@ -2,9 +2,9 @@
 using UnityEngine;
 
 [Serializable]
-public class Oscilator : ISource
+public class Oscilator : Source
 {
-    public Oscilator(float multiplyer, int repeatRate, string curveId = "")
+    public Oscilator(string name, Sprite icon, Color color, float multiplyer, int repeatRate, string curveId = ""): base (name, icon, 0f, 1f, color)
     {
         this.Multiplyer = multiplyer;
         this.RepeatRate = repeatRate;

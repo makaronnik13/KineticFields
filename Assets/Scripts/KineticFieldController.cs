@@ -52,9 +52,9 @@ public class KineticFieldController : Singleton<KineticFieldController>
     public GenericFlag<KineticSession> Session = new GenericFlag<KineticSession>("CurrentSession", null);
     public GenericFlag<KineticPoint> ActivePoint = new GenericFlag<KineticPoint>("ActivePoint", null);
     public GenericFlag<FrequencyGap> ActiveGap = new GenericFlag<FrequencyGap>("ActiveGap", null);
-    public GenericFlag<ISource> DraggingSource = new GenericFlag<ISource>("DraggingSource", null);
+    public GenericFlag<Source> DraggingSource = new GenericFlag<Source>("DraggingSource", null);
 
-    public GenericFlag<ISource> SelectedSource = new GenericFlag<ISource>("SelectedSource", null);
+    public GenericFlag<Source> SelectedSource = new GenericFlag<Source>("SelectedSource", null);
 
     public bool KeysEnabled = true;
 
@@ -63,11 +63,11 @@ public class KineticFieldController : Singleton<KineticFieldController>
 
     private KineticPointInstance CoppyingPoint;
 
-    public List<ISource> Sources
+    public List<Source> Sources
     {
         get
         {
-            List<ISource> scs = new List<ISource>();
+            List<Source> scs = new List<Source>();
             scs.Add(new FrequencyGap("none", 0, 0, Color.red, DefaultResources.GapSprites[0]));
             if (Session.Value != null)
             {
@@ -163,14 +163,14 @@ public class KineticFieldController : Singleton<KineticFieldController>
         }
     }
 
-    private void DraggingSourceChanged(ISource source)
+    private void DraggingSourceChanged(Source source)
     {
 
         draggingSourceView.SetActive(source != null);
 
         if (source != null)
         {
-            draggingSourceView.transform.GetChild(0).GetComponent<Image>().sprite = source.Icon;
+            draggingSourceView.transform.GetChild(0).GetComponent<Image>().sprite = source.Sprite;
         }
     }
 

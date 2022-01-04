@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class SorceView : MonoBehaviour, IDragHandler, IBeginDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    private ISource source;
+    private Source source;
 
     void OnEnable()
     {
