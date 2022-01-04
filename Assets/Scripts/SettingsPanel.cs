@@ -10,9 +10,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.VFX;
 using Windows.Kinect;
+using Zenject;
+using UnityEngine.EventSystems;
+using UniRx;
 
 public class SettingsPanel : Singleton<SettingsPanel>
 {
+
     [SerializeField]
     private GameObject ScreenTogglePrefab;
 
@@ -31,8 +35,7 @@ public class SettingsPanel : Singleton<SettingsPanel>
     [SerializeField]
     private AudioProcessor Processor;
 
-    [SerializeField]
-    private AudioVisualizationProfile AudioProfile, MicProfile;
+   
 
     [SerializeField]
     private GameObject View;
@@ -46,20 +49,72 @@ public class SettingsPanel : Singleton<SettingsPanel>
     [SerializeField]
     private VisualEffect Effect;
 
+    private SoundSourceProvider soundSourceProvider;
+
     public GenericFlag<KineticModel> ActiveModel = new GenericFlag<KineticModel>("ActiveModel", null);
 
-    private MMDeviceCollection devices = null;
-    private MMDevice soundSourceDdevice = null;
+    
 
     public Action<bool> OnResolinkStateChanged = (v) => { };
 
     private List<ScreenToggle> screenToggles = new List<ScreenToggle>();
 
+
+    [Inject]
+    private void Construct(SoundSourceProvider soundSourceProvider)
+    {
+        this.soundSourceProvider = soundSourceProvider;
+
+        soundSourceProvider.Devices.ObserveCountChanged().Subscribe(v =>
+        {
+            SoundSourcesChanged();
+        });
+
+        soundSourceProvider.Devices.ObserveAdd().Subscribe(x =>
+        {
+            SoundSourcesChanged();
+        });
+
+        soundSourceProvider.Devices.ObserveRemove().Subscribe(x =>
+        {
+            SoundSourcesChanged();
+        });
+    }
+
+    private void SoundSourcesChanged()
+    {
+        List<TMPro.TMP_Dropdown.OptionData> options = new List<TMPro.TMP_Dropdown.OptionData>();
+        options.Add(new TMPro.TMP_Dropdown.OptionData("System sound"));
+
+        foreach (MMDevice device in soundSourceProvider.Devices)
+        {
+            options.Add(new TMPro.TMP_Dropdown.OptionData(device.FriendlyName.Split('(', ')')[1]));
+        }
+
+        SoundSourceDropdown.ClearOptions();
+        SoundSourceDropdown.AddOptions(options);
+
+        if (soundSourceProvider.ActiveSoundDevice.Value == null || options.FirstOrDefault(o => o.text == soundSourceProvider.ActiveSoundDevice.Value.FriendlyName.Split('(', ')')[1]) == null)
+        {
+            if (options.Count == 0)
+            {
+                SoundSourceDropdown.value = 0;
+            }
+            else
+            {
+                SoundSourceDropdown.value = soundSourceProvider.Devices.IndexOf(soundSourceProvider.GetDefaultDevice()) + 1;
+            }
+        }
+
+        SoundSourceDropdown.RefreshShownValue();
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
         VisualDropdown.onValueChanged.AddListener(VisualChanged);
-        SoundSourceDropdown.onValueChanged.AddListener(SoundSourceChanged);
+        SoundSourceDropdown.onValueChanged.AddListener(SoundDropdownChanged);
 
         KinectSensor sensor = FindObjectOfType<KinectPointCloudMapped>().Sensor;
 
@@ -88,9 +143,14 @@ public class SettingsPanel : Singleton<SettingsPanel>
         ModelDropdown.value = 0;
 
 
-        StartCoroutine(ProfileSmooth());
+    
 
         ResolinkToggle.onValueChanged.AddListener(ToggleResolink);
+    }
+
+    private void SoundDropdownChanged(int value)
+    {
+        soundSourceProvider.SelectSoundSource(value);
     }
 
     private void ToggleResolink(bool v)
@@ -99,68 +159,8 @@ public class SettingsPanel : Singleton<SettingsPanel>
         OnResolinkStateChanged(v);
     }
 
-    private IEnumerator ProfileSmooth()
-    {
-        MicProfile.AudioSmoothingIterations = 1;
-        AudioProfile.AudioSmoothingIterations = 1;
-        yield return null;
-        MicProfile.AudioSmoothingIterations = 2;
-        AudioProfile.AudioSmoothingIterations = 2;
-    }
+   
 
-    private void SoundSourceChanged(int v)
-    {
-        if (v == 0)
-        {
-            soundSourceDdevice = null;
-            Bar.Profile = AudioProfile;
-        }
-        else
-        {
-            soundSourceDdevice = devices.ItemAt(v-1);
-            Bar.Profile = MicProfile;
-        }
-        source.SetSourceType(soundSourceDdevice);
-    }
-
-    private void Update()
-    {
-        
-        using (var deviceEnumerator = new MMDeviceEnumerator())
-        {
-            MMDeviceCollection newDevices = deviceEnumerator.EnumAudioEndpoints(DataFlow.Capture, DeviceState.Active);
-            if (devices == null || newDevices.Count!=devices.Count)
-            {
-                devices = newDevices;
-
-                List<TMPro.TMP_Dropdown.OptionData> options = new List<TMPro.TMP_Dropdown.OptionData>();
-                options.Add(new TMPro.TMP_Dropdown.OptionData("System sound"));
-                foreach (MMDevice device in devices)
-                {
-                    options.Add(new TMPro.TMP_Dropdown.OptionData(device.FriendlyName.Split('(', ')')[1]));
-                }
-
-                SoundSourceDropdown.ClearOptions();
-                SoundSourceDropdown.AddOptions(options);
-      
-                if (soundSourceDdevice == null || options.FirstOrDefault(o=>o.text == soundSourceDdevice.FriendlyName.Split('(', ')')[1])==null)
-                {
-                    if (options.Count == 0)
-                    {
-                        SoundSourceDropdown.value = 0;
-                    }
-                    else
-                    {
-                        SoundSourceDropdown.value = devices.ToList().IndexOf(deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia))+1;
-                    }
-                }
-                SoundSourceDropdown.RefreshShownValue();
-                SoundSourceChanged(SoundSourceDropdown.value);
-            }
-
-        }
-     
-    }
 
     private void ModelDropdownChanged(int v)
     {

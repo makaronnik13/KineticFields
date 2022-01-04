@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Assets.Scripts;
 using Zenject;
 
-public class AudioProcessor
+public class AudioProcessor: MonoBehaviour
 {
     private long lastT, nowT, diff, entries, sum;
 
@@ -55,6 +55,9 @@ public class AudioProcessor
     [Header("Events")]
     public OnBeatEventHandler onBeat;
     public OnSpectrumEventHandler onSpectrum;
+
+    [SerializeField]
+    private BarSpectrum spectrumBar;
 
     //////////////////////////////////
 
@@ -123,7 +126,7 @@ public class AudioProcessor
     // Update is called once per frame
     void Update()
     {
-        spectrum = spectrumBar.GetSpectrumData();
+            spectrum = spectrumBar.GetSpectrumData();
             computeAverages(spectrum);
             onSpectrum.Invoke(averages);
 

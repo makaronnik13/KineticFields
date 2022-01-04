@@ -417,7 +417,7 @@ public class KineticSession
 
     private void AddOscilator(float multiplyer, int repeatRate, string curveId)
     {
-        Oscilators.Add(new Oscilator(multiplyer, repeatRate, curveId));
+        Oscilators.Add(new Oscilator("oscilator", null, Color.cyan, multiplyer, repeatRate, curveId));
     }
 
     public FrequencyGap AddGap(string name, float pos, float size, Color color, Sprite sprite)

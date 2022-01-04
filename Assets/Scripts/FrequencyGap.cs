@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public class FrequencyGap: ISource, ICloneable
+public class FrequencyGap: Source, ICloneable
 {
     public enum GapType
     {
@@ -97,39 +97,10 @@ public class FrequencyGap: ISource, ICloneable
         }
     }
 
-    [SerializeField]
-    private int spriteId = -1;
-
-    public Sprite Sprite
+    public FrequencyGap(string name, float pos, float size, Color color, Sprite sprite): base (name, sprite, 0f, 1f, color)
     {
-        get
-        {
-            return DefaultResources.GapSprites[spriteId];
-        }
-        set
-        {
-            spriteId = DefaultResources.GapSprites.IndexOf(value);
-        }
-    }
-
-
-    public float SourceValue
-    {
-        get
-        {
-            return Value;
-        }
-    }
-
-    public Sprite Icon => Sprite;
-
-    public FrequencyGap(string name, float pos, float size, Color color, Sprite sprite)
-    {
-        this.Name = name;
         Position.SetState(pos);
         GapSize.SetState(size);
-        this.color = color;
-        Sprite = sprite;
     }
 
     public void UpdateFrequency(List<float> data)
