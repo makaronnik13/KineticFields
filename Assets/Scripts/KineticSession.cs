@@ -469,12 +469,12 @@ public class KineticSession
 
     private void MeshChanged(int meshId)
     {
-        KineticFieldController.Instance.Visual.SetMesh("ParticleMesh", DefaultResources.Settings.Meshes[meshId]);
+        //KineticFieldController.Instance.Visual.SetMesh("ParticleMesh", DefaultResources.Settings.Meshes[meshId]);
     }
 
     private void NoizeChanged(float val)
     {
-        KineticFieldController.Instance.Visual.SetFloat("Noize", val);
+        //KineticFieldController.Instance.Visual.SetFloat("Noize", val);
     }
 
     private void GlobalSizeChanged(float val)
@@ -484,7 +484,7 @@ public class KineticSession
 
     private void PCountChanged(float v)
     {
-        KineticFieldController.Instance.Visual.SetInt("Rate", Mathf.RoundToInt(v));
+        //KineticFieldController.Instance.Visual.SetInt("Rate", Mathf.RoundToInt(v));
     }
 
     private void LifetimeChanged(float v)
