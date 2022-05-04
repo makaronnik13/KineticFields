@@ -1,7 +1,7 @@
-﻿using Assets.Scripts;
-using Assets.WasapiAudio.Scripts.Unity;
+﻿using Assets.WasapiAudio.Scripts.Unity;
 using com.armatur.common.flags;
 using CSCore.CoreAudioAPI;
+using KineticFields;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ public class SettingsPanel : Singleton<SettingsPanel>
     private Toggle ResolinkToggle;
 
     [SerializeField]
-    private BarSpectrum Bar;
+    private FFTService Bar;
 
     [SerializeField]
     private AudioProcessor Processor;
@@ -110,12 +110,12 @@ public class SettingsPanel : Singleton<SettingsPanel>
         if (v == 0)
         {
             soundSourceDdevice = null;
-            Bar.Profile = AudioProfile;
+            //Bar.Profile = AudioProfile;
         }
         else
         {
             soundSourceDdevice = devices.ItemAt(v-1);
-            Bar.Profile = MicProfile;
+            //Bar.Profile = MicProfile;
         }
         source.SetSourceType(soundSourceDdevice);
     }

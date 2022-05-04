@@ -1,11 +1,9 @@
-﻿using Assets.Scripts;
-using com.armatur.common.flags;
-using System;
+﻿using com.armatur.common.flags;
+using KineticFields;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.VFX;
 
@@ -35,9 +33,6 @@ public class KineticFieldController : Singleton<KineticFieldController>
     public VisualEffect Visual;
 
     [SerializeField]
-    private BarSpectrum SpectrumBar;
-
-    [SerializeField]
     private FrequencyGapEditor GapEditor;
 
     [SerializeField]
@@ -60,6 +55,8 @@ public class KineticFieldController : Singleton<KineticFieldController>
 
     [SerializeField]
     private GameObject draggingSourceView;
+
+    private FFTService fftSource;
 
     private KineticPointInstance CoppyingPoint;
 
@@ -184,13 +181,13 @@ public class KineticFieldController : Singleton<KineticFieldController>
 
         if (Session.Value != null)
         {
-            List<float> d = SpectrumBar.GetSpectrumData().ToList();
+            List<float> d = new List<float>();// SpectrumBar.GetSpectrumData().ToList();
             foreach (FrequencyGap fg in Session.Value.Gaps)
             {
-                int start = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.Start);
-                int end = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.End);
+                int start = Mathf.RoundToInt(fftSource.SpectrumSize * fg.Start);
+                int end = Mathf.RoundToInt(fftSource.SpectrumSize * fg.End);
                 List<float> data = d.GetRange(start, end - start);
-                float dataAverage = FindObjectOfType<MultiplyerSlider>().scale * data.Sum() / data.Count;
+                //float dataAverage = FindObjectOfType<MultiplyerSlider>().scale * data.Sum() / data.Count;
                 fg.UpdateFrequency(data);
             }
 
