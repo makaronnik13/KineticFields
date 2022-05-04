@@ -1,12 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
+using Assets.WasapiAudio.Scripts.Unity;
 using UnityEngine;
 using Zenject;
 
-public class ProjectInstaller : MonoInstaller
+namespace KineticFields
 {
-    public override void InstallBindings()
+    public class ProjectInstaller : MonoInstaller
     {
-        Container.BindWithInterfaces<FFTSerivce>();
+        [SerializeField]
+        private AudioVisualizationProfile fftProfile;
+
+        public override void InstallBindings()
+        {
+            Debug.Log("Install project bindings");
+
+            Container.BindWithInterfaces<PrefabCreator>();
+            Container.BindWithInterfaces<FFTService>();
+            Container.Bind<AudioVisualizationProfile>().FromInstance(fftProfile).AsSingle().NonLazy();
+        }
     }
 }
