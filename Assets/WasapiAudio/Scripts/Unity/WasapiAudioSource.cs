@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.WasapiAudio.Scripts.Core;
 using Assets.WasapiAudio.Scripts.Wasapi;
 using CSCore.CoreAudioAPI;
@@ -101,7 +102,6 @@ namespace Assets.WasapiAudio.Scripts.Unity
             // 2: Scaled. Scales against animation curve
             for (int i = 0; i < SpectrumSize; i++)
             {
-
                 var scaledValue = profile.ScaleCurve.Evaluate(scaleStep * i) * _spectrumData[i];
                 scaledSpectrumData[i] = scaledValue;
 

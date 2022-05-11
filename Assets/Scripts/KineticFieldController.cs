@@ -1,11 +1,9 @@
-﻿using Assets.Scripts;
-using com.armatur.common.flags;
-using System;
+﻿using com.armatur.common.flags;
+using KineticFields;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.VFX;
 
@@ -35,9 +33,6 @@ public class KineticFieldController : Singleton<KineticFieldController>
     public VisualEffect Visual;
 
     [SerializeField]
-    private BarSpectrum SpectrumBar;
-
-    [SerializeField]
     private FrequencyGapEditor GapEditor;
 
     [SerializeField]
@@ -60,6 +55,8 @@ public class KineticFieldController : Singleton<KineticFieldController>
 
     [SerializeField]
     private GameObject draggingSourceView;
+
+    private FFTService fftSource;
 
     private KineticPointInstance CoppyingPoint;
 
@@ -184,13 +181,13 @@ public class KineticFieldController : Singleton<KineticFieldController>
 
         if (Session.Value != null)
         {
-            List<float> d = SpectrumBar.GetSpectrumData().ToList();
+            List<float> d = new List<float>();// SpectrumBar.GetSpectrumData().ToList();
             foreach (FrequencyGap fg in Session.Value.Gaps)
             {
-                int start = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.Start);
-                int end = Mathf.RoundToInt(SpectrumBar.SpectrumSize * fg.End);
+                int start = Mathf.RoundToInt(fftSource.SpectrumSize * fg.Start);
+                int end = Mathf.RoundToInt(fftSource.SpectrumSize * fg.End);
                 List<float> data = d.GetRange(start, end - start);
-                float dataAverage = FindObjectOfType<MultiplyerSlider>().scale * data.Sum() / data.Count;
+                //float dataAverage = FindObjectOfType<MultiplyerSlider>().scale * data.Sum() / data.Count;
                 fg.UpdateFrequency(data);
             }
 
@@ -226,17 +223,17 @@ public class KineticFieldController : Singleton<KineticFieldController>
     private void UpdateVisual(KineticPreset preset, bool useTemp = false)
     {
 
-        Visual.SetFloat("FrontCutPlane", preset.NearCutPlane.Value.Value + Session.Value.GeneralAnchor.Value.Value-4f);
-        Visual.SetFloat("BackCutPlane", preset.FarCutPlane.Value.Value * Session.Value.GeneralScale.Value.Value);
-        Visual.SetMesh("ParticleMesh", DefaultResources.Settings.Meshes[preset.MeshId.Value]);
+        //Visual.SetFloat("FrontCutPlane", preset.NearCutPlane.Value.Value + Session.Value.GeneralAnchor.Value.Value-4f);
+        //Visual.SetFloat("BackCutPlane", preset.FarCutPlane.Value.Value * Session.Value.GeneralScale.Value.Value);
+        //Visual.SetMesh("ParticleMesh", DefaultResources.Settings.Meshes[preset.MeshId.Value]);
         Visual.SetFloat("Lifetime", preset.Lifetime.Value.Value);
-        Visual.SetInt("Rate", Mathf.RoundToInt(preset.ParticlesCount.Value.Value));
+        //Visual.SetInt("Rate", Mathf.RoundToInt(preset.ParticlesCount.Value.Value));
 
 
         Visual.SetFloat("Size", (0.05f + preset.MainPoint.Deep.Value.Value - 1f) / 8f);
         //size
 
-        for (int i = 0; i < 13; i++)
+        for (int i = 0; i < 6; i++)
         {
             if (preset.Points.FirstOrDefault(p => p.Id == i).Active.Value || useTemp)
             {
@@ -245,13 +242,13 @@ public class KineticFieldController : Singleton<KineticFieldController>
                 {
                     rad *= Session.Value.GeneralScale.Value.Value;
                 }
-                Visual.SetFloat("P" + i + "Radius", rad);
+                //Visual.SetFloat("P" + i + "Radius", rad);
                 Visual.SetFloat("P" + i + "Value", preset.Points.FirstOrDefault(p => p.Id == i).Volume.Value.Value);
             }
             else
             {
 
-                Visual.SetFloat("P" + i + "Radius", 0);
+                //Visual.SetFloat("P" + i + "Radius", 0);
                 Visual.SetFloat("P" + i + "Value", 0);
             }
 
@@ -259,15 +256,19 @@ public class KineticFieldController : Singleton<KineticFieldController>
             {
                 if (preset.Points.FirstOrDefault(p => p.Id == i).ShowGradient)
                 {
-                    Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points.FirstOrDefault(p => p.Id == i).TempGradient.Gradient);
-                    Visual.SetAnimationCurve("P" + i + "Func", preset.Points.FirstOrDefault(p => p.Id == i).TempCurve.Curve);
+                    if (i==0)
+                    {
+                        Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points.FirstOrDefault(p => p.Id == i).TempGradient.Gradient);
+                    }
+                    
+                    //Visual.SetAnimationCurve("P" + i + "Func", preset.Points.FirstOrDefault(p => p.Id == i).TempCurve.Curve);
                 }
 
             }
             else
             {
-                Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points.FirstOrDefault(p => p.Id == i).Gradient.Gradient);
-                Visual.SetAnimationCurve("P" + i + "Func", preset.Points.FirstOrDefault(p => p.Id == i).Curve.Curve);
+                //Visual.SetGradient("P" + i + "Gradient".ToString(), preset.Points.FirstOrDefault(p => p.Id == i).Gradient.Gradient);
+               // Visual.SetAnimationCurve("P" + i + "Func", preset.Points.FirstOrDefault(p => p.Id == i).Curve.Curve);
             }
         }
 

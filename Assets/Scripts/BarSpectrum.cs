@@ -3,77 +3,48 @@ using System.Collections;
 using Assets.WasapiAudio.Scripts.Unity;
 using UnityEngine;
 using Zenject;
+using UniRx;
+using System.Linq;
 
-namespace Assets.Scripts
+namespace KineticFields
 {
-    public class BarSpectrum : AudioVisualizationEffect
+    public class BarSpectrum : MonoBehaviour
     {
+
         private GameObject[] _spectrumBars;
-        private Vector3[] _originalPositions;
-        private Vector3 _originalScale;
-        private float[] _spectrumCaps;
-        private float[] _spectrumBarsSensivity;
-
-
-
+        private int spectrumSize;
+        private float height;
         public GameObject Prefab;
-        public float AudioScale;
-        public float Power;
 
         [Inject]
-        public void Construct(AudioProcessor processor)
+        public void Construct(FFTService fftsource, PrefabCreator prefabCreator)
         {
-            _spectrumBars = new GameObject[SpectrumSize];
-            _originalPositions = new Vector3[SpectrumSize];
-            _originalScale = Prefab.transform.localScale;
+            height = (transform as RectTransform).rect.height;
 
+            spectrumSize = fftsource.SpectrumSize;
+            _spectrumBars = new GameObject[spectrumSize];
             var width = Prefab.transform.localScale.x;
 
-            for (var i = 0; i < SpectrumSize; i++)
+            for (var i = 0; i < spectrumSize; i++)
             {
-                var spectrumBar = GameObject.Instantiate(Prefab);
-                spectrumBar.transform.parent = transform;
-                spectrumBar.transform.localPosition = new Vector3(width * i, 0.0f, 0.0f);
-                _spectrumBars[i] = spectrumBar;
-                _originalPositions[i] = spectrumBar.transform.localPosition;
+                _spectrumBars[i] = prefabCreator.Create(Prefab, transform);
             }
 
             Prefab.SetActive(false);
 
-
-            _spectrumCaps = GetSpectrumData();
-        }
-
-        public void Update()
-        {
-            var spectrumData = GetSpectrumData();
-
-            if (_spectrumCaps == null)
+            fftsource.OutputSpectrum.Subscribe(spectrum =>
             {
-                return;
-            }
-
-                for (var i = 0; i < SpectrumSize; i++)
+                if (spectrum==null || spectrum.Count==0)
                 {
-                    if (_spectrumCaps[i] < spectrumData[i])
-                    {
-                        _spectrumCaps[i] = spectrumData[i];
-                    }
-                    else
-                    {
-                        _spectrumCaps[i] -= Time.deltaTime;
-                    }
-                    var audioScale = Mathf.Pow(spectrumData[i] * AudioScale, Power);
-                    var newScale = new Vector3(_originalScale.x, _originalScale.y + audioScale, _originalScale.z);
-                    var halfScale = newScale / 2.0f;
-                    _spectrumBars[i].transform.localPosition = new Vector3(_originalPositions[i].x + halfScale.x, _originalPositions[i].y + halfScale.y, _originalPositions[i].z + halfScale.z);
-                    _spectrumBars[i].transform.localScale = newScale;
-
-                    newScale = new Vector3(_originalScale.x, _originalScale.y + audioScale, _originalScale.z);
-
-                    //_spectrumBars[i].transform.GetChild(0).localPosition = Vector3.zero;
-                    //_spectrumBars[i].transform.GetChild(0).localScale = newScale;
+                    return;
                 }
+
+                for (var i = 0; i < spectrumSize; i++)
+                {
+                    var audioScale = spectrum[i];
+                    (_spectrumBars[i].transform as RectTransform).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, audioScale*height);
+                }
+            }).AddTo(this);
         }
     }
 }

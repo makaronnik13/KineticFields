@@ -1,13 +1,11 @@
 ﻿using Assets.WasapiAudio.Scripts.Unity;
 using com.armatur.common.flags;
-using Resolink;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Zenject;
 
 public class BpmManager : MonoBehaviour
 {
@@ -53,39 +51,10 @@ public class BpmManager : MonoBehaviour
 
     private float sinceLastBeat = 0;
     private float lastClickTime;
-
-    private AudioDecorator audio;
-
-    [Inject]
-    public void Construct(AudioDecorator audio)
-    {
-        this.audio = audio;
-    }
-
+ 
     public void Awake()
     {
         Instance = this;
-        FindObjectOfType<SettingsPanel>().OnResolinkStateChanged += ResolinkStateChanged;
-    }
-
-    private void ResolinkStateChanged(bool v)
-    {
-        if (v)
-        {
-            FindObjectOfType<TimeManager>().BpmChanged += BpmChangedFromResolink;
-        }
-        else
-        {
-            FindObjectOfType<TimeManager>().BpmChanged -= BpmChangedFromResolink;
-        }
-        
-    }
-
-    private void BpmChangedFromResolink(int v)
-    {
-        Bpm.SetState(v);
-        KineticFieldController.Instance.SyncOsc();
-        TracksManager.Instance.RandomSwap();
     }
 
     // Start is called before the first frame update
@@ -153,10 +122,7 @@ public class BpmManager : MonoBehaviour
 
     public void TestBeat()
     {
-        if (SettingsPanel.Instance.Resolink.activeInHierarchy)
-        {
-            return;
-        }
+
         if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count >= realTimeSpectralFluxAnalyzer.thresholdWindowSize)
         {
             if (Mathf.Abs(realTimeSpectralFluxAnalyzer.Bpm - Bpm.Value) > BeatTreshold)
@@ -223,7 +189,7 @@ public class BpmManager : MonoBehaviour
 
     void Update()
     {
-        realTimeSpectralFluxAnalyzer.analyzeSpectrum(audio.Spectrum.Take(Samples).ToArray(), Time.timeSinceLevelLoad);
+        //realTimeSpectralFluxAnalyzer.analyzeSpectrum(processor.ChachedSpectrumData.Take(Samples).ToArray(), Time.timeSinceLevelLoad);
 
         if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count>realTimeSpectralFluxAnalyzer.thresholdWindowSize*1000f)
         {

@@ -1,5 +1,5 @@
-﻿using Assets.Scripts;
-using com.armatur.common.flags;
+﻿using com.armatur.common.flags;
+using KineticFields;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,8 +16,7 @@ public class FrequencyGapEditor : MonoBehaviour
     [SerializeField]
     private float HideTime = 1.5f;
 
-    [SerializeField]
-    private BarSpectrum SpectrumBar;
+    private FFTService SpectrumBar;
 
     public FrequencyGap activeGap =  null;
     [SerializeField]
@@ -184,9 +183,9 @@ public class FrequencyGapEditor : MonoBehaviour
     private void ColoriseSpectrum(float start, float end, Color color)
     {
         int i = 0;
-       
 
-       List < MeshRenderer > renderers = SpectrumBar.GetComponentsInChildren<MeshRenderer>().ToList();
+
+        List<MeshRenderer> renderers = new List<MeshRenderer>();// SpectrumBar.GetComponentsInChildren<MeshRenderer>().ToList();
         int startPos = Mathf.RoundToInt(renderers.Count * start);
         int endPos = Mathf.RoundToInt(renderers.Count * end);
 
