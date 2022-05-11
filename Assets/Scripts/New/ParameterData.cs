@@ -7,8 +7,8 @@ namespace KineticFields
     public class ParameterData
     {
         public string Name;
-        public int Min;
-        public int Max;
+        public float Min;
+        public float Max;
         public float MinGap = 0;
         public float MaxGap = 1;
         public float Multiplyer = 1;
@@ -27,6 +27,8 @@ namespace KineticFields
         public ParameterData(string name, float min = 0, float max = 1)
         {
             Name = name;
+            this.Min = min;
+            this.Max = max;
         }
     }
 }
