@@ -1,11 +1,21 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using Assets.Scripts;
+using Assets.WasapiAudio.Scripts.Unity;
 using Zenject;
+using UniRx;
+using System.Linq;
 
-public class AudioProcessor: MonoBehaviour
+public class AudioProcessor : MonoBehaviour
 {
+    [SerializeField]
+    private WasapiAudioSource audioSource;
+
+    [SerializeField]
+    private float AudioScale;
+
+    public AudioVisualizationProfile Profile;
+    public AudioVisualizationStrategy Strategy;
+    public bool Smoothed;
+
     private long lastT, nowT, diff, entries, sum;
 
     public int bufferSize = 1024;
@@ -53,32 +63,13 @@ public class AudioProcessor: MonoBehaviour
     // trade-off constant between tempo deviation penalty and onset strength
 
     [Header("Events")]
-    public OnBeatEventHandler onBeat;
-    public OnSpectrumEventHandler onSpectrum;
+    public ReactiveCommand onBeat = new ReactiveCommand();
+    public ReactiveCommand<float[]> onSpectrum = new ReactiveCommand<float[]>();
+    public ReactiveCommand<float[]> onAverages = new ReactiveCommand<float[]>();
 
-    [SerializeField]
-    private BarSpectrum spectrumBar;
+    public int SpectrumSize => audioSource.SpectrumSize;
 
     //////////////////////////////////
-
-    [Inject]    
-    public void Construct()
-    {
-        Debug.Log("Construct audio processor");
-        initArrays(); 
-
-        framePeriod = (float)bufferSize / (float)samplingRate;
-
-        //initialize record of previous spectrum
-        spec = new float[nBand];
-        for (int i = 0; i < nBand; ++i)
-            spec[i] = 100.0f;
-
-        auco = new Autoco(maxlag, decay, framePeriod, getBandWidth());
-
-        lastT = getCurrentTimeMillis();
-    }
-
     private long getCurrentTimeMillis()
     {
         long milliseconds = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond;
@@ -95,6 +86,23 @@ public class AudioProcessor: MonoBehaviour
         averages = new float[12];
         acVals = new float[maxlag];
         alph = 100 * gThresh;
+    }
+
+    [Inject]
+    public void Construct()
+    {
+        initArrays();
+
+        framePeriod = (float)bufferSize / (float)samplingRate;
+
+        //initialize record of previous spectrum
+        spec = new float[nBand];
+        for (int i = 0; i < nBand; ++i)
+            spec[i] = 100.0f;
+
+        auco = new Autoco(maxlag, decay, framePeriod, getBandWidth());
+
+        lastT = getCurrentTimeMillis();
     }
 
     public void tapTempo()
@@ -126,9 +134,15 @@ public class AudioProcessor: MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-            spectrum = spectrumBar.GetSpectrumData();
-            computeAverages(spectrum);
-            onSpectrum.Invoke(averages);
+
+        spectrum = audioSource.GetSpectrumData(Strategy, Smoothed, Profile);
+
+        onSpectrum.Execute(spectrum.Select(s=>s * AudioScale).ToArray());
+
+
+        computeAverages(spectrum);
+
+        onAverages.Execute(averages);
 
             /* calculate the value of the onset function in this frame */
             float onset = 0;
@@ -211,7 +225,7 @@ public class AudioProcessor: MonoBehaviour
                 if (sinceLast > tempopd / 4)
                 {
                 Debug.Log(auco.avgBpm());
-                onBeat.Invoke();
+                onBeat.Execute();
                     blipDelay[0] = 1;
                     // record that we did actually mark a beat this frame
                     dobeat[now] = 1;
@@ -296,18 +310,7 @@ public class AudioProcessor: MonoBehaviour
         return inclusiveMinimum;
     }
 
-    [System.Serializable]
-    public class OnBeatEventHandler : UnityEngine.Events.UnityEvent
-    {
-
-    }
-
-    [System.Serializable]
-    public class OnSpectrumEventHandler : UnityEngine.Events.UnityEvent<float[]>
-    {
-
-    }
-
+    
     // class to compute an array of online autocorrelators
     private class Autoco
     {
