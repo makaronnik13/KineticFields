@@ -19,6 +19,9 @@ namespace KineticFields
 
         public string Name => data.Name;
 
+        public float MaxValue => data.Max;
+        public float MinValue => data.Min;
+
         [Inject]
         public void Construct(ParameterData data, FFTService fftService)
         {

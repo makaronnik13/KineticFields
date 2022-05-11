@@ -20,6 +20,7 @@ namespace KineticFields
         public void Construct(FFTService fftsource, PrefabCreator prefabCreator)
         {
             height = (transform as RectTransform).rect.height;
+
             spectrumSize = fftsource.SpectrumSize;
             _spectrumBars = new GameObject[spectrumSize];
             var width = Prefab.transform.localScale.x;

@@ -13,6 +13,7 @@ namespace KineticFields
         {
             Debug.Log("Install project bindings");
 
+            Container.BindFactory<ParameterData, ParameterInstance, ParameterInstance.Factory>();
             Container.BindWithInterfaces<PrefabCreator>();
             Container.BindWithInterfaces<FFTService>();
             Container.Bind<AudioVisualizationProfile>().FromInstance(fftProfile).AsSingle().NonLazy();
