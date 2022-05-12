@@ -4,13 +4,8 @@ using UnityEngine;
 
 namespace KineticFields.Ui
 {
-    public class SpectrumLine : MonoBehaviour
+    public class EnvelopeEditor : MonoBehaviour
     {
-
-
-        public void SetLine()
-        {
-
-        }
+        
     }
 }

@@ -14,6 +14,8 @@ namespace KineticFields
         private FFTService fftService;
 
         public ReactiveProperty<float> Value { get; private set; } = new ReactiveProperty<float>();
+        public ReactiveProperty<bool> UseEnvelope => data.UseEnvelope;
+        public ReactiveProperty<bool> UseFft => data.UseFft;
 
         public ReactiveProperty<SourceType> SourceType => data.SourceType;
 
@@ -21,6 +23,42 @@ namespace KineticFields
 
         public float MaxValue => data.Max;
         public float MinValue => data.Min;
+
+        public float UserValue
+        {
+            get
+            {
+                return data.UserValue;
+            }
+            set
+            {
+                data.UserValue = value;
+            }
+        }
+
+        public float UserMaxValue
+        {
+            get
+            {
+                return data.UserMax;
+            }
+            set
+            {
+                data.UserMax = value;
+            }
+        }
+
+        public float UserMinValue 
+        {
+            get
+            {
+                return data.UserMin;
+            }
+            set
+            {
+                data.UserMin = value;
+            }
+        }
 
         [Inject]
         public void Construct(ParameterData data, FFTService fftService)

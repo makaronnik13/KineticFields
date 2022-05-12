@@ -9,12 +9,18 @@ namespace KineticFields
         public string Name;
         public float Min;
         public float Max;
+        public float UserMin;
+        public float UserMax;
+        public float UserValue;
         public float MinGap = 0;
         public float MaxGap = 1;
         public float Multiplyer = 1;
         public int Beats = 1;
         public ReactiveProperty<float> Value { get; private set; } = new ReactiveProperty<float>(0.5f);
         public ReactiveProperty<SourceType> SourceType { get; private set; } = new ReactiveProperty<SourceType>(KineticFields.SourceType.None);
+        public ReactiveProperty<bool> UseEnvelope { get; private set; } = new ReactiveProperty<bool>();
+        public ReactiveProperty<bool> UseFft { get; private set; } = new ReactiveProperty<bool>();
+
 
         public bool UseCurve = false;
         public AnimationCurve Curve;
@@ -29,6 +35,8 @@ namespace KineticFields
             Name = name;
             this.Min = min;
             this.Max = max;
+            UserMin = min;
+            UserMax = max;
         }
     }
 }
