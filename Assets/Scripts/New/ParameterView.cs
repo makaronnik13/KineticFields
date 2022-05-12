@@ -34,7 +34,6 @@ namespace KineticFields.Ui
 
             parameter.Value.Subscribe(v=> 
             {
-                Debug.Log(parameter.Name+" "+v);
                 slider.value = v;
                 value.text = v.ToString();
             }).AddTo(this);

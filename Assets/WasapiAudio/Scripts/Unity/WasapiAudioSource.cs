@@ -30,13 +30,11 @@ namespace Assets.WasapiAudio.Scripts.Unity
         public int MaxFrequency = 20000;
         public WasapiAudioFilter[] Filters;
 
-        private ProjectSettings settings;
 
         [Inject]
-        public void Construct(ProjectSettings settings)
+        public void Construct()
         {
-            this.settings = settings;
-
+            StartListen(WasapiCaptureType.Loopback);
             Debug.Log("construct WAS");
         }
 
@@ -88,6 +86,11 @@ namespace Assets.WasapiAudio.Scripts.Unity
 
         public float[] GetSpectrumData(AudioVisualizationStrategy strategy, bool smoothed, AudioVisualizationProfile profile)
         {
+            if (_spectrumData == null)
+            {
+                Debug.Log("(((");
+                return new float[0];
+            }
 
             var scaledSpectrumData = new float[SpectrumSize];
             var scaledMinMaxSpectrumData = new float[SpectrumSize];
@@ -97,7 +100,6 @@ namespace Assets.WasapiAudio.Scripts.Unity
             var scaledAverage = 0.0f;
             var scaledTotal = 0.0f;
             var scaleStep = 1.0f / SpectrumSize;
-
 
             // 2: Scaled. Scales against animation curve
             for (int i = 0; i < SpectrumSize; i++)
