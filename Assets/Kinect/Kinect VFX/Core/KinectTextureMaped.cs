@@ -88,7 +88,6 @@ public class KinectTextureMaped : MonoBehaviour
 
                 byte[] colorBytes = CreateColorBytesFromDepthArray(depthFrameData, frameWidth, frameHeight);
 
-                Debug.Log(colorBytes.Length);
                 tempPositionTexture.LoadRawTextureData(colorBytes);
 
                 Graphics.CopyTexture(tempPositionTexture, PointCloudMap);
