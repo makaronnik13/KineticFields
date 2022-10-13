@@ -129,7 +129,6 @@ namespace UniRx
             trigger.Dispose();
             canExecuteSubscription.Dispose();
         }
-
     }
 
     /// <summary>

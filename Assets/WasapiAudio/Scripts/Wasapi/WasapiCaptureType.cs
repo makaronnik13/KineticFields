@@ -3,6 +3,7 @@
     public enum WasapiCaptureType
     {
         Loopback,
-        Microphone
+        Microphone,
+        AudioClip
     }
 }

@@ -226,7 +226,7 @@ namespace KineticFields
             }
 
             _wasapiAudio = new WasapiAudio(wct, SpectrumSize, ScalingStrategy.Sqrt, minFrequency, maxFrequency, new WasapiAudioFilter[0], spectrumData =>
-            {
+            {        
                 _spectrumData = spectrumData;
             });
 
@@ -279,6 +279,7 @@ namespace KineticFields
                 scaledMinMaxSpectrumData[i] = scaledValue;
             }
 
+            
             // 4: Smoothed
             return smoother.GetSpectrumData(scaledSpectrumData);
         }
