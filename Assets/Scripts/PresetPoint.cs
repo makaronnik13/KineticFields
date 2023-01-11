@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI.Extensions;
 
 public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IBeginDragHandler, IEndDragHandler
 {
@@ -13,8 +12,6 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
 
     [SerializeField]
     private PresetSquare Preview;
-    [SerializeField]
-    private UILineRenderer Line;
 
     [SerializeField]
     private GameObject SelectionCircle;
@@ -43,13 +40,11 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
         this.preset = preset;
         this.preset.OnPositionChanged += PositionChanged;
         Preview.Init(preset);
-        BpmManager.Instance.OnQuart += Beat;
     }
 
     private void OnDestroy()
     {
         this.preset.OnPositionChanged -= PositionChanged;
-        BpmManager.Instance.OnQuart -= Beat;
     }
 
     private void Beat()
@@ -60,7 +55,6 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
         {
             t = 0;
         }
-        Line.sprite = LightningSprites[(int)t];
     }
 
     private void PositionChanged(Vector2 p)
@@ -99,18 +93,8 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
         Vector2 p1 = transform.InverseTransformPoint(Center.Instance.transform.position);
         Vector2 p2 = Vector2.zero;
 
-        Line.Points = new Vector2[2]
-        {
-            p1,p2
-        };
-
-        Line.color = Preset.Color2;
-        //Line.Resolution = Vector2.Distance(p1,p2)/50f;
-        Line.LineThickness = DynamicWidth.Evaluate(Volume.Value);
-        if (Line.LineThickness<0.5f)
-        {
-            Line.LineThickness = 0;
-        }
+      
+       
     }
 
     public void SetSelected(bool v)
@@ -151,14 +135,11 @@ public class PresetPoint : MonoBehaviour, IDragHandler, IPointerClickHandler, IB
     {
 
         PresetsLerper.Instance.SelectedPreset.SetState(Preset);
-
-        TrackView.Instance.DraggingPresets.Add(Preset);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         Preset.Position = new Vector2(transform.localPosition.x, transform.localPosition.y);
-        TrackView.Instance.DraggingPresets.Remove(Preset);
         SessionsManipulator.Instance.Autosave();
     }
 }

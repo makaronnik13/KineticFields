@@ -69,7 +69,7 @@ public class Oscilator : Source
 
     public void UpdateOscilator()
     {
-        float repeatTime = 60f / BpmManager.Instance.Bpm.Value;
+        float repeatTime = 60f;
 
         if (RepeatRate>0)
         {

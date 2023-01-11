@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -12,9 +11,24 @@ using UniRx;
 
 namespace KineticFields
 {
-    public class FFTService: IDisposable, ITickable
+    public class FFTService: MonoBehaviour
     {
-        public ReactiveProperty<MMDevice> CaptureDevice { get; private set; } = new ReactiveProperty<MMDevice>(null);
+        [SerializeField] private bool autoGain;
+        
+        public List<SourceVariant> SourceVariants { get; private set; } = new List<SourceVariant>();
+        public ReactiveProperty<SourceVariant> CaptureDevice { get; private set; } = new ReactiveProperty<SourceVariant>(null);
+
+        public ReactiveCommand OnDeviceListChanged { get; private set; } = new ReactiveCommand();
+
+        public int DeviceId => SourceVariants.IndexOf(CaptureDevice.Value);
+
+        [SerializeField] private List<WasapiAudioSource> Sources = new List<WasapiAudioSource>();
+
+        private Dictionary<WasapiAudioSource, float[]> cachedSpectrums = new Dictionary<WasapiAudioSource, float[]>();
+        private float multiplyer = 1;
+        private float autoGainRelaxationTime = 5f;
+        
+        /*
         public ReactiveProperty<List<float>> OutputSpectrum { get; private set; } = new ReactiveProperty<List<float>>();
         public ReactiveCommand OnBeat { get; private set; } = new ReactiveCommand();
         public float AudioScale = 10f;
@@ -56,17 +70,192 @@ namespace KineticFields
         private readonly int maxFrequency = 20000;
 
         private CompositeDisposable disposables = new CompositeDisposable();
-
+        */
+        
+        
         [Inject]
-        public void Construct(AudioVisualizationProfile profile)
+        public void Construct()
         {
-            this.profile = profile;
-            init();
+            CaptureDevice.Subscribe(device =>
+            {
+                if (device==null)
+                {
+                    return;
+                }
+                foreach (WasapiAudioSource source in Sources)
+                {
+                    source.SetSourceType(device);
+                }
+            }).AddTo(this);
 
-            smoother = new SpectrumSmoother(SpectrumSize, profile.AudioSmoothingIterations);
-            CaptureDevice.Subscribe(device=> { AudioDeviceChanged(device);}).AddTo(disposables);
+            //add loopback variant
+            SourceVariants.Add(new SourceVariant());
+            
+            Observable.EveryUpdate().Subscribe(_ =>
+            {
+                ManageDevices();
+                ManageSignalMultiplyer();
+                CacheSpectrums();
+            }).AddTo(this);
+            
+            
         }
 
+        private void CacheSpectrums()
+        {
+            foreach (WasapiAudioSource source in Sources)
+            {
+                if (!cachedSpectrums.ContainsKey(source))
+                {
+                    cachedSpectrums.Add(source, source.GetSpectrumData(AudioVisualizationStrategy.Scaled, source.Profile));
+                }
+                else
+                {
+                    cachedSpectrums[source] = source.GetSpectrumData(AudioVisualizationStrategy.Scaled,  source.Profile);
+                }
+            }
+        }
+
+        private void ManageSignalMultiplyer()
+        {
+            if (autoGain)
+            {
+                float maxUnmult = Sources[0].GetSpectrumData(AudioVisualizationStrategy.Scaled, Sources[0].Profile, false).Max();
+                float max = Sources[0].GetSpectrumData(AudioVisualizationStrategy.Scaled, Sources[0].Profile, true).Max();
+                //Debug.Log(Sources[0].GetSpectrumData(AudioVisualizationStrategy.Scaled, true, Sources[0].Profile, false).Max());
+             
+                if (maxUnmult>0.1f)
+                {
+                    if (max>1)
+                    {
+                        multiplyer -= Time.deltaTime / autoGainRelaxationTime;
+                    }
+                    else
+                    {
+                        multiplyer += Time.deltaTime / autoGainRelaxationTime;
+                    }
+                }
+            }
+            else
+            {
+                multiplyer = 1;
+            }
+            
+            foreach (WasapiAudioSource source in Sources)
+            {
+                source.Multiplyer = multiplyer;
+            }
+        }
+
+        private void ManageDevices()
+        {
+            bool changed = false;
+                
+            using (var deviceEnumerator = new MMDeviceEnumerator())
+            {
+                MMDeviceCollection newDevices = deviceEnumerator.EnumAudioEndpoints(DataFlow.Capture, DeviceState.Active);
+                    
+                if (SourceVariants.Count!=newDevices.Count+1)
+                {
+                    for (int i = SourceVariants.Count - 1; i >= 0; i--)
+                    {
+                        if (SourceVariants[i].CaptureType == WasapiCaptureType.Microphone && !newDevices.Contains(SourceVariants[i].Device))
+                        {
+                            SourceVariants.Remove(SourceVariants[i]);
+                            changed = true;
+                        }
+                    }
+
+                    foreach (MMDevice device in newDevices)
+                    {
+                        if (SourceVariants.FirstOrDefault(v=>v.Device == device)==null)
+                        {
+                            SourceVariants.Add(new SourceVariant(device));
+                            changed = true;
+                        }   
+                    }
+                        
+                    if (!SourceVariants.Contains(CaptureDevice.Value))
+                    {
+                        CaptureDevice.Value = SourceVariants.FirstOrDefault(s => s.CaptureType == WasapiCaptureType.Loopback);
+                    }
+                }
+
+            }
+
+            if (changed)
+            {
+                OnDeviceListChanged.Execute();
+            }
+        }
+
+        public void SelectDevice(int i)
+        {
+            CaptureDevice.Value = SourceVariants[i];
+        }
+
+        public float[] GetRawSpectrum(int i)
+        {
+            return Sources[i].GetSpectrumData(AudioVisualizationStrategy.Raw, Sources[i].Profile, false);
+        }
+        
+        public float[] GetSpectrumGap(FrequencyGap gap)
+        {
+            WasapiAudioSource source = Sources[0];
+            int minFrequency = 0;
+            int maxFrequency = 0;
+
+            switch (gap)
+            {
+                case FrequencyGap.None:
+                    source = Sources[0];
+                    minFrequency = 0;
+                    maxFrequency = source.SpectrumSize;
+                    break;
+                case FrequencyGap.SubBass:
+                    source = Sources[1];
+                    minFrequency = 0;
+                    maxFrequency = Mathf.RoundToInt(source.SpectrumSize*0.1f);
+                    break;
+                case FrequencyGap.Bass:
+                    source = Sources[1];
+                    minFrequency =  Mathf.RoundToInt(source.SpectrumSize*0.1f);
+                    maxFrequency = Mathf.RoundToInt(source.SpectrumSize*0.25f);
+                    break;
+                case FrequencyGap.LowMidrange:
+                    minFrequency = Mathf.RoundToInt(source.SpectrumSize*0.2f);
+                    maxFrequency = Mathf.RoundToInt(source.SpectrumSize*0.4f);
+                    source = Sources[2];
+                    break;
+                case FrequencyGap.Midrange:
+                    source = Sources[2];
+                    minFrequency = Mathf.RoundToInt(source.SpectrumSize*0.4f);
+                    maxFrequency = Mathf.RoundToInt(source.SpectrumSize*0.6f);
+                    break;
+                case FrequencyGap.UpperMidrange:
+                    source = Sources[2];
+                    minFrequency = Mathf.RoundToInt(source.SpectrumSize*0.6f);
+                    maxFrequency = Mathf.RoundToInt(source.SpectrumSize*0.8f);
+                    break;
+                case FrequencyGap.Presence:
+                    source = Sources[3];
+                    minFrequency = Mathf.RoundToInt(source.SpectrumSize*0.7f);
+                    maxFrequency = source.SpectrumSize;
+                    break;
+            }
+            
+            float[] spectrum = cachedSpectrums[source];
+            try
+            {
+                return spectrum.ToList().GetRange(minFrequency, maxFrequency - minFrequency).ToArray();
+            }
+            catch
+            {
+                return spectrum;
+            }
+        }
+        
+        /*
         public void TapTempo()
         {
             nowT = currentTimeMillis;
@@ -121,7 +310,7 @@ namespace KineticFields
 
             computeAverages(OutputSpectrum.Value);
 
-            /* calculate the value of the onset function in this frame */
+            calculate the value of the onset function in this frame 
             float onset = 0;
             for (int i = 0; i < nBand; i++)
             {
@@ -134,7 +323,7 @@ namespace KineticFields
 
             onsets[now] = onset;
 
-            /* update autocorrelator and find peak lag = current tempo */
+            //update autocorrelator and find peak lag = current tempo 
             auco.newVal(onset);
             // record largest value in (weighted) autocorrelation as it will be the tempo
             float aMax = 0.0f;
@@ -152,7 +341,7 @@ namespace KineticFields
                 acVals[maxlag - 1 - i] = acVal;
             }
 
-            /* calculate DP-ish function to update the best-score function */
+            // calculate DP-ish function to update the best-score function 
             float smax = -999999;
             int smaxix = 0;
             // weight can be varied dynamically with the mouse
@@ -179,7 +368,7 @@ namespace KineticFields
             for (int i = 0; i < colmax; ++i)
                 scorefun[i] -= smin;
 
-            /* find the largest value in the score fn window, to decide if we emit a blip */
+            // find the largest value in the score fn window, to decide if we emit a blip 
             smax = scorefun[0];
             smaxix = 0;
             for (int i = 0; i < colmax; ++i)
@@ -210,29 +399,13 @@ namespace KineticFields
                 }
             }
 
-            /* update column index (for ring buffer) */
+            // update column index (for ring buffer) 
             if (++now == colmax)
                 now = 0;
         }
+*/
 
-        private void AudioDeviceChanged(MMDevice microphone)
-        {
-            _wasapiAudio?.StopListen();
-            WasapiCaptureType wct = WasapiCaptureType.Loopback;
-
-            if (microphone!=null)
-            {
-                wct = WasapiCaptureType.Microphone;
-            }
-
-            _wasapiAudio = new WasapiAudio(wct, SpectrumSize, ScalingStrategy.Sqrt, minFrequency, maxFrequency, new WasapiAudioFilter[0], spectrumData =>
-            {        
-                _spectrumData = spectrumData;
-            });
-
-            _wasapiAudio.StartListen(microphone);
-        }
-
+        /*
         private float[] GetSpectrumData()
         {
 
@@ -325,6 +498,62 @@ namespace KineticFields
             _wasapiAudio.StopListen();
             _wasapiAudio = null;
             disposables.Dispose();
+        }
+        */
+        public float[] GetSpectrum(int spectrumId)
+        {
+            return cachedSpectrums[Sources[spectrumId]];
+        }
+
+        public int GetSpectrumGapSize(FrequencyGap gap)
+        {
+            int minFrequency = 0;
+            int maxFrequency = 0;
+
+            WasapiAudioSource source;
+            
+            switch (gap)
+            {
+                case FrequencyGap.None:
+                    source = Sources[0];
+                    minFrequency = 0;
+                    maxFrequency = source.SpectrumSize;
+                    break;
+                case FrequencyGap.SubBass:
+                    source = Sources[1];
+                    minFrequency = 0;
+                    maxFrequency = Mathf.RoundToInt(source.SpectrumSize*0.1f);
+                    break;
+                case FrequencyGap.Bass:
+                    source = Sources[1];
+                    minFrequency =  Mathf.RoundToInt(source.SpectrumSize*0.1f);
+                    maxFrequency = Mathf.RoundToInt(source.SpectrumSize*0.25f);
+                    break;
+                case FrequencyGap.LowMidrange:
+                    source = Sources[2];
+                    minFrequency = Mathf.RoundToInt(source.SpectrumSize*0.2f);
+                    maxFrequency = Mathf.RoundToInt(source.SpectrumSize*0.4f);
+                    break;
+                case FrequencyGap.Midrange:
+                    source = Sources[2];
+                    minFrequency = Mathf.RoundToInt(source.SpectrumSize*0.4f);
+                    maxFrequency = Mathf.RoundToInt(source.SpectrumSize*0.6f);
+                    break;
+                case FrequencyGap.UpperMidrange:
+                    source = Sources[2];
+                    minFrequency = Mathf.RoundToInt(source.SpectrumSize*0.6f);
+                    maxFrequency = Mathf.RoundToInt(source.SpectrumSize*0.8f);
+                    break;
+                case FrequencyGap.Presence:
+                    source = Sources[3];
+                    minFrequency = Mathf.RoundToInt(source.SpectrumSize*0.7f);
+                    maxFrequency = source.SpectrumSize;
+                    break;
+                default:
+                    source = Sources[0];
+                    break;
+            }
+            return maxFrequency - minFrequency;
         }
     }
 }

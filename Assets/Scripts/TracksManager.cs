@@ -61,7 +61,7 @@ public class TracksManager : Singleton<TracksManager>
             CurrentLib.SetState(new TrackLib("NewTrackLib_" + (SessionsManipulator.Instance.TrackLibs.Count + 1)));
         }
         CurrentLib.AddListener(LibChanged);
-        FindObjectOfType<BpmManager>().OnBeat += Beat;
+        //FindObjectOfType<BpmManager>().OnBeat += Beat;
         Playing.AddListener(PlayingStateChanged);
         Shufle.AddListener(ShufleStateChanged);       
     }
@@ -220,7 +220,7 @@ public class TracksManager : Singleton<TracksManager>
 
     public void RandomSwap()
     {
-        if (!Shufle.Value || TrackView.Instance.DraggingPresets.Count>0)
+        if (!Shufle.Value )
         {
             return;
         }

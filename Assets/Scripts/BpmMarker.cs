@@ -13,14 +13,10 @@ public class BpmMarker : MonoBehaviour
 
         time+= Time.deltaTime;
         
-
-
-        GetComponent<RectTransform>().anchoredPosition = new Vector2(-time*100*BpmManager.Instance.Bpm.Value/120f, 0);
-
+        
         if (GetComponent<RectTransform>().anchoredPosition.x<=-100 && transform.GetChild(0).gameObject.activeInHierarchy)
         {
             transform.GetChild(0).gameObject.SetActive(false);
-            BpmManager.Instance.Beat();
         }
 
     }

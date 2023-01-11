@@ -135,7 +135,7 @@ public class AudioProcessor : MonoBehaviour
     void Update()
     {
 
-        spectrum = audioSource.GetSpectrumData(Strategy, Smoothed, Profile);
+        spectrum = audioSource.GetSpectrumData(Strategy, Profile);
 
         onSpectrum.Execute(spectrum.Select(s=>s * AudioScale).ToArray());
 

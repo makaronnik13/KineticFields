@@ -7,7 +7,7 @@ namespace Assets.WasapiAudio.Scripts.Unity
     {
         // Inspector Fields
         public AnimationCurve ScaleCurve;
-        [Range(1, 50)]
+        [Range(0, 50)]
         public int AudioSmoothingIterations = 5;
         [Range(1, 2)]
         public float MinMaxThreshold = 1.2f;

@@ -10,12 +10,14 @@ namespace KinectVfx
 {
     public class KinectPointCloud : MonoBehaviour
     {
+        
         public RenderTexture PointCloudMap;
         public ComputeShader PointCloudBaker;
         public RenderTexture ColorMap;
         public bool ManageSensor = true;
         public bool UseColor = true;
-
+        public float maxDepth;
+        
         private KinectSensor sensor;
         private MultiSourceFrameReader multiSourceReader;
         private byte[] colorFrameData;
@@ -27,6 +29,8 @@ namespace KinectVfx
         private Texture2D colorSourceTexture;
         private RenderTexture tempColorTexture;
 
+        
+        
         void Start()
         {
             sensor = KinectSensor.GetDefault();
@@ -102,11 +106,14 @@ namespace KinectVfx
                                 int bakeDepthKernel = PointCloudBaker.FindKernel("BakeDepth");
                                 PointCloudBaker.SetInts("MapDimensions", mapDimensions);
                                 PointCloudBaker.SetFloat("BaseDepth", baseDepth);
+                                
+                                PointCloudBaker.SetFloat("MaxDepth", maxDepth);
                                 PointCloudBaker.SetBuffer(bakeDepthKernel, "PositionBuffer", positionBuffer);
                                 PointCloudBaker.SetTexture(bakeDepthKernel, "PositionTexture", tempPositionTexture);
                                 PointCloudBaker.Dispatch(bakeDepthKernel, depthFrameWidth / 8, depthFrameHeight / 8, 1);
                             }
-
+                            
+                            //Graphics.Blit(tempPositionTexture, tempPositionTexture, CutDepthMaterial);
                             Graphics.CopyTexture(tempPositionTexture, PointCloudMap);
 
                             if (UseColor) {

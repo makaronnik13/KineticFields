@@ -21,6 +21,7 @@ namespace KineticFields
         {
             height = (transform as RectTransform).rect.height;
 
+            /*
             spectrumSize = fftsource.SpectrumSize;
             _spectrumBars = new GameObject[spectrumSize];
             var width = Prefab.transform.localScale.x;
@@ -45,6 +46,7 @@ namespace KineticFields
                     (_spectrumBars[i].transform as RectTransform).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, audioScale*height);
                 }
             }).AddTo(this);
+            */
         }
     }
 }

@@ -8,7 +8,6 @@ namespace Assets.WasapiAudio.Scripts.Unity
         public WasapiAudioSource WasapiAudioSource;
         public AudioVisualizationProfile Profile;
         public AudioVisualizationStrategy Strategy;
-        public bool Smoothed;
 
         public int SpectrumSize { get; private set; }
 
@@ -32,7 +31,7 @@ namespace Assets.WasapiAudio.Scripts.Unity
             }
 
 
-            return WasapiAudioSource.GetSpectrumData(Strategy, Smoothed, Profile);
+            return WasapiAudioSource.GetSpectrumData(Strategy, Profile);
         }
     }
 }
