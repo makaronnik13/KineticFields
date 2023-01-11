@@ -422,7 +422,7 @@ public class KineticSession
 
     public FrequencyGap AddGap(string name, float pos, float size, Color color, Sprite sprite)
     {
-        FrequencyGap fg = new FrequencyGap(name, pos, size, color, sprite);
+        FrequencyGap fg = new FrequencyGap();//name, pos, size, color, sprite);
         Gaps.Add(fg);
         return fg;
     }

@@ -46,7 +46,7 @@ public class KineticFieldController : Singleton<KineticFieldController>
 
     public GenericFlag<KineticSession> Session = new GenericFlag<KineticSession>("CurrentSession", null);
     public GenericFlag<KineticPoint> ActivePoint = new GenericFlag<KineticPoint>("ActivePoint", null);
-    public GenericFlag<FrequencyGap> ActiveGap = new GenericFlag<FrequencyGap>("ActiveGap", null);
+    //public GenericFlag<FrequencyGap> ActiveGap = new GenericFlag<FrequencyGap>("ActiveGap", null);
     public GenericFlag<Source> DraggingSource = new GenericFlag<Source>("DraggingSource", null);
 
     public GenericFlag<Source> SelectedSource = new GenericFlag<Source>("SelectedSource", null);
@@ -65,11 +65,11 @@ public class KineticFieldController : Singleton<KineticFieldController>
         get
         {
             List<Source> scs = new List<Source>();
-            scs.Add(new FrequencyGap("none", 0, 0, Color.red, DefaultResources.GapSprites[0]));
+            //scs.Add(new FrequencyGap("none", 0, 0, Color.red, DefaultResources.GapSprites[0]));
             if (Session.Value != null)
             {
-                scs.AddRange(Session.Value.Gaps);
-                scs.AddRange(Session.Value.Oscilators);
+                //scs.AddRange(Session.Value.Gaps);
+                //scs.AddRange(Session.Value.Oscilators);
             }
 
 
@@ -116,7 +116,7 @@ public class KineticFieldController : Singleton<KineticFieldController>
     {
         if (obj != null)
         {
-            ActiveGap.SetState(null);
+            //ActiveGap.SetState(null);
         }
 
     }
@@ -133,7 +133,7 @@ public class KineticFieldController : Singleton<KineticFieldController>
     private void Start()
     {
         ActivePoint.AddListener(ActivePointChanged);
-        ActiveGap.AddListener(ActiveGapChanged);
+        //ActiveGap.AddListener(ActiveGapChanged);
         Session.AddListener(SessionChanged);
         DraggingSource.AddListener(DraggingSourceChanged);
         StartCoroutine(UpdateAveragePreset());
@@ -184,11 +184,11 @@ public class KineticFieldController : Singleton<KineticFieldController>
             List<float> d = new List<float>();// SpectrumBar.GetSpectrumData().ToList();
             foreach (FrequencyGap fg in Session.Value.Gaps)
             {
-                int start = Mathf.RoundToInt(fftSource.SpectrumSize * fg.Start);
-                int end = Mathf.RoundToInt(fftSource.SpectrumSize * fg.End);
-                List<float> data = d.GetRange(start, end - start);
+                //int start = Mathf.RoundToInt(fftSource.SpectrumSize * fg.Start);
+                //int end = Mathf.RoundToInt(fftSource.SpectrumSize * fg.End);
+                //List<float> data = d.GetRange(start, end - start);
                 //float dataAverage = FindObjectOfType<MultiplyerSlider>().scale * data.Sum() / data.Count;
-                fg.UpdateFrequency(data);
+                //fg.UpdateFrequency(data);
             }
 
 
@@ -278,7 +278,7 @@ public class KineticFieldController : Singleton<KineticFieldController>
     {
 
         ActivePoint.SetState(null);
-        ActiveGap.SetState(null);
+        //ActiveGap.SetState(null);
 
         if (Session.Value.ActivePreset.Value != null)
         {
@@ -308,8 +308,6 @@ public class KineticFieldController : Singleton<KineticFieldController>
                 o.Reset();
             }
         }
-
-        TrackView.Instance.ResetTrack();
     }
 
 }

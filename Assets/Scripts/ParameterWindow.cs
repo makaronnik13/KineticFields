@@ -26,13 +26,13 @@ public class ParameterWindow : MonoBehaviour
     {
         get
         {
-            return FindObjectOfType<KineticFieldController>().ActiveGap.Value;
+            return FrequencyGap.Bass; //FindObjectOfType<KineticFieldController>().ActiveGap.Value;
         }
     }
 
     void Start()
     {
-        FindObjectOfType<KineticFieldController>().ActiveGap.AddListener(ActiveGapChanged);
+       // FindObjectOfType<KineticFieldController>().ActiveGap.AddListener(ActiveGapChanged);
         GapType.onValueChanged.AddListener(GapTypeChanged);
         Multiplyer.onValueChanged.AddListener(MultiplyerChanged);
         BaseValue.onValueChanged.AddListener(BaseValueChanged);
@@ -40,29 +40,29 @@ public class ParameterWindow : MonoBehaviour
 
     private void BaseValueChanged(string value)
     {
-        Gap.BaseValue.SetState(float.Parse(value));
+        //Gap.BaseValue.SetState(float.Parse(value));
     }
 
     private void MultiplyerChanged(string value)
     {
-        Gap.Multiplyer.SetState(float.Parse(value));
+        //Gap.Multiplyer.SetState(float.Parse(value));
     }
 
     private void GapTypeChanged(int v)
     {
-        FrequencyGap.GapType gt = (FrequencyGap.GapType)v;
-        Gap.GapT = gt;
-        Multiplyer.gameObject.SetActive(gt == FrequencyGap.GapType.Music);
+        //FrequencyGap.GapType gt = (FrequencyGap.GapType)v;
+        //Gap.GapT = gt;
+        //Multiplyer.gameObject.SetActive(gt == FrequencyGap.GapType.Music);
     }
 
     private void ActiveGapChanged(FrequencyGap gap)
     {
         if (Gap != null)
         {
-            GapType.value = (int)gap.GapT;
-            BaseValue.text = gap.BaseValue.Value.ToString();
-            Multiplyer.text = gap.Multiplyer.Value.ToString();
-            ParamName.text = gap.Name;
+            //GapType.value = (int)gap.GapT;
+            //BaseValue.text = gap.BaseValue.Value.ToString();
+            //Multiplyer.text = gap.Multiplyer.Value.ToString();
+            //ParamName.text = gap.Name;
         }
     }
 
@@ -70,8 +70,8 @@ public class ParameterWindow : MonoBehaviour
     {
         if (Gap != null)
         {
-            Value.text = System.Math.Round(Gap.Value,2).ToString();
-            ValueSlider.value = Gap.Value / 100f;
+            //Value.text = System.Math.Round(Gap.Value,2).ToString();
+            //ValueSlider.value = Gap.Value / 100f;
         }
     }
 

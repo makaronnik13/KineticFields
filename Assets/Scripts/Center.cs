@@ -60,10 +60,7 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
     public void OnDrag(PointerEventData eventData)
     {
         transform.position = eventData.position;
-        if (TracksManager.Instance.CurrentTrack.Value != null)
-        {
-            TrackView.Instance.WritePosition(transform.localPosition, 1);
-        }
+
     }
 
     private void Update()
@@ -73,7 +70,6 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
             float rad = PresetsLerper.Instance.Radius.Value + Input.mouseScrollDelta.y * Sensivity;
             rad = Mathf.Clamp(rad, 50, 250);
             PresetsLerper.Instance.Radius.SetState(rad);
-            TrackView.Instance.WriteRadius(PresetsLerper.Instance.Radius.Value, 1);
 
         }
     }
@@ -82,19 +78,17 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        TrackView.Instance.DraggingPresets.Add(Preset);
         if (TracksManager.Instance.Playing.Value)
         {
-            BpmManager.Instance.OnBeat += Beat;
+           // BpmManager.Instance.OnBeat += Beat;
         }
     }
 
     private void Beat()
     {
-        TrackView.Instance.ResetTime();
         writing = true;
-        BpmManager.Instance.OnBeat -= Beat;
-        BpmManager.Instance.OnBeat += Beat2;
+        //BpmManager.Instance.OnBeat -= Beat;
+        //BpmManager.Instance.OnBeat += Beat2;
     }
 
     private void Beat2()
@@ -102,8 +96,7 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
         beatCount++;
         if (TracksManager.Instance.CurrentTrack.Value!=null && beatCount >= TracksManager.Instance.CurrentTrack.Value.Steps)
         {
-            TrackView.Instance.DraggingPresets.Remove(Preset);
-           BpmManager.Instance.OnBeat -= Beat2;
+            //BpmManager.Instance.OnBeat -= Beat2;
             writing = false;
             beatCount = 0;
         }
@@ -112,14 +105,13 @@ public class Center : Singleton<Center>, IDragHandler, IBeginDragHandler, IEndDr
     public void OnEndDrag(PointerEventData eventData)
     {
         writing = false;
-        BpmManager.Instance.OnBeat -= Beat2;
-        BpmManager.Instance.OnBeat -= Beat;
+        //BpmManager.Instance.OnBeat -= Beat2;
+        //BpmManager.Instance.OnBeat -= Beat;
         if (Preset!=null)
         {
             Preset.Position = new Vector2(transform.localPosition.x, transform.localPosition.y);
         }
-
-        TrackView.Instance.DraggingPresets.Remove(Preset);
+        
         SessionsManipulator.Instance.Autosave();
     }
 }

@@ -14,6 +14,7 @@ public class TextureFromSpectrum : MonoBehaviour
     [Inject]
     public void Construct(FFTService fftService)
     {
+        /*
         fftService.OutputSpectrum.Subscribe(spectrum =>
         {
             if (spectrum!=null)
@@ -21,7 +22,7 @@ public class TextureFromSpectrum : MonoBehaviour
                 UpdateTexture(spectrum);
             }
         }).AddTo(this);
-
+*/
         /*
         audioProcessor.onSpectrum.Subscribe(spectrum =>
         {

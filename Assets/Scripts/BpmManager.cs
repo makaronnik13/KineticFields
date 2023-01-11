@@ -1,216 +1,68 @@
-﻿using Assets.WasapiAudio.Scripts.Unity;
-using com.armatur.common.flags;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using KineticFields;
+using UniRx;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using Zenject;
 
 public class BpmManager : MonoBehaviour
 {
     [SerializeField]
-    private int BeatTreshold = 15;
-
-    [SerializeField]
-    private TMPro.TextMeshProUGUI BpmLable;
-
-    public static BpmManager Instance;
-
-    [SerializeField]
-    private AudioProcessor processor;
-
-    private Coroutine swapCoroutine;
-
-    public GenericFlag<bool> Playing = new GenericFlag<bool>("isPlaying", false);
-
-    public GenericFlag<int> Bpm = new GenericFlag<int>("bpm", 120);
-
-
-    [SerializeField]
-    private int Samples = 1024;
-
-    [SerializeField]
-    private int WindowSize = 200;
+    private int WindowSize = 5;
 
     [SerializeField]
     private float PeakCoef = 1.5f;
 
     [SerializeField]
-    private GameObject Marker, Circles;
+    private float repeatRate = 0.03f;
+    
+    public ReactiveProperty<int> Bpm { get; private set; } = new ReactiveProperty<int>(120);
 
-    private Coroutine detectionCoroutine, spawnMarkerCoroutine, tapDetectionCoroutine;
+    public ReactiveCommand OnBeat { get; private set; } = new ReactiveCommand();
 
-
-    public Action OnBeat = () => { };
-    public Action OnQuart = () => { };
-
-    private List<float> beats = new List<float>();
-
-    private SpectralFluxAnalyzer realTimeSpectralFluxAnalyzer;
+    private Dictionary<int, SpectralFluxAnalyzer> realTimeSpectralFluxAnalyzers = new Dictionary<int, SpectralFluxAnalyzer>();
 
     private float sinceLastBeat = 0;
     private float lastClickTime;
  
-    public void Awake()
+    [Inject]
+    public void Construct(FFTService fftService)
     {
-        Instance = this;
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        //processor.onBeat.AddListener(TestBeat);
-        Bpm.AddListener(BpmChanged);
-
-        realTimeSpectralFluxAnalyzer = new SpectralFluxAnalyzer(Samples, WindowSize, PeakCoef);
-
-        spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
-    }
-
- 
-
-    private IEnumerator SpawnMarker()
-    {
-        while (true)
-        {
-
-            if (Bpm.Value>0)
-            {
-                CreateMarker();
-            }
-
-            for (int i = 0; i < 4; i++)
-            {
-                float t = 0;
-                OnQuart();
-                while (t< 15f / Bpm.Value)
-                {
-                    t += Time.deltaTime;
-                    yield return null;
-                }
-            }
-            OnBeat();
-
-        }
-    }
-
-    private void CreateMarker()
-    {
-
-        GameObject newMarker = Marker.Spawn(transform.GetChild(0), Vector3.zero);
-        newMarker.name = transform.GetChild(0).childCount + "_marker";
-        newMarker.transform.SetParent(transform.GetChild(0));
-        newMarker.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
-        newMarker.GetComponent<BpmMarker>().Reset();
-        StartCoroutine(DelayDestroy(newMarker, 200f/Bpm.Value));
-    }
-
-    private void BpmChanged(int v)
-    {
-        BpmLable.text = v + "bpm";
-
-        if (KineticFieldController.Instance.Session.Value!=null)
-        {
-            foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
-            {
-               // osc.Reset();
-            }
-        }
+        int realWindowSize = WindowSize;
+        realTimeSpectralFluxAnalyzers.Add(0, new SpectralFluxAnalyzer(fftService.GetSpectrumGapSize(FrequencyGap.None), realWindowSize, PeakCoef));
+        realTimeSpectralFluxAnalyzers.Add(1, new SpectralFluxAnalyzer(fftService.GetSpectrumGapSize(FrequencyGap.None), realWindowSize, PeakCoef));
+        //realTimeSpectralFluxAnalyzers.Add(FrequencyGap.SubBass, new SpectralFluxAnalyzer(fftService.GetSpectrumGapSize(FrequencyGap.SubBass), realWindowSize, PeakCoef));
+        //realTimeSpectralFluxAnalyzers.Add(FrequencyGap.LowMidrange, new SpectralFluxAnalyzer(fftService.GetSpectrumGapSize(FrequencyGap.LowMidrange), realWindowSize, PeakCoef));
+        //realTimeSpectralFluxAnalyzers.Add(FrequencyGap.Midrange, new SpectralFluxAnalyzer(fftService.GetSpectrumGapSize(FrequencyGap.Midrange), realWindowSize, PeakCoef));
+        realTimeSpectralFluxAnalyzers.Add(2, new SpectralFluxAnalyzer(fftService.GetSpectrumGapSize(FrequencyGap.None), realWindowSize, PeakCoef));
+        realTimeSpectralFluxAnalyzers.Add(3, new SpectralFluxAnalyzer(fftService.GetSpectrumGapSize(FrequencyGap.None), realWindowSize, PeakCoef));
         
-    }
-
-    public void TestBeat()
-    {
-
-        if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count >= realTimeSpectralFluxAnalyzer.thresholdWindowSize)
+        Observable.EveryUpdate().Subscribe(_ =>
         {
-            if (Mathf.Abs(realTimeSpectralFluxAnalyzer.Bpm - Bpm.Value) > BeatTreshold)
+            string bpms = "";
+            float sum = 0;
+            
+            foreach (KeyValuePair<int, SpectralFluxAnalyzer> pair in realTimeSpectralFluxAnalyzers)
             {
-                Bpm.SetState(realTimeSpectralFluxAnalyzer.Bpm);
-
-                /*
-                if (spawnMarkerCoroutine != null)
+                if (pair.Value.spectralFluxSamples.Count>Mathf.RoundToInt(WindowSize / repeatRate))
                 {
-                    StopCoroutine(spawnMarkerCoroutine);
+                    Debug.Log( $"{pair.Key}: {pair.Value.Bpm}");
+                    pair.Value.Reset();
                 }
-                spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
-                */
+                
+                pair.Value.thresholdMultiplier = PeakCoef;
+                pair.Value.thresholdWindowSize = WindowSize;
+                pair.Value.analyzeSpectrum(fftService.GetRawSpectrum(pair.Key).ToArray(), Time.timeSinceLevelLoad);
+                bpms += $"{pair.Key}: {pair.Value.Bpm}\n";
+                sum += pair.Value.Bpm;
             }
-        }
-        else
-        {
-            if (Bpm.Value!=120)
-            {
-                Bpm.SetState(120);
-
-                /*
-                if (spawnMarkerCoroutine != null)
-                {
-                    StopCoroutine(spawnMarkerCoroutine);
-                }
-                spawnMarkerCoroutine = StartCoroutine(SpawnMarker());
-                */
-
-
-            }
-        }
-    }
-
-    public void Beat()
-    {
-        GameObject circles = Circles.Spawn();
-        circles.transform.SetParent(transform.GetChild(0));
-        circles.transform.localPosition = Vector3.zero;
-
-    
-        StartCoroutine(DelayDestroy(circles, 1f));
-
-        OnBeat.Invoke();
-
-
-        if (KineticFieldController.Instance.Session.Value!=null)
-        {
-            foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
-            {
-                osc.Beat();
-            }
-        }
-    }
-
-    private IEnumerator DelayDestroy(GameObject obj, float v)
-    {
-        yield return new WaitForSeconds(v);
-
-        obj.Recycle();
-    }
-
-
-
-    void Update()
-    {
-        //realTimeSpectralFluxAnalyzer.analyzeSpectrum(processor.ChachedSpectrumData.Take(Samples).ToArray(), Time.timeSinceLevelLoad);
-
-        if (realTimeSpectralFluxAnalyzer.spectralFluxSamples.Count>realTimeSpectralFluxAnalyzer.thresholdWindowSize*1000f)
-        {
-            realTimeSpectralFluxAnalyzer.Reset();
-        }
-
-        if (KineticFieldController.Instance.Session.Value!=null)
-        {
-            foreach (Oscilator osc in KineticFieldController.Instance.Session.Value.Oscilators)
-            {
-                osc.UpdateOscilator();
-            }
-        }
-
-        TestBeat();
-    }
-
-
-    public void ResetBpm()
-    {
-        realTimeSpectralFluxAnalyzer.Reset();
-        TestBeat();
+            
+            //Debug.Log(sum+"/"+realTimeSpectralFluxAnalyzers.Count);
+            float average = (float)sum / realTimeSpectralFluxAnalyzers.Count;
+            //Debug.Log("avg: "+average);
+            //Debug.Log(bpms);
+        }).AddTo(this);
     }
 }

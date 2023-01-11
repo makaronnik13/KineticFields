@@ -166,11 +166,11 @@ public class PresetsLerper : Singleton<PresetsLerper>
         }
         beats = 0;
 
-        BpmManager.Instance.OnBeat -= Beat;
+       // BpmManager.Instance.OnBeat -= Beat;
 
         if (v!=0)
         {
-            BpmManager.Instance.OnBeat += Beat;
+            //BpmManager.Instance.OnBeat += Beat;
         }
     }
 

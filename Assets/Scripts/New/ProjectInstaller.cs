@@ -15,7 +15,7 @@ namespace KineticFields
 
             Container.BindFactory<ParameterData, ParameterInstance, ParameterInstance.Factory>();
             Container.BindWithInterfaces<PrefabCreator>();
-            Container.BindWithInterfaces<FFTService>();
+           // Container.BindWithInterfaces<FFTService>();
             Container.Bind<AudioVisualizationProfile>().FromInstance(fftProfile).AsSingle().NonLazy();
         }
     }

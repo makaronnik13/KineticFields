@@ -16,10 +16,10 @@ public class SorceView : MonoBehaviour, IDragHandler, IBeginDragHandler, IPointe
             source = GetComponentInParent<OscilatorView>().Oscilator;
         }
 
-        if (GetComponentInParent<FrequencyGapSlider>() != null)
+        /*if (GetComponentInParent<FrequencyGapSlider>() != null)
         {
             source = GetComponentInParent<FrequencyGapSlider>().Gap;
-        }
+        }*/
     }
 
     void Start()

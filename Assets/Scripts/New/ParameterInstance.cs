@@ -89,7 +89,7 @@ namespace KineticFields
                 case KineticFields.SourceType.None:
                     break;
                 case KineticFields.SourceType.FFT:
-                    sourceValue = fftService.OutputSpectrum.Value.Average();
+                    //sourceValue = fftService.OutputSpectrum.Value.Average();
                     break;
                 case KineticFields.SourceType.Body:
                     break;

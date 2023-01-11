@@ -41,12 +41,9 @@ namespace Assets.WasapiAudio.Scripts.Wasapi
             _receiveAudio = receiveAudio;
         }
 
-        public void StartListen(MMDevice microphone)
+        public void StartListen(SourceVariant source)
         {
-            if (microphone == null)
-            {
-                _captureType = WasapiCaptureType.Loopback;
-            }
+            _captureType = source.CaptureType;
 
             switch (_captureType)
             {
@@ -55,7 +52,7 @@ namespace Assets.WasapiAudio.Scripts.Wasapi
                     break;
                 case WasapiCaptureType.Microphone:
                     _wasapiCapture = new WasapiCapture();
-                    _wasapiCapture.Device = microphone;
+                    _wasapiCapture.Device = source.Device;
                     break;
                 default:
                     throw new InvalidOperationException("Unhandled WasapiCaptureType");
@@ -79,7 +76,7 @@ namespace Assets.WasapiAudio.Scripts.Wasapi
             _wasapiCapture.Start();
 
             var sampleSource = _soundInSource.ToSampleSource();
-
+            
             if (_filters != null && _filters.Length > 0)
             {
                 foreach (var filter in _filters)

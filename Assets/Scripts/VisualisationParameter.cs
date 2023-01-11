@@ -13,7 +13,7 @@ public class VisualisationParameter
         {
             if (gap!=null)
             {
-                return gap.Value + value;
+                return value; //gap.Value + value;
             }
             return value;
         }
@@ -38,12 +38,12 @@ public class VisualisationParameter
     {
         if (this.gap!=null)
         {
-            this.gap.OnValueChanged -= ValueChanged;
+            //this.gap.OnValueChanged -= ValueChanged;
         }
         this.gap = gap;
         if (gap != null)
         {
-            gap.OnValueChanged += ValueChanged;
+            //gap.OnValueChanged += ValueChanged;
         }
     }
 

@@ -24,47 +24,26 @@ namespace Assets.WasapiAudio.Scripts.Unity
         
         public int SpectrumSize = 512;
 
-
+        public float Multiplyer = 1f;
         public ScalingStrategy ScalingStrategy = ScalingStrategy.Sqrt;
-        public int MinFrequency = 100;
-        public int MaxFrequency = 20000;
+        public int MinFrequency = 20;
+        public int MaxFrequency = 10000;
         public WasapiAudioFilter[] Filters;
+        public AudioVisualizationProfile Profile;
 
 
         [Inject]
         public void Construct()
         {
-            StartListen(WasapiCaptureType.Loopback);
-            Debug.Log("construct WAS");
         }
 
 
 
-
-        private void StartListen(WasapiCaptureType captureType)
+        
+        public void SetSourceType(SourceVariant sourceVariant)
         {
-            if (_wasapiAudio != null)
-            {
-                _wasapiAudio.StopListen();
-            }
-            // Setup loopback audio and start listening
-            _wasapiAudio = new Wasapi.WasapiAudio(captureType, SpectrumSize, ScalingStrategy, MinFrequency, MaxFrequency, Filters, spectrumData =>
-            {
-                _spectrumData = spectrumData;
-            });
-
-            _wasapiAudio.StartListen(null);
-        }
-
-        public void SetSourceType(MMDevice microphone)
-        {
-            _wasapiAudio.StopListen();
-            WasapiCaptureType wct = WasapiCaptureType.Loopback;
-
-            if (microphone!=null)
-            {
-                wct = WasapiCaptureType.Microphone;
-            }
+            _wasapiAudio?.StopListen();
+            WasapiCaptureType wct = sourceVariant.CaptureType;
 
             CaptureType.Value = wct;
 
@@ -73,7 +52,7 @@ namespace Assets.WasapiAudio.Scripts.Unity
                 _spectrumData = spectrumData;
             });
 
-            _wasapiAudio.StartListen(microphone);
+            _wasapiAudio.StartListen(sourceVariant);
         }
 
         public void Update()
@@ -84,11 +63,12 @@ namespace Assets.WasapiAudio.Scripts.Unity
             }
         }
 
-        public float[] GetSpectrumData(AudioVisualizationStrategy strategy, bool smoothed, AudioVisualizationProfile profile)
+        public float[] GetSpectrumData(AudioVisualizationStrategy strategy,  AudioVisualizationProfile profile, bool useMultiplyer = true)
         {
+            bool smoothed = profile.AudioSmoothingIterations != 0;
+            
             if (_spectrumData == null)
             {
-                Debug.Log("(((");
                 return new float[0];
             }
 
@@ -145,29 +125,34 @@ namespace Assets.WasapiAudio.Scripts.Unity
 
             var smoother = _spectrumSmoothers[smootherId];
 
+            float[] result = null;
+            
             switch (strategy)
             {
                 case AudioVisualizationStrategy.Raw:
-                    if (smoothed)
-                    {
-                        return smoother.GetSpectrumData(_spectrumData);
-                    }
-                    return _spectrumData;
+                    result = _spectrumData;
+                    break;
                 case AudioVisualizationStrategy.Scaled:
-                    if (smoothed)
-                    {
-                        return smoother.GetSpectrumData(scaledSpectrumData);
-                    }
-                    return scaledSpectrumData;
+                    result = scaledSpectrumData;
+                    break;
                 case AudioVisualizationStrategy.ScaledMinMax:
-                    if (smoothed)
-                    {
-                        return smoother.GetSpectrumData(scaledMinMaxSpectrumData);
-                    }
-                    return scaledMinMaxSpectrumData;
+                    result = scaledMinMaxSpectrumData;
+                    break;
                 default:
                     throw new InvalidOperationException($"Invalid strategy: {strategy}");
             }
+            
+            if (useMultiplyer)
+            {
+                result = result.Select(v => v * Multiplyer).ToArray();
+            }
+
+            if (smoothed)
+            {
+                result = smoother.GetSpectrumData(result);
+            }
+
+            return result;
         }
 
         public void OnApplicationQuit()

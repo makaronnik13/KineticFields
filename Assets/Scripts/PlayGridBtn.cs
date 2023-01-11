@@ -9,11 +9,11 @@ public class PlayGridBtn : MonoBehaviour
     {
         get
         {
-            return BpmManager.Instance.Playing.Value;
+            return false;
         }
         set
         {
-            BpmManager.Instance.Playing.SetState(value);
+            //BpmManager.Instance.Playing.SetState(value);
         }
     }
 
