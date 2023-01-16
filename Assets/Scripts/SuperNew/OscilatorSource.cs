@@ -1,37 +1,64 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using KineticFields;
 using Lasp;
 using UniRx;
 using UnityEngine;
 using Zenject;
 
-public class SOscilatorSource : MonoBehaviour
+public class OscilatorSource : MonoBehaviour
 {
+    [SerializeField] private float extraValue;
     [SerializeField] private AnimationCurve curve;
+    public AnimationCurve Curve => curve;
     [SerializeField] public float multiplyer = 1;
-    [SerializeField] private float interpolaionTime;
-    
+
     [SerializeReference] PropertyBinder[] propertyBinders = null;
     public PropertyBinder[] PropertyBinders
     { get => (PropertyBinder[])propertyBinders.Clone();
         set => propertyBinders = value; }
-
-    private float time; 
+    
     public float Value => value;
-    public float MultipliedValue => Value * multiplyer;
+    public float MultipliedValue => Value * multiplyer+extraValue;
     
     private float value;
 
-    private FFTService fftService;
-
-
+    private CompositeDisposable disposables = new CompositeDisposable();
+    private IBPMSource bpmSource;
+    private int skipedBeats = 0;
+    private float time = 0;
+    private int bpm;
+    public float Time => time;
     
     [Inject]
-    public void Construct(FFTService fftService)
+    public void Construct(ConstantBPMSource bpmSource)
     {
-        this.fftService = fftService;
+        bpmSource.OnBPMchanged.Subscribe(bpm =>
+        {
+            this.bpm = bpm;
+            
+            disposables.Clear();
+
+            skipedBeats = 0;
+            time = 0;
+            
+            Observable.EveryUpdate().Subscribe(_ =>
+            {
+                time += UnityEngine.Time.deltaTime*bpm/60f;
+                value = curve.Evaluate(time);
+            }).AddTo(disposables);
+            
+            bpmSource.OnBeat.Subscribe(_ =>
+            {
+                Debug.Log("b");
+                
+                skipedBeats += 1;
+                if (skipedBeats>=curve.keys[curve.keys.Length-1].time)
+                {
+                    time = 0;
+                    skipedBeats = 0;
+                }
+                
+            }).AddTo(disposables);
+        }).AddTo(this);
 
         Observable.EveryUpdate().Subscribe(_ =>
         {
@@ -39,11 +66,8 @@ public class SOscilatorSource : MonoBehaviour
             {
                 return;
             }
-
-            
-   
-                if (propertyBinders != null)
-                    foreach (var b in propertyBinders) b.Level = value;
+            if (propertyBinders != null)
+                    foreach (var b in propertyBinders) b.Level = MultipliedValue;
         }).AddTo(this);
     }
     

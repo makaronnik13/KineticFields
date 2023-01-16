@@ -3,9 +3,9 @@ using UnityEngine.VFX;
 using UnityEngine.VFX.Utility;
 
 // The VFXBinder Attribute will populate this class into the property binding's add menu.
-[VFXBinder("Audio/Gain")]
+[VFXBinder("Audio/Oscilator")]
 // The class need to extend VFXBinderBase
-public class VfxSpectrumBinder : VFXBinderBase
+public class VFXBeatBinder : VFXBinderBase
 {
     // VFXPropertyBinding attributes enables the use of a specific
     // property drawer that populates the VisualEffect properties of a
@@ -13,7 +13,7 @@ public class VfxSpectrumBinder : VFXBinderBase
     [VFXPropertyBinding("System.Single")]
     public ExposedProperty property;
 
-    public SignalSource target;
+    public OscilatorSource target;
 
     // The IsValid method need to perform the checks and return if the binding
     // can be achieved.

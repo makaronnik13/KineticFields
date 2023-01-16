@@ -14,15 +14,16 @@ public class SignalSource : MonoBehaviour
     [SerializeField] private bool interpolate;
     [SerializeField] public float multiplyer = 1;
     [SerializeField] private float interpolaionTime;
-    
+    [SerializeField] private float extraValue;
 
+    [HideInInspector]
     [SerializeReference] PropertyBinder[] propertyBinders = null;
     public PropertyBinder[] PropertyBinders
     { get => (PropertyBinder[])propertyBinders.Clone();
         set => propertyBinders = value; }
     
     public float Value => value;
-    public float MultipliedValue => Value * multiplyer;
+    public float MultipliedValue => Value * multiplyer+extraValue;
     
     private float value;
 
