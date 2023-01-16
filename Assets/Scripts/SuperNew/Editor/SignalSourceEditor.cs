@@ -15,6 +15,7 @@ public class SignalSourceEditor : Editor
     private SerializedProperty interpolate;
     private SerializedProperty interpolationTime;
     private SerializedProperty multiplyer;
+    private SerializedProperty extraValue;
     
     void OnEnable()
     {
@@ -24,6 +25,7 @@ public class SignalSourceEditor : Editor
         interpolate = serializedObject.FindProperty("interpolate");
         interpolationTime = serializedObject.FindProperty("interpolaionTime");
         multiplyer = serializedObject.FindProperty("multiplyer");
+        extraValue = serializedObject.FindProperty("extraValue");
     }
 
     public override void OnInspectorGUI()
@@ -37,6 +39,7 @@ public class SignalSourceEditor : Editor
             EditorGUILayout.PropertyField(interpolationTime);
         }
         EditorGUILayout.PropertyField(multiplyer);
+        EditorGUILayout.PropertyField(extraValue);
         
         serializedObject.ApplyModifiedProperties();
         
