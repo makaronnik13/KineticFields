@@ -48,8 +48,6 @@ public class OscilatorSource : MonoBehaviour
             
             bpmSource.OnBeat.Subscribe(_ =>
             {
-                Debug.Log("b");
-                
                 skipedBeats += 1;
                 if (skipedBeats>=curve.keys[curve.keys.Length-1].time)
                 {

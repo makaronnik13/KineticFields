@@ -54,11 +54,12 @@ namespace KineticFields.Ui
         {
             mainRect = transform as RectTransform;
 
+            /*
             this.OnMouseDownAsObservable().Subscribe(_=>
             {
                 Debug.Log(Input.mousePosition);
             }).AddTo(this);
-
+*/
             LeftValue.Subscribe(_ =>
             {
                 LeftValue.Value = Mathf.Clamp(LeftValue.Value, 0, RightValue.Value);
