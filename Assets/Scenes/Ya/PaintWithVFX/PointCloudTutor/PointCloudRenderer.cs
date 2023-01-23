@@ -27,12 +27,24 @@ public class PointCloudRenderer : MonoBehaviour
     Color[] colors = new Color[0];
     private int id = 0;
 
+    [SerializeField] private float shake = 2f;
     [SerializeField] private float paintSpeed;
 
     private CompositeDisposable process = new CompositeDisposable();
 
     private void Start()
     {
+        Observable.EveryUpdate().Subscribe(_ =>
+        {
+            RaycastHit hitinfo;
+                        
+            if (Physics.Raycast(Camera.main.transform.position,   brush3d.transform.position-Camera.main.transform.position, out  hitinfo))
+            {
+                brush3d.transform.position = hitinfo.point;
+                brush3d.transform.LookAt(hitinfo.point+hitinfo.normal);
+            }
+        }).AddTo(this);
+        
         Observable.EveryUpdate()
             .Where(_ => Input.GetMouseButtonDown(0)).Subscribe(_ =>
             {
@@ -51,8 +63,28 @@ public class PointCloudRenderer : MonoBehaviour
                     else
                     {
                         id++;
+                        //mesh paint
+                        /*
                         Matrix4x4 localToWorld = brush3d.transform.localToWorldMatrix;
                         Paint(localToWorld.MultiplyPoint3x4(vertices[id]));
+                    */
+                        
+                        //raycst
+                        RaycastHit hitinfo;
+                       
+                        Vector3 aim = brush3d.transform.position+(new Vector3((Random.value-0.5f)*shake,(Random.value-0.5f)*shake,(Random.value-0.5f)*shake)) - Camera.main.transform.position;
+                        
+                        if (Physics.Raycast(Camera.main.transform.position,aim, out hitinfo))
+                        {
+                            Paint(hitinfo.point);
+                        }
+
+                       // brush3d.transform.position = hitinfo.point;
+                       // brush3d.transform.LookAt(hitinfo.point+hitinfo.normal);
+                        
+                        
+         
+                       
                     }
                 }).AddTo(process);
             }).AddTo(this);
