@@ -4,7 +4,7 @@ namespace Smrvfx {
 
 // Sample point structure with barycentric coordinates
 [StructLayout(LayoutKind.Sequential)]
-struct SamplePoint
+public struct SamplePoint
 {
     public int Index1, Index2, Index3, __Padding1;
     public float Weight1, Weight2, Weight3, __Padding2;
