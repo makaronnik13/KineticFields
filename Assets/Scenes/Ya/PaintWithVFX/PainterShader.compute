@@ -1,0 +1,46 @@
+#pragma kernel TransferData
+
+struct SamplePoint
+{
+    uint4 indices;
+    float4 weights;
+};
+
+uint SampleCount;
+float4x4 Transform;
+float FrameRate;
+
+StructuredBuffer<SamplePoint> SamplePoints;
+StructuredBuffer<float3> PositionBuffer;
+
+RWTexture2D<float4> PositionMap;
+
+// Point sampling function
+float3 SampleBuffer(StructuredBuffer<float3> buffer, SamplePoint sp)
+{
+    return buffer[sp.indices.x]  /** sp.weights.x*/ + 
+           buffer[sp.indices.y] /** sp.weights.y*/ + 
+           buffer[sp.indices.z] /** sp.weights.z*/;
+}
+
+// Hash function from H. Schechter & R. Bridson, goo.gl/RXiKaH
+uint Hash(uint s)
+{
+    s ^= 2747636419u;
+    s *= 2654435769u;
+    s ^= s >> 16;
+    s *= 2654435769u;
+    s ^= s >> 16;
+    s *= 2654435769u;
+    return s;
+}
+
+[numthreads(8, 8, 1)]
+void TransferData(uint2 id : SV_DispatchThreadID)
+{
+    uint si = Hash(id.x + id.y * 65536) % SampleCount;
+    SamplePoint sp = SamplePoints[si];
+    float3 p1 = SampleBuffer(PositionBuffer, sp);
+    //p1 = mul(Transform, float4(p1, 1)).xyz;
+    PositionMap[id] = float4(p1, 1);
+}

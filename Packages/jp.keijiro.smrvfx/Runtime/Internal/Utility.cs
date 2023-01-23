@@ -10,7 +10,7 @@ static class MathUtil
       => math.length(math.cross(v2 - v1, v3 - v1)) / 2;
 }
 
-static class ObjectUtil
+public static class ObjectUtil
 {
     public static void Destroy(Object o)
     {
@@ -22,7 +22,7 @@ static class ObjectUtil
     }
 }
 
-static class MemoryUtil
+public static class MemoryUtil
 {
     public static NativeArray<T> Array<T>(int length) where T : struct
         => new NativeArray<T>(length, Allocator.Persistent,
@@ -37,7 +37,7 @@ static class MemoryUtil
                               NativeArrayOptions.UninitializedMemory);
 }
 
-static class RenderTextureUtil
+public static class RenderTextureUtil
 {
     public static RenderTexture AllocateHalf(int width, int height)
       => Allocate(width, height, RenderTextureFormat.ARGBHalf);
