@@ -17,6 +17,8 @@ public class PointCloudRenderer : MonoBehaviour
     public VisualEffect vfx;
     public uint resolution = 2048;
 
+    public bool writeAngle = true;
+    
     public float particleSize = 0.1f;
     
     bool toUpdate = false;
@@ -70,20 +72,19 @@ public class PointCloudRenderer : MonoBehaviour
                     */
                         
                         //raycst
-                        RaycastHit hitinfo;
-                       
-                        Vector3 aim = brush3d.transform.position+(new Vector3((Random.value-0.5f)*shake,(Random.value-0.5f)*shake,(Random.value-0.5f)*shake)) - Camera.main.transform.position;
-                        
-                        if (Physics.Raycast(Camera.main.transform.position,aim, out hitinfo))
-                        {
-                            Paint(hitinfo.point);
-                        }
 
-                       // brush3d.transform.position = hitinfo.point;
+                        // brush3d.transform.position = hitinfo.point;
                        // brush3d.transform.LookAt(hitinfo.point+hitinfo.normal);
                         
                         
-         
+                       RaycastHit hitinfo;
+                       
+                       Vector3 aim = brush3d.transform.position+(new Vector3((Random.value-0.5f)*shake,(Random.value-0.5f)*shake,(Random.value-0.5f)*shake)) - Camera.main.transform.position;
+                        
+                       if (Physics.Raycast(Camera.main.transform.position,aim, out hitinfo))
+                       {
+                           Paint(hitinfo.point);
+                       }
                        
                     }
                 }).AddTo(process);
@@ -147,6 +148,13 @@ public class PointCloudRenderer : MonoBehaviour
             for (int x = 0; x < texWidth; x++) {
                 int index = x + y * texWidth;
                 texColor.SetPixel(x, y, colors[index]);
+
+                float extraV = particleSize;
+
+                if (writeAngle)
+                {
+                    
+                }
                 var data = new Color(positions[index].x, positions[index].y, positions[index].z, particleSize);
                 texPosScale.SetPixel(x, y, data);
             }

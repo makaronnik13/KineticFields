@@ -138,8 +138,15 @@ public class FreeLookCam : MonoBehaviour
     /// </summary>
     public void StopLooking()
     {
+        /*
         looking = false;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        */
+    }
+
+    private void Start()
+    {
+        StartLooking();
     }
 }
