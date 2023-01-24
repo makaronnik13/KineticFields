@@ -58,6 +58,7 @@ public class PointCloudRenderer : MonoBehaviour
                 
                 Observable.Interval(TimeSpan.FromSeconds(paintSpeed)).Subscribe(_ =>
                 {
+                    /*
                     if (id >= vertices.Length-1)
                     {
                         id = 0;
@@ -85,8 +86,7 @@ public class PointCloudRenderer : MonoBehaviour
                        {
                            Paint(hitinfo.point);
                        }
-                       
-                    }
+                       // }
                 }).AddTo(process);
             }).AddTo(this);
         
@@ -130,6 +130,7 @@ public class PointCloudRenderer : MonoBehaviour
     private void Paint(Vector3 point)
     {
        
+        Debug.Log(id);
         id++;
         if (id>=resolution*resolution)
         {
