@@ -30,7 +30,7 @@ public sealed partial class SkinnedMeshBaker : MonoBehaviour
     void OnDestroy()
       => DisposeInternals();
 
-    void LateUpdate()
+    void Update()
     {
         if (!IsValid) return;
 
