@@ -4,7 +4,7 @@ using UniRx;
 using UnityEngine;
 using Zenject;
 
-public class OscilatorSource : MonoBehaviour
+public class OscilatorSource : BaseSignalSource
 {
     [SerializeField] private float extraValue;
     [SerializeField] private AnimationCurve curve;
@@ -27,10 +27,12 @@ public class OscilatorSource : MonoBehaviour
     private float time = 0;
     private int bpm;
     public float Time => time;
-    
+
+
     [Inject]
-    public void Construct(ConstantBPMSource bpmSource)
+    public void Construct(ConstantBPMSource  bpmSource)
     {
+        this.bpmSource = bpmSource;
         bpmSource.OnBPMchanged.Subscribe(bpm =>
         {
             this.bpm = bpm;
@@ -44,6 +46,7 @@ public class OscilatorSource : MonoBehaviour
             {
                 time += UnityEngine.Time.deltaTime*bpm/60f;
                 value = curve.Evaluate(time);
+                Signal.Value = value;
             }).AddTo(disposables);
             
             bpmSource.OnBeat.Subscribe(_ =>
