@@ -120,7 +120,12 @@ namespace KineticFields
         {
             if (autoGain)
             {
-                float maxUnmult = Sources[0].GetSpectrumData(AudioVisualizationStrategy.Scaled, Sources[0].Profile, false).Max();
+                float[] spectrum = Sources[0].GetSpectrumData(AudioVisualizationStrategy.Scaled, Sources[0].Profile, false);
+                if(spectrum.Count() == 0)
+                {
+                    return;
+                }
+                float maxUnmult = spectrum.Max();
                 float max = Sources[0].GetSpectrumData(AudioVisualizationStrategy.Scaled, Sources[0].Profile, true).Max();
                 //Debug.Log(Sources[0].GetSpectrumData(AudioVisualizationStrategy.Scaled, true, Sources[0].Profile, false).Max());
              

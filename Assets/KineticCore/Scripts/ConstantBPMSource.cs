@@ -12,29 +12,33 @@ public class ConstantBPMSource : MonoBehaviour, IBPMSource
     public ReactiveCommand OnBeat => onBeat;
     public ReactiveCommand<int> OnBPMchanged => onBPMChanged;
 
+    public int Bpm => bpm;
+
     private CompositeDisposable counter = new CompositeDisposable();
     
-    [SerializeField] private int BPM = 120;
+    [SerializeField] private int bpm = 120;
+
 
     void Start()
     {
-        Restart(BPM);    
+        Restart(bpm);    
     }
 
     [ContextMenu("Restart")]
     public void Restart()
     {
-        Restart(BPM);
+        Restart(bpm);
     }
     
     public void Restart(int bpm)
     {
-        BPM = bpm;
+        this.bpm = bpm;
         counter.Clear();
         OnBPMchanged.Execute(bpm);
-        Observable.Interval(TimeSpan.FromSeconds(60f * 1f / BPM)).Subscribe(_ =>
+        Observable.Interval(TimeSpan.FromSeconds(60f * 1f / bpm)).Subscribe(_ =>
         {
             onBeat.Execute();
         }).AddTo(counter);
     }
+
 }

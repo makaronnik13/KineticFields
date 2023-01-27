@@ -82,6 +82,10 @@ using Zenject;
         void UpdateTexture()
         {
             float[] spectrum = fftService.GetSpectrum(0);
+        if (spectrum.Length == 0)
+        {
+            return;
+        }
             // Refresh the temporary texture when the resolution was changed.
             if (_texture != null && _texture.width != spectrum.Length)
             {
@@ -96,6 +100,7 @@ using Zenject;
                            { wrapMode = TextureWrapMode.Clamp };
 
             // Texture update
+         
             _texture.LoadRawTextureData(new NativeArray<float>(spectrum, Allocator.Temp));
             _texture.Apply();
 

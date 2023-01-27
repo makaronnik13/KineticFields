@@ -7,7 +7,7 @@ using UniRx;
 using UnityEngine;
 using Zenject;
 
-public class SignalSource : MonoBehaviour
+public class SignalSource : BaseSignalSource
 {
     [SerializeField] private FrequencyGap gap;
     [SerializeField] private SignalType signalType;
@@ -36,7 +36,8 @@ public class SignalSource : MonoBehaviour
     private float v;
 
     public float V => v;
-    
+
+
     [Inject]
     public void Construct(FFTService fftService)
     {
@@ -80,7 +81,8 @@ public class SignalSource : MonoBehaviour
                 {
                     value = v;
                 }
-            
+
+                Signal.Value = v;
                 lastValue = v;
    
                 if (propertyBinders != null)
