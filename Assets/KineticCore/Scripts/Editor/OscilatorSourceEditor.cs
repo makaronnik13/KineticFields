@@ -64,7 +64,9 @@ public class OscilatorSourceEditor : Editor
             
             // Curve
             Handles.color = Color.green;
-            float pos = source.Time * curveWidthPerBeat*3.3f;
+        //Debug.Log(source.Time);
+
+            float pos = source.Time * rect.width / source.Curve.keys[source.Curve.keys.Count()-1].time;
 
             Handles.DrawLine(new Vector2(rect.xMin+pos, rect.yMin), new Vector2(rect.xMin+pos, rect.yMax));
             Handles.color = Color.white;

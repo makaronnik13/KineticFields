@@ -32,6 +32,7 @@ public class OscilatorSource : BaseSignalSource
     [Inject]
     public void Construct(ConstantBPMSource  bpmSource)
     {
+        
         this.bpmSource = bpmSource;
         bpmSource.OnBPMchanged.Subscribe(bpm =>
         {
@@ -44,20 +45,39 @@ public class OscilatorSource : BaseSignalSource
             
             Observable.EveryUpdate().Subscribe(_ =>
             {
-                time += UnityEngine.Time.deltaTime*bpm/60f;
-                value = curve.Evaluate(time);
-                Signal.Value = value;
-            }).AddTo(disposables);
-            
-            bpmSource.OnBeat.Subscribe(_ =>
-            {
-                skipedBeats += 1;
-                if (skipedBeats>=curve.keys[curve.keys.Length-1].time)
+                time += UnityEngine.Time.deltaTime*(bpm/60f);
+
+                if (time>= curve.keys[curve.keys.Length - 1].time)
                 {
                     time = 0;
                     skipedBeats = 0;
                 }
+
+
+                value = curve.Evaluate(time);
+               
+            }).AddTo(disposables);
+            
+            bpmSource.OnBeat.Subscribe(_ =>
+            {
+                /*
+                skipedBeats += 1;
+                if (isActiveAndEnabled)
+                {
+                    Debug.Log(skipedBeats + " " + gameObject);
+             
+                }
                 
+                if (skipedBeats>curve.keys[curve.keys.Length-1].time)
+                {
+                    if (isActiveAndEnabled)
+                    {
+                        Debug.Log("reset");
+                    }
+                    time = 0;
+                    skipedBeats = 0;
+                }
+                */
             }).AddTo(disposables);
         }).AddTo(this);
 
@@ -67,6 +87,8 @@ public class OscilatorSource : BaseSignalSource
             {
                 return;
             }
+
+            Signal.Value = value;
             if (propertyBinders != null)
                     foreach (var b in propertyBinders) b.Level = MultipliedValue;
         }).AddTo(this);

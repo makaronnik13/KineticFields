@@ -41,6 +41,10 @@ public class TapToBpm : MonoBehaviour
                 relax.Clear();
                 Observable.Timer(TimeSpan.FromSeconds(silenceTime)).Subscribe(_ =>
                 {
+                    if (dists.Count == 0)
+                    {
+                        return;
+                    }
                     Debug.Log(dists.Average());
                     Debug.Log("set "+ Mathf.RoundToInt(60f/dists.Average()));
 

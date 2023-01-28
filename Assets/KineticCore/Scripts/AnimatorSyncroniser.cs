@@ -3,33 +3,79 @@ using System.Collections;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Zenject;
 
 public class AnimatorSyncroniser : MonoBehaviour
 {
     [SerializeField]
-    private Animator animator;
+    private Animation animation;
+
+    private KineticCoreInput input;
 
 
     private ConstantBPMSource bPMSource;
-    private int neededTrack = -1;
+
+    public int neededTrack = 0;
+
     private int bpm = 120;
+
+    [SerializeField]
+    private List<AnimationClip> clips = new List<AnimationClip>();
+
 
     [Inject]
     public void Construct(ConstantBPMSource bpmSource)
     {
         Debug.Log(bpmSource);
         this.bPMSource = bpmSource;
-        
+
+        input = new KineticCoreInput();
+
+        input.Controllers.LeftClip.performed += (context) =>
+        {
+           
+                Debug.Log("!");
+                neededTrack--;
+                if (neededTrack < 0)
+                {
+                    neededTrack = clips.Count - 1;
+                }
+
+                SetTrack(neededTrack);
+         
+        };
+
+        if (input.Controllers.LeftClip.IsPressed())
+        {
+            Debug.Log("!");
+            neededTrack--;
+            if (neededTrack < 0)
+            {
+                neededTrack = clips.Count - 1;
+            }
+
+            SetTrack(neededTrack);
+        }
+
+        if (input.Controllers.RightClip.IsPressed())
+        {
+            neededTrack++;
+            if (neededTrack >= clips.Count)
+            {
+                neededTrack = 0;
+            }
+
+            SetTrack(neededTrack);
+        }
+
+
+
+
         bpmSource.OnBeat.Subscribe(_ =>
         {
-            if (neededTrack!=-1)
-            {
-                Debug.Log("track " + neededTrack);
-                animator.SetInteger("Track", neededTrack);
-                neededTrack = -1;
                 SetSpeed();
-            }
+
         }).AddTo(this);
 
         bpm = bpmSource.Bpm;
@@ -37,6 +83,13 @@ public class AnimatorSyncroniser : MonoBehaviour
         {
             bpm = bpmSource.Bpm;
         }).AddTo(this);
+
+        animation.Stop();
+        foreach (AnimationClip clip in clips)
+        {
+            animation.AddClip(clip, clip.name);
+            animation.Play();
+        }
 
     }
 
@@ -52,11 +105,12 @@ public class AnimatorSyncroniser : MonoBehaviour
             SetTrack(1);
         }
     }
-
+    
     public void SetTrack(int i)
     {
-        Debug.Log("set "+i);
+        //Debug.Log(i);
         neededTrack = i;
+        animation.Play(clips[i].name);
     }
 
     public void SetSpeed()
@@ -66,12 +120,18 @@ public class AnimatorSyncroniser : MonoBehaviour
         //0.5 сек - 1 бит
         //
         //bpm = 10/0.5 - 20 битов
+        foreach (AnimationState state in animation)
+        {
+            int beatsCount = Mathf.RoundToInt(state.length / (60f / bpm));
 
-        int beatsCount = Mathf.RoundToInt(animator.GetCurrentAnimatorStateInfo(0).length / (60f / bpm));
+            float length = beatsCount * (60f / bpm);
+            float diff = length - state.length;
 
-        float length = beatsCount * (60f / bpm);
-        float diff = length - animator.GetCurrentAnimatorStateInfo(0).length;
-        
-        animator.speed = 1f+Mathf.Abs(diff/animator.GetCurrentAnimatorStateInfo(0).length);
+            state.speed = 1f + Mathf.Abs(diff / state.length);
+
+            //state.speed = 0.5F;
+        }
+
+        SetTrack(neededTrack);
     }
 }
