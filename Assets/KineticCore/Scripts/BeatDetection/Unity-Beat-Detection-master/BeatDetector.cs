@@ -135,14 +135,14 @@ public class BeatDetector : MonoBehaviour
 	public void Construct(FFTService fftService)
 	{
 		this.fftService = fftService;
-		Observable.Timer(TimeSpan.FromSeconds(0.5f)).Subscribe(_ =>
+		
+		Observable.Timer(TimeSpan.FromSeconds(0.1f)).Subscribe(_ =>
 		{
 			Observable.EveryUpdate().Subscribe(_=>Analyse()).AddTo(this);
 		}).AddTo(this);
 	}
-	
-	
-	private long getCurrentTimeMillis ()
+
+    private long getCurrentTimeMillis ()
 	{
 		long milliseconds = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond;
 		return milliseconds;

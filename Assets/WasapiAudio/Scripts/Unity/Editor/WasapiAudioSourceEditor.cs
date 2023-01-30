@@ -21,7 +21,7 @@ public class WasapiAudioSourceEditor : Editor
         base.OnInspectorGUI();
         if (Application.isPlaying)
         {
-            float[] data = source.GetSpectrumData(AudioVisualizationStrategy.Scaled, source.Profile);
+            float[] data = source.GetSpectrumData(AudioVisualizationStrategy.Scaled);
             //Debug.Log(data.Sum());
             if (data.Length != 0)
             {

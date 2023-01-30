@@ -68,4 +68,9 @@ public class TapToBpm : MonoBehaviour
 
         }
     }
+
+    void OnDestroy()
+    {
+        relax.Dispose();
+    }
 }

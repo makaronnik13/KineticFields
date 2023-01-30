@@ -30,6 +30,7 @@ public class BpmManager : MonoBehaviour
     [Inject]
     public void Construct(FFTService fftService)
     {
+        Debug.Log(this.isActiveAndEnabled);
         int realWindowSize = WindowSize;
         realTimeSpectralFluxAnalyzers.Add(0, new SpectralFluxAnalyzer(fftService.GetSpectrumGapSize(FrequencyGap.None), realWindowSize, PeakCoef));
         realTimeSpectralFluxAnalyzers.Add(1, new SpectralFluxAnalyzer(fftService.GetSpectrumGapSize(FrequencyGap.None), realWindowSize, PeakCoef));

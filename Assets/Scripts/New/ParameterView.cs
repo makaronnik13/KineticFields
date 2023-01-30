@@ -41,7 +41,7 @@ namespace KineticFields.Ui
             btn.OnClickAsObservable().Subscribe(_=> 
             {
                 editPanel.Show(parameter);
-            });
+            }).AddTo(this);
         }
     }
 }

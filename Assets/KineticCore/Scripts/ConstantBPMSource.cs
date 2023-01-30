@@ -41,4 +41,8 @@ public class ConstantBPMSource : MonoBehaviour, IBPMSource
         }).AddTo(counter);
     }
 
+    void OnDestroy()
+    {
+        counter.Dispose();
+    }
 }

@@ -23,6 +23,6 @@ public class SourceView : MonoBehaviour
             Slider.maxValue = source.maxValue;
             Slider.value = (float)v;
             Value.text = ((float)v).ToString("F1");
-        });
+        }).AddTo(this);
     }
 }

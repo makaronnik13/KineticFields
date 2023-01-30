@@ -166,4 +166,9 @@ public class PointCloudRenderer : MonoBehaviour
         particleCount = (uint)positions.Length;
         toUpdate = true;
     }
+
+    private void OnDestroy()
+    {
+        process.Dispose();
+    }
 }
