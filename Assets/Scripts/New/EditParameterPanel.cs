@@ -83,5 +83,12 @@ namespace KineticFields.Ui
 
             view.SetActive(true);
         }
+
+        private void OnDestroy()
+        {
+            disposables.Dispose();
+        }
     }
+
+    
 }

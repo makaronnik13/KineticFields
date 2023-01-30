@@ -25,7 +25,7 @@ namespace Assets.WasapiAudio.Scripts.Unity
 
         protected float[] GetSpectrumData()
         {
-            return WasapiAudioSource.GetSpectrumData(Strategy, Profile);
+            return WasapiAudioSource.GetSpectrumData(Strategy);
         }
     }
 }

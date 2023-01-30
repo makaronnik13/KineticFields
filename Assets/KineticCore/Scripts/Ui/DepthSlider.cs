@@ -16,6 +16,11 @@ public class DepthSlider : MonoBehaviour
     [Inject]
     public void Construct(KinectPointCloud kinectPointCloud)
     {
+        if (kinectPointCloud==null)
+        {
+            Debug.LogWarning("Depth slider has no reference to kinekt point cloud");
+            return;
+        }
         slider.value = kinectPointCloud.maxDepth;
         value.text = kinectPointCloud.maxDepth.ToString();
         

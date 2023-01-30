@@ -93,6 +93,9 @@ public class OscilatorSource : BaseSignalSource
                     foreach (var b in propertyBinders) b.Level = MultipliedValue;
         }).AddTo(this);
     }
-    
 
+    private void OnDestroy()
+    {
+        disposables.Dispose();
+    }
 }

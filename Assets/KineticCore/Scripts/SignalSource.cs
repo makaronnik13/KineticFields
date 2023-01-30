@@ -37,65 +37,66 @@ public class SignalSource : BaseSignalSource
 
     public float V => v;
 
+    private float[] data;
 
     [Inject]
     public void Construct(FFTService fftService)
     {
         this.fftService = fftService;
+    }
 
-        Observable.EveryUpdate().Subscribe(_ =>
+    private void Update()
+    {
+        if (!isActiveAndEnabled)
         {
-            if (!isActiveAndEnabled)
+            return;
+        }
+
+        data = GetSpectrumData();
+
+        if (data!=null && data.Length > 0)
+        {
+            max = data.Max();
+            average = data.Average();
+
+            if (signalType == SignalType.Max || signalType == SignalType.MaxDiff)
             {
-                return;
+                v = max;
+            }
+            if (signalType == SignalType.Average || signalType == SignalType.AverageDiff)
+            {
+                v = average;
             }
 
-            float[] data = GetSpectrumData();
-
-            if (data.Length>0)
+            if (interpolate)
             {
-                max = GetSpectrumData().Max();
-                average = GetSpectrumData().Average();
-                
-                if (signalType == SignalType.Max || signalType == SignalType.MaxDiff)
-                {
-                    v = max;
-                }
-                if (signalType == SignalType.Average || signalType == SignalType.AverageDiff)
-                {
-                    v = average;
-                }
-
-                if (interpolate)
-                {
-                    v = Mathf.Lerp(value, v, Time.deltaTime / interpolaionTime);   
-                }
-            
-            
-            
-                if (signalType == SignalType.AverageDiff || signalType == SignalType.MaxDiff)
-                {
-                    value =  v - lastValue;
-                }
-                else
-                {
-                    value = v;
-                }
-
-                Signal.Value = v;
-                lastValue = v;
-   
-                if (propertyBinders != null)
-                    foreach (var b in propertyBinders) b.Level = value;
+                v = Mathf.Lerp(value, v, Time.deltaTime / interpolaionTime);
             }
-        }).AddTo(this);
+
+
+
+            if (signalType == SignalType.AverageDiff || signalType == SignalType.MaxDiff)
+            {
+                value = v - lastValue;
+            }
+            else
+            {
+                value = v;
+            }
+
+            Signal.Value = v;
+            lastValue = v;
+
+            if (propertyBinders != null)
+                foreach (var b in propertyBinders) b.Level = value;
+        }
     }
 
     public float[] GetSpectrumData()
     {
         if (fftService == null)
         {
-            return new float[0];
+            return null; // new float[0];
         }
         
         return fftService.GetSpectrumGap(gap);
