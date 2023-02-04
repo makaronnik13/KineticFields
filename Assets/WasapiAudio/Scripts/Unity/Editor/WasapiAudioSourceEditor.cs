@@ -25,7 +25,7 @@ public class WasapiAudioSourceEditor : Editor
             //Debug.Log(data.Sum());
             if (data.Length != 0)
             {
-                SpectrumDrawer.DrawGraph(data);
+                SpectrumDrawer.DrawGraph(data.Select(d=>d*source.Multiplyer).ToArray(), data.Max(), data.Max()*source.Multiplyer);
             }
         }
     }

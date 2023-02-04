@@ -12,9 +12,7 @@ public class SignalSource : BaseSignalSource
     [SerializeField] private FrequencyGap gap;
     [SerializeField] private SignalType signalType;
     [SerializeField] private bool interpolate;
-    [SerializeField] public float multiplyer = 1;
     [SerializeField] private float interpolaionTime;
-    [SerializeField] private float extraValue;
 
     [HideInInspector]
     [SerializeReference] PropertyBinder[] propertyBinders = null;
@@ -37,7 +35,7 @@ public class SignalSource : BaseSignalSource
 
     public float V => v;
 
-    private float[] data;
+    private List<float> data;
 
     [Inject]
     public void Construct(FFTService fftService)
@@ -52,9 +50,9 @@ public class SignalSource : BaseSignalSource
             return;
         }
 
-        data = GetSpectrumData();
+        data = GetSpectrumData().ToList();
 
-        if (data!=null && data.Length > 0)
+        if (data!=null && data.Count > 0)
         {
             max = data.Max();
             average = data.Average();
@@ -92,14 +90,14 @@ public class SignalSource : BaseSignalSource
         }
     }
 
-    public float[] GetSpectrumData()
+    public IEnumerable<float> GetSpectrumData()
     {
         if (fftService == null)
         {
             return null; // new float[0];
         }
         
-        return fftService.GetSpectrumGap(gap);
+        return fftService.GetCachedSpectrumGap(gap);
     }
     
     public enum SignalType

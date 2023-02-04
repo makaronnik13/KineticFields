@@ -6,20 +6,16 @@ using Zenject;
 
 public class OscilatorSource : BaseSignalSource
 {
-    [SerializeField] private float extraValue;
     [SerializeField] private AnimationCurve curve;
     public AnimationCurve Curve => curve;
-    [SerializeField] public float multiplyer = 1;
+ 
 
     [SerializeReference] PropertyBinder[] propertyBinders = null;
     public PropertyBinder[] PropertyBinders
     { get => (PropertyBinder[])propertyBinders.Clone();
         set => propertyBinders = value; }
     
-    public float Value => value;
-    public float MultipliedValue => Value * multiplyer+extraValue;
     
-    private float value;
 
     private CompositeDisposable disposables = new CompositeDisposable();
     private IBPMSource bpmSource;
@@ -54,7 +50,7 @@ public class OscilatorSource : BaseSignalSource
                 }
 
 
-                value = curve.Evaluate(time);
+                Signal.Value = curve.Evaluate(time);
                
             }).AddTo(disposables);
             
@@ -88,9 +84,9 @@ public class OscilatorSource : BaseSignalSource
                 return;
             }
 
-            Signal.Value = value;
+       
             if (propertyBinders != null)
-                    foreach (var b in propertyBinders) b.Level = MultipliedValue;
+                    foreach (var b in propertyBinders) b.Level = MultipliedSignal.Value;
         }).AddTo(this);
     }
 

@@ -8,6 +8,7 @@ using CSCore.CoreAudioAPI;
 using Assets.WasapiAudio.Scripts.Unity;
 using Zenject;
 using UniRx;
+using System.Collections;
 
 namespace KineticFields
 {
@@ -31,6 +32,7 @@ namespace KineticFields
         private float autoGainRelaxationTime = 5f;
         private MMDeviceEnumerator deviceEnumerator = new MMDeviceEnumerator();
 
+        private Dictionary<FrequencyGap, IEnumerable<float>> gapsValues = new Dictionary<FrequencyGap, IEnumerable<float>>();
 
         [Inject]
         public void Construct()
@@ -52,6 +54,57 @@ namespace KineticFields
 
 
             deviceEnumerator = new MMDeviceEnumerator();
+
+            foreach (FrequencyGap gap in Enum.GetValues(typeof(FrequencyGap)))
+            {
+                WasapiAudioSource source = Sources[0];
+                int minFrequency = 0;
+                int maxFrequency = 0;
+
+                switch (gap)
+                {
+                    case FrequencyGap.None:
+                        source = Sources[0];
+                        minFrequency = 0;
+                        maxFrequency = source.SpectrumSize;
+                        break;
+                    case FrequencyGap.SubBass:
+                        source = Sources[1];
+                        minFrequency = 0;
+                        maxFrequency = Mathf.RoundToInt(source.SpectrumSize * 0.1f);
+                        break;
+                    case FrequencyGap.Bass:
+                        source = Sources[1];
+                        minFrequency = Mathf.RoundToInt(source.SpectrumSize * 0.1f);
+                        maxFrequency = Mathf.RoundToInt(source.SpectrumSize * 0.25f);
+                        break;
+                    case FrequencyGap.LowMidrange:
+                        minFrequency = Mathf.RoundToInt(source.SpectrumSize * 0.2f);
+                        maxFrequency = Mathf.RoundToInt(source.SpectrumSize * 0.4f);
+                        source = Sources[2];
+                        break;
+                    case FrequencyGap.Midrange:
+                        source = Sources[2];
+                        minFrequency = Mathf.RoundToInt(source.SpectrumSize * 0.4f);
+                        maxFrequency = Mathf.RoundToInt(source.SpectrumSize * 0.6f);
+                        break;
+                    case FrequencyGap.UpperMidrange:
+                        source = Sources[2];
+                        minFrequency = Mathf.RoundToInt(source.SpectrumSize * 0.6f);
+                        maxFrequency = Mathf.RoundToInt(source.SpectrumSize * 0.8f);
+                        break;
+                    case FrequencyGap.Presence:
+                        source = Sources[3];
+                        minFrequency = Mathf.RoundToInt(source.SpectrumSize * 0.7f);
+                        maxFrequency = source.SpectrumSize;
+                        break;
+                }
+
+                int valuesCount = maxFrequency - minFrequency;
+
+                gapsValues.Add(gap, new List<float>());
+            }
+
             
         }
 
@@ -64,6 +117,7 @@ namespace KineticFields
 
         private void CacheSpectrums()
         {
+            int i = 0;
             foreach (WasapiAudioSource source in Sources)
             {
                 if (!cachedSpectrums.ContainsKey(source))
@@ -72,11 +126,25 @@ namespace KineticFields
                 }
                 else
                 {
-                    cachedSpectrums[source] = source.GetSpectrumData(AudioVisualizationStrategy.Scaled);
+                    cachedSpectrums[source] = source.GetSpectrumData(AudioVisualizationStrategy.Scaled).Select(s=>s*multiplyer).ToArray();
                 }
+
+              
+                    //SaveGapValues((FrequencyGap)i,  cachedSpectrums[source]);
+                    i++;
             }
+
+            foreach (FrequencyGap gap in Enum.GetValues(typeof(FrequencyGap)))
+            {
+                gapsValues[gap] = GetSpectrumGap(gap);
+            }
+
         }
 
+        private void SaveGapValues(FrequencyGap i, float[] floats)
+        {
+            throw new NotImplementedException();
+        }
 
         private float[] ApplyFrofile(float[] data)
         {
@@ -264,7 +332,7 @@ namespace KineticFields
             return Sources[i].GetSpectrumData(AudioVisualizationStrategy.Raw);
         }
         
-        public float[] GetSpectrumGap(FrequencyGap gap)
+        public IEnumerable<float> GetSpectrumGap(FrequencyGap gap)
         {
             WasapiAudioSource source = Sources[0];
             int minFrequency = 0;
@@ -311,7 +379,7 @@ namespace KineticFields
             
             try
             {
-                return cachedSpectrums[source].Select(s => s * source.Multiplyer).ToList().GetRange(minFrequency, maxFrequency - minFrequency).ToArray();
+                return cachedSpectrums[source].Skip(minFrequency).Take(maxFrequency - minFrequency);
             }
             catch
             {
@@ -373,6 +441,11 @@ namespace KineticFields
                     break;
             }
             return maxFrequency - minFrequency;
+        }
+
+        public IEnumerable<float> GetCachedSpectrumGap(FrequencyGap gap)
+        {
+            return gapsValues[gap];
         }
     }
 }

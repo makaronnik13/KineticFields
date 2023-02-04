@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Assets.WasapiAudio.Scripts.Unity;
 using UnityEditor;
@@ -46,10 +47,10 @@ public class SignalSourceEditor : Editor
         
         if (Application.isPlaying)
         {
-            float[] data = source.GetSpectrumData();
-            if (data.Length != 0)
+            IEnumerable<float> data = source.GetSpectrumData();
+            if (data.Count()!= 0)
             {
-                SpectrumDrawer.DrawGraph(data, source.V, source.MultipliedValue);
+                SpectrumDrawer.DrawGraph(data.Select(s=>s*source.multiplyer).ToArray(), source.V, source.MultipliedValue);
             }
         }
     }
