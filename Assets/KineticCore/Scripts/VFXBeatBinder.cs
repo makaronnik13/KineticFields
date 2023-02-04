@@ -27,6 +27,6 @@ public class VFXBeatBinder : VFXBinderBase
     // IsValid returned true.
     public override void UpdateBinding(VisualEffect component)
     {
-        component.SetFloat(property, target.MultipliedValue);
+        component.SetFloat(property, target.MultipliedSignal.Value);
     }
 }

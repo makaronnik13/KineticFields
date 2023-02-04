@@ -34,7 +34,7 @@ public class OscilatorSourceEditor : Editor
         
         if (Application.isPlaying)
         {
-            DrawCurve(source.Time, source.Value, source.MultipliedValue);
+            DrawCurve(source.Time, source.Signal.Value, source.MultipliedSignal.Value);
         }
     }
 
