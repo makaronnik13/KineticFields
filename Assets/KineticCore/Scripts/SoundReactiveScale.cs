@@ -16,7 +16,7 @@ public class SoundReactiveScale : MonoBehaviour
         scale = transform.localScale;
         signalSource.Signal.Subscribe(v =>
         {
-            Vector3 newVec = new Vector3(scale.x * axisMultiplyers.x, scale.y * axisMultiplyers.y, scale.z * axisMultiplyers.z) * v;
+            Vector3 newVec = new Vector3(scale.x * axisMultiplyers.x, scale.y * axisMultiplyers.y, scale.z * axisMultiplyers.z) * signalSource.MultipliedSignal.Value;
             transform.localScale = Vector3.Lerp(transform.localScale, newVec, speed) ;
         }).AddTo(this);
     }
