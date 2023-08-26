@@ -2,11 +2,12 @@
 using Zenject;
 using UnityEngine;
 
-public class PrefabCreator
+public class PrefabCreator: MonoBehaviour
 {
-    private readonly DiContainer diContainer;
+    private DiContainer diContainer;
 
-    public PrefabCreator(DiContainer diContainer)
+    [Inject]
+    public void Construct(DiContainer diContainer)
     {
         this.diContainer = diContainer;
     }

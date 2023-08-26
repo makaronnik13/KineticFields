@@ -10,6 +10,6 @@ public class MovingValue : BaseSignalSource
 
     private void Update()
     {
-        Signal.Value += Time.deltaTime * multiplyer * source.MultipliedValue;
+        Signal.Value += Time.deltaTime * multiplyer * source.MultipliedSignal.Value;
     }
 }

@@ -13,7 +13,7 @@ public class VfxSpectrumBinder : VFXBinderBase
     [VFXPropertyBinding("System.Single")]
     public ExposedProperty property;
 
-    public SignalSource target;
+    public BaseSignalSource target;
 
     // The IsValid method need to perform the checks and return if the binding
     // can be achieved.
@@ -27,6 +27,6 @@ public class VfxSpectrumBinder : VFXBinderBase
     // IsValid returned true.
     public override void UpdateBinding(VisualEffect component)
     {
-        component.SetFloat(property, target.MultipliedValue);
+        component.SetFloat(property, target.MultipliedSignal.Value);
     }
 }

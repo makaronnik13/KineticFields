@@ -11,6 +11,6 @@ public class SoundReactiveAnimation : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        animator.SetFloat("Speed", baseSpeed+signalSource.MultipliedValue);
+        animator.SetFloat("Speed", baseSpeed + signalSource.MultipliedSignal.Value);
     }
 }

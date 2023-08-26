@@ -41,7 +41,7 @@ public class OscilatorSource : BaseSignalSource
             
             Observable.EveryUpdate().Subscribe(_ =>
             {
-                time += UnityEngine.Time.deltaTime*(bpm/60f);
+                time += UnityEngine.Time.deltaTime*(bpm/60f)*0.25f;
 
                 if (time>= curve.keys[curve.keys.Length - 1].time)
                 {

@@ -5,11 +5,11 @@ using UnityEngine;
 public class ValuePusher : BaseSignalSource
 {
     [SerializeField]
-    private SignalSource source;
+    private BaseSignalSource source;
    
     // Update is called once per frame
     void Update()
     {
-        Signal.Value += Time.deltaTime * (source.MultipliedValue * multiplyer + extraValue);
+        Signal.Value += Time.deltaTime * (source.MultipliedSignal.Value * multiplyer + extraValue);
     }
 }

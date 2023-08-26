@@ -20,10 +20,10 @@ public class SignalSource : BaseSignalSource
     { get => (PropertyBinder[])propertyBinders.Clone();
         set => propertyBinders = value; }
     
-    public float Value => value;
-    public float MultipliedValue => Value * multiplyer+extraValue;
+    //public float Value => value;
+    //public float MultipliedValue => Value * multiplyer+extraValue;
     
-    private float value;
+    //private float value;
 
     private FFTService fftService;
     private float max;
@@ -68,25 +68,34 @@ public class SignalSource : BaseSignalSource
 
             if (interpolate)
             {
-                v = Mathf.Lerp(value, v, Time.deltaTime / interpolaionTime);
+                if (Signal.Value>v)
+                {
+                    v = Mathf.Lerp(Signal.Value, v, Time.deltaTime / interpolaionTime);
+                }
+                else
+                {
+                    if (v>0)
+                    {
+                        v -= Time.deltaTime / interpolaionTime;
+                    }
+                }
             }
 
 
 
             if (signalType == SignalType.AverageDiff || signalType == SignalType.MaxDiff)
             {
-                value = v - lastValue;
+                Signal.Value = v - lastValue;
             }
             else
             {
-                value = v;
+                Signal.Value  = v;
             }
 
-            Signal.Value = v;
             lastValue = v;
 
             if (propertyBinders != null)
-                foreach (var b in propertyBinders) b.Level = value;
+                foreach (var b in propertyBinders) b.Level = MultipliedSignal.Value;
         }
     }
 

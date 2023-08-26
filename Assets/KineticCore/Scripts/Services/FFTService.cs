@@ -28,7 +28,11 @@ namespace KineticFields
         private AudioVisualizationProfile profile;
 
         private Dictionary<WasapiAudioSource, float[]> cachedSpectrums = new Dictionary<WasapiAudioSource, float[]>();
-        private float multiplyer = 1;
+
+        [SerializeField]
+        public float multiplyer = 1;
+
+        [SerializeField]
         private float autoGainRelaxationTime = 5f;
         private MMDeviceEnumerator deviceEnumerator = new MMDeviceEnumerator();
 
@@ -272,7 +276,7 @@ namespace KineticFields
             }
             else
             {
-                multiplyer = 1;
+                //multiplyer = 1;
             }
             
             foreach (WasapiAudioSource source in Sources)

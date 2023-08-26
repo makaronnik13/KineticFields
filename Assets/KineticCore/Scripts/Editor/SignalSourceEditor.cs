@@ -50,7 +50,7 @@ public class SignalSourceEditor : Editor
             IEnumerable<float> data = source.GetSpectrumData();
             if (data.Count()!= 0)
             {
-                SpectrumDrawer.DrawGraph(data.Select(s=>s*source.multiplyer).ToArray(), source.V, source.MultipliedValue);
+                SpectrumDrawer.DrawGraph(data.ToArray(), source.Signal.Value, source.MultipliedSignal.Value);
             }
         }
     }
