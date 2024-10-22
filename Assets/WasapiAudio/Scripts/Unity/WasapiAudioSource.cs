@@ -1,86 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Assets.WasapiAudio.Scripts.Core;
-using Assets.WasapiAudio.Scripts.Wasapi;
-using CSCore.CoreAudioAPI;
+﻿using Assets.WasapiAudio.Scripts.Core;
 using UnityEngine;
-using Zenject;
-using UniRx;
 
 namespace Assets.WasapiAudio.Scripts.Unity
 {
     [ExecuteInEditMode]
     public class WasapiAudioSource : MonoBehaviour
     {
-        private readonly Dictionary<string, SpectrumSmoother> _spectrumSmoothers = new Dictionary<string, SpectrumSmoother>();
-
-        private Wasapi.WasapiAudio _wasapiAudio;
-        private float[] _spectrumData;
+        private Core.WasapiAudio _wasapiAudio;
 
         // Inspector Properties
-        public ReactiveProperty<WasapiCaptureType> CaptureType = new ReactiveProperty<WasapiCaptureType>(WasapiCaptureType.Loopback);
-
-        
-        public int SpectrumSize = 512;
-
-        public float Multiplyer = 1f;
-        public ScalingStrategy ScalingStrategy = ScalingStrategy.Sqrt;
-        public int MinFrequency = 20;
-        public int MaxFrequency = 10000;
+        public WasapiCaptureType CaptureType = WasapiCaptureType.Loopback;
         public WasapiAudioFilter[] Filters;
-        //public AudioVisualizationProfile Profile;
 
-
-        [Inject]
-        public void Construct()
+        public void Awake()
         {
-        }
-
-
-
-        
-        public void SetSourceType(SourceVariant sourceVariant)
-        {
-            _wasapiAudio?.StopListen();
-            WasapiCaptureType wct = sourceVariant.CaptureType;
-
-            CaptureType.Value = wct;
-
-            _wasapiAudio = new Wasapi.WasapiAudio(wct, SpectrumSize, ScalingStrategy, MinFrequency, MaxFrequency, Filters, spectrumData =>
-            {
-                _spectrumData = spectrumData;
-            });
-
-            _wasapiAudio.StartListen(sourceVariant);
-        }
-
-        public void Update()
-        {
-            foreach (var smoother in _spectrumSmoothers.Values)
-            {
-                smoother.AdvanceFrame();
-            }
-        }
-
-        public float[] GetSpectrumData(AudioVisualizationStrategy strategy)
-        {   
-
-            if (_spectrumData == null)
-            {
-                return new float[0];
-            }
-
-            return _spectrumData;
-
-            
+            Initialize();
         }
 
         public void OnApplicationQuit()
         {
-            if (_wasapiAudio != null)
+            _wasapiAudio?.StopCapture();
+        }
+
+        public void AddReceiver(SpectrumReceiver receiver)
+        {
+            Initialize();
+            _wasapiAudio.AddReceiver(receiver);
+        }
+
+        private void Initialize()
+        {
+            if (_wasapiAudio == null)
             {
-                _wasapiAudio.StopListen();
+                // Setup loopback audio and start listening
+                _wasapiAudio = new Core.WasapiAudio(CaptureType, Filters);
+
+                _wasapiAudio.StartCapture();
             }
         }
     }

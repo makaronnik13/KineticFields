@@ -10,6 +10,13 @@ public class ValuePusher : BaseSignalSource
     // Update is called once per frame
     void Update()
     {
-        Signal.Value += Time.deltaTime * (source.MultipliedSignal.Value * multiplyer + extraValue);
+        if (source==null)
+        {
+            Signal.Value += Time.deltaTime *  multiplyer + extraValue;
+        }
+        else
+        {
+            Signal.Value += Time.deltaTime * (source.MultipliedSignal.Value * multiplyer + extraValue);
+        }
     }
 }

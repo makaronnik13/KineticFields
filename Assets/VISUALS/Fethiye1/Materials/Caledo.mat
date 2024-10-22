@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 5
+  version: 9
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -23,6 +23,8 @@ Material:
   m_Name: Caledo
   m_Shader: {fileID: -6465566751694194690, guid: d937d05f76d8ba14db689ea3dc6059f1,
     type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -30,12 +32,14 @@ Material:
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - Texture2D_38FB9F65:
-        m_Texture: {fileID: 2800000, guid: 9fe25b8135711fa45993e3de56f9d7f8, type: 3}
+        m_Texture: {fileID: 2800000, guid: 0bc10240ec716db46936e67e7e09881e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
@@ -103,7 +107,7 @@ Material:
     - Radial_Scale: 0.5
     - RotationRate2: 6.2
     - Rotation_rate: 6.04
-    - Segments: 4
+    - Segments: 2
     - _AlphaClip: 0
     - _Blend: 0
     - _BumpScale: 1
@@ -114,26 +118,31 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _Emission: 1
+    - _Emission: 3.07
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _MaskPow: 0.5
+    - _MaskOfsetX: 0
+    - _MaskOfsetY: 0
+    - _MaskPow: 0.81
+    - _Metalic: 0
     - _Metallic: 0
-    - _NoizePow: 4.9
-    - _NoizeScale: 5
+    - _NoizePow: 0.11
+    - _NoizeScale: 4.5
     - _OcclusionStrength: 1
-    - _Offset1: 0.12
-    - _Offset2: 0.55
-    - _Offset3: 3.72
+    - _Offset1: 1.05
+    - _Offset2: -0.06
+    - _Offset3: 4.21
+    - _Opacity: 0.64
     - _Parallax: 0.005
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _RadialScale: 1
+    - _RadialScale: 0.76
     - _ReceiveShadows: 1
     - _RotationRate: 0
-    - _RotationRate2: 0.27
+    - _RotationRate2: 0.56
+    - _Smooth: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -146,5 +155,8 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _MaskOfeset: {r: 0, g: 0, b: 0, a: 0}
+    - _MaskTiling: {r: 1, g: 1, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

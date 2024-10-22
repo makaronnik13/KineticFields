@@ -8,10 +8,14 @@ static class SpectrumDrawer
 #if UNITY_2021_2_OR_NEWER
     // To avoid issue 1358691 (compilation error with ReadOnlySpan),
     // we copy the ReadOnlySpan to a temporary span before accessing.
-    static float[] _temp = new float[4096];
+    static float[] _temp = new float[8000];
 
     public static void DrawGraph(System.ReadOnlySpan<float> spectrum_ro, float linePosition = 0, float value = 0)
     {
+        if (spectrum_ro.Length==0)
+        {
+            return;
+        }
         var spectrum = new System.Span<float>(_temp, 0, spectrum_ro.Length);
         spectrum_ro.CopyTo(spectrum);
 #else
@@ -34,7 +38,7 @@ static class SpectrumDrawer
         for (var i = 0; i < _vertices.Length; i++)
         {
             var x = (float) i / _vertices.Length;
-            var y = spectrum[i * spectrum.Length / _vertices.Length];
+            var y = spectrum[Mathf.RoundToInt(((float)i / _vertices.Length) * spectrum.Length)];
 
             x = x * rect.width + rect.xMin;
             y = rect.yMax - y * rect.height;

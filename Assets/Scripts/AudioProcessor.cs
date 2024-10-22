@@ -12,8 +12,8 @@ public class AudioProcessor : MonoBehaviour
     [SerializeField]
     private float AudioScale;
 
-    public AudioVisualizationProfile Profile;
-    public AudioVisualizationStrategy Strategy;
+    //public AudioVisualizationProfile Profile;
+    //public AudioVisualizationStrategy Strategy;
     public bool Smoothed;
 
     private long lastT, nowT, diff, entries, sum;
@@ -67,7 +67,7 @@ public class AudioProcessor : MonoBehaviour
     public ReactiveCommand<float[]> onSpectrum = new ReactiveCommand<float[]>();
     public ReactiveCommand<float[]> onAverages = new ReactiveCommand<float[]>();
 
-    public int SpectrumSize => audioSource.SpectrumSize;
+    public int SpectrumSize => 0;// audioSource.SpectrumSize;
 
     //////////////////////////////////
     private long getCurrentTimeMillis()
@@ -135,7 +135,7 @@ public class AudioProcessor : MonoBehaviour
     void Update()
     {
 
-        spectrum = audioSource.GetSpectrumData(Strategy);
+        //spectrum = audioSource.GetSpectrumData(Strategy);
 
         onSpectrum.Execute(spectrum.Select(s=>s * AudioScale).ToArray());
 

@@ -47,10 +47,10 @@ public class SignalSourceEditor : Editor
         
         if (Application.isPlaying)
         {
-            IEnumerable<float> data = source.GetSpectrumData();
+            float[] data = source.GetSpectrumData();
             if (data.Count()!= 0)
             {
-                SpectrumDrawer.DrawGraph(data.ToArray(), source.Signal.Value, source.MultipliedSignal.Value);
+                SpectrumDrawer.DrawGraph(data, source.Signal.Value, source.MultipliedSignal.Value);
             }
         }
     }

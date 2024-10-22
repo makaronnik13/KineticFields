@@ -20,11 +20,11 @@ public class MirrorFlipCamera : MonoBehaviour
 
     void OnPreRender()
     {
-        GL.SetRevertBackfacing(true);
+        GL.invertCulling = true;
     }
 
     void OnPostRender()
     {
-        GL.SetRevertBackfacing(false);
+        GL.invertCulling = false;
     }
 }

@@ -207,7 +207,7 @@ public class BeatDetector : MonoBehaviour
 	// Update is called once per frame
 	void Analyse ()
 	{
-		spectrum = fftService.GetSpectrum(1);
+		spectrum = fftService.GetSpectrumGap(FrequencyGap.Bass);
 		spectrum.Max();
 		int splitFrameSize = Mathf.FloorToInt((BASE_FREQUENCY / (float)BASE_FREQUENCY) * (1f/ (float)BASE_CHANNELS) * (float)BASE_SPLIT_SAMPLE_SIZE);
 		highs.Enqueue(spectrum.Max());

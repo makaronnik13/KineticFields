@@ -6,8 +6,8 @@ namespace KineticFields
 {
     public class ProjectInstaller : MonoInstaller
     {
-        [SerializeField]
-        private AudioVisualizationProfile fftProfile;
+        //[SerializeField]
+        //private AudioVisualizationProfile fftProfile;
 
         public override void InstallBindings()
         {
@@ -16,7 +16,7 @@ namespace KineticFields
             Container.BindFactory<ParameterData, ParameterInstance, ParameterInstance.Factory>();
             Container.BindWithInterfaces<PrefabCreator>();
            // Container.BindWithInterfaces<FFTService>();
-            Container.Bind<AudioVisualizationProfile>().FromInstance(fftProfile).AsSingle().NonLazy();
+            //Container.Bind<AudioVisualizationProfile>().FromInstance(fftProfile).AsSingle().NonLazy();
         }
     }
 }
