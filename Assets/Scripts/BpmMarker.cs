@@ -1,15 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BpmMarker : MonoBehaviour
 {
-    float time = 0;
-
-    private void Start()
-    {
-        Destroy(gameObject, 5);
-    }
+    public float time = 0;
 
     // Update is called once per frame
     void Update()
@@ -17,12 +13,18 @@ public class BpmMarker : MonoBehaviour
 
         time+= Time.deltaTime;
         
-        GetComponent<RectTransform>().anchoredPosition = new Vector2(-time*100*BpmManager.Instance.Bpm.Value/120f, 0);
-
-        if (GetComponent<RectTransform>().anchoredPosition.x<=100 && !transform.GetChild(0).gameObject.activeInHierarchy)
+        
+        if (GetComponent<RectTransform>().anchoredPosition.x<=-100 && transform.GetChild(0).gameObject.activeInHierarchy)
         {
-            transform.GetChild(0).gameObject.SetActive(true);
-            BpmManager.Instance.Beat();
+            transform.GetChild(0).gameObject.SetActive(false);
         }
+
+    }
+
+
+    public void Reset()
+    {
+        time = 0f;
+        transform.GetChild(0).gameObject.SetActive(true);
     }
 }

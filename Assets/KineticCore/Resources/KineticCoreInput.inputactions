@@ -1,0 +1,71 @@
+{
+    "name": "KineticCoreInput",
+    "maps": [
+        {
+            "name": "Controllers",
+            "id": "30556dfa-ac7d-4942-87ba-b9290bab753c",
+            "actions": [
+                {
+                    "name": "RightClip",
+                    "type": "Button",
+                    "id": "73a1faf9-2028-4ef9-a5c3-5b33dd8846a4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftClip",
+                    "type": "Button",
+                    "id": "5b710c01-77ea-41e7-a0d9-d962575e5562",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "9e5aaee1-5396-4ed8-81c1-74d736755c02",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Pc",
+                    "action": "RightClip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f7bb6b20-ea60-44cd-acb8-08ccdc7c0b1b",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Pc",
+                    "action": "LeftClip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Pc",
+            "bindingGroup": "Pc",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}

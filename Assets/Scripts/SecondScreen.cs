@@ -1,14 +1,12 @@
-﻿using System;
+﻿using com.armatur.common.flags;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SecondScreen : MonoBehaviour
+public class SecondScreen : Singleton<SecondScreen>
 {
-    [SerializeField]
-    private TMPro.TextMeshProUGUI DisplaysCount;
-
     [SerializeField]
     private GameObject Camera;
 
@@ -18,12 +16,18 @@ public class SecondScreen : MonoBehaviour
     [SerializeField]
     private Toggle FlipBtn;
 
-    private int lastDisplaysCount = 0;
+    [SerializeField]
+    private GameObject CameraPrefab;
 
+    public List<GameObject> Cameras = new List<GameObject>();
+
+    private GenericFlag<int> screensCount = new GenericFlag<int>("screens", 1);
 
     private void Start()
     {
         FlipBtn.onValueChanged.AddListener(ToggleFlip);
+        Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+        Screen.fullScreen = true;
     }
 
     private void ToggleFlip(bool v)
@@ -42,24 +46,24 @@ public class SecondScreen : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (lastDisplaysCount!= Display.displays.Length)
+        while (screensCount.Value < Display.displays.Length)
         {
-            DisplaysCount.text = Display.displays.Length.ToString();
-
-            if (Display.displays.Length > 1)
-            {
-                Camera.SetActive(true);
-                Display.displays[1].Activate();
-            }
-            else
-            {
-                Camera.SetActive(false);
-            }
-
-            lastDisplaysCount = Display.displays.Length;
-
-            FlipBtn.gameObject.SetActive(Display.displays.Length > 1);
+           // Display.displays[screensCount.Value].Activate();
+            screensCount.SetState(screensCount.Value+1);
+            GameObject newCamera = Instantiate(CameraPrefab);
+            newCamera.transform.SetParent(transform.GetChild(0));
+            newCamera.transform.localPosition = Vector3.zero;
+            newCamera.transform.localScale = Vector3.one;
+            //newCamera.GetComponent<Camera>().targetDisplay = screensCount.Value;
+            newCamera.gameObject.SetActive(false);
+            Cameras.Add(newCamera);
         }
-      
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            transform.Rotate(transform.forward, 90f);
+            Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+            Screen.fullScreen = true;
+        }
     }
 }

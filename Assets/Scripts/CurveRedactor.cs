@@ -83,9 +83,10 @@ public class CurveRedactor : Singleton<CurveRedactor>
 
     public void Apply()
     {
+        Debug.Log(editingCurve.keys.Length);
         Curve.Curve = new AnimationCurve(editingCurve.keys);
+        Debug.Log(Curve.Curve.keys.Length);
         Curve.OnEdited();
-        SessionsManipulator.Instance.SaveCurves();
         Cancel();
     }
 
@@ -110,6 +111,8 @@ public class CurveRedactor : Singleton<CurveRedactor>
         Curve = curve;
         editingCurve = new AnimationCurve(Curve.Curve.keys);
         View.SetActive(true);
+
+        Debug.Log(editingCurve.keys.Length);
         foreach (Keyframe kf in editingCurve.keys)
         {
             CreateKey(kf);
@@ -139,6 +142,8 @@ public class CurveRedactor : Singleton<CurveRedactor>
 
         for (int i = 0;i<handles.Count;i++)
         {
+            Debug.Log(handles.Count+"/"+editingCurve.keys.Length);
+
             editingCurve.MoveKey(i, handles[i].kf);
         }
 

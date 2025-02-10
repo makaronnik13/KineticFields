@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using com.armatur.common.flags;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -40,6 +41,18 @@ public class KineticPoint : MonoBehaviour
     {
         get
         {
+            if (PresetsLerper.Instance.View.activeInHierarchy)
+            {
+                if (KineticFieldController.Instance.Session.Value!=null && point!=null)
+                {
+                    point = KineticFieldController.Instance.Session.Value.AveragePreset.Points.FirstOrDefault(p => p.Id == point.Id);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            
             return point;
         }
         set
@@ -56,6 +69,7 @@ public class KineticPoint : MonoBehaviour
     void Start()
     {
         KineticFieldController.Instance.ActivePoint.AddListener(ActivePointChanged);
+        KineticFieldController.Instance.SelectedSource.AddListener(SourceChanged);
     }
 
     public void Init(KineticPointInstance point)
@@ -108,28 +122,51 @@ public class KineticPoint : MonoBehaviour
     {
         if (Point.Active.Value)
         {
-            KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Radius", v);
+            //KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Radius", v);
         }
         else
         {
-            KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Radius", 0);
+            //KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Radius", 0);
         }
     }
     private void VolumeChanged(float v)
     {
         if (Point.Active.Value)
         {
-            KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Value", v);
+            //KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Value", v);
         }
         else
         {
-            KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Value", 0);
+            //KineticFieldController.Instance.Visual.SetFloat("P" + Point.Id + "Value", 0);
         }
     }
     private void ActivePointChanged(KineticPoint p)
     {
-        Selector.SetActive(p == this);
         GetComponent<Collider2D>().enabled = p != this;
+    }
+
+    private void SourceChanged(Source source)
+    {
+        if (point == null)
+        {
+            return;
+        }
+        if (source == null)
+        {
+            Selector.SetActive(false);
+            return;
+        }
+
+        Selector.SetActive(point.Deep.Source == source || point.Radius.Source == source || point.Volume.Source == source);
+
+        if (point == KineticFieldController.Instance.Session.Value.ActivePreset.Value.MainPoint)
+        {
+            Selector.SetActive(Selector.activeInHierarchy 
+                || KineticFieldController.Instance.Session.Value.ActivePreset.Value.FarCutPlane.Source == source
+                || KineticFieldController.Instance.Session.Value.ActivePreset.Value.NearCutPlane.Source == source
+                || KineticFieldController.Instance.Session.Value.ActivePreset.Value.ParticlesCount.Source == source
+                || KineticFieldController.Instance.Session.Value.ActivePreset.Value.Lifetime.Source == source);
+        }
     }
 
     // Update is called once per frame

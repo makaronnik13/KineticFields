@@ -48,6 +48,7 @@ public class GradientCurveBtn : MonoBehaviour
 
         GetComponent<Image>().sprite = CurveEditor.Instance.MakeScreenshot(curve.Curve);
         GetComponent<Button>().onClick.RemoveAllListeners();
+
         GetComponent<Button>().onClick.AddListener(() => CurvePickWindow.Instance.SelectCurve(curve.Id));
 
     }
@@ -86,6 +87,8 @@ public class GradientCurveBtn : MonoBehaviour
 
     private void CurveEdited()
     {
+        Debug.Log("E2");
+
         GetComponent<Image>().sprite = CurveEditor.Instance.MakeScreenshot(curve.Curve);
     }
 

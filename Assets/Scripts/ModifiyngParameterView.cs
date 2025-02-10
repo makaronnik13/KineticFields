@@ -70,7 +70,7 @@ public class ModifiyngParameterView : MonoBehaviour
         if (Parameter.Source != null)
         {
             MultiplicatorSlider.Value = Parameter.Multiplicator.Value;
-            MultiplicatorSlider.Init(Parameter.Source.Icon);
+            MultiplicatorSlider.Init(Parameter.Source.Sprite);
         }
     }
 
@@ -121,7 +121,7 @@ public class ModifiyngParameterView : MonoBehaviour
 
 
 
-    public void ChooseSource(ISource source)
+    public void ChooseSource(Source source)
     {
         Parameter.SetSource(source);
     }

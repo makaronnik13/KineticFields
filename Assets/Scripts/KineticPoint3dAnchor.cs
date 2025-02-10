@@ -5,6 +5,14 @@ using UnityEngine;
 
 public class KineticPoint3dAnchor : MonoBehaviour
 {
+    public float LerpSpeed
+    {
+        get
+        {
+            return DefaultResources.Settings.PointsLerpSpeed3d;
+        }
+    } 
+
     [SerializeField]
     private KineticPoint Point2d;
 
@@ -28,27 +36,39 @@ public class KineticPoint3dAnchor : MonoBehaviour
 
     void Update()
     {
-        if (Input.mouseScrollDelta.y!=0)
+        if (!PresetsLerper.Instance.Lerping.Value)
         {
-            BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.one*2, Time.deltaTime * 3);
+            if (Input.mouseScrollDelta.y != 0)
+            {
+                BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.one * 3, Time.deltaTime * 3);
+            }
+            else
+            {
+                BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.zero, Time.deltaTime * 3);
+            }
+
+            if (KineticFieldController.Instance.ActivePoint.Value == Point2d)
+            {
+                Point2d.Point.Deep.SetValue(KineticFieldController.Instance.ActivePoint.Value.Point.Deep.BaseValue.Value - Input.mouseScrollDelta.y * 0.3f);
+            }
         }
-        else
+
+        if (Point2d && Point2d.Point!=null)
         {
-            BlackView.transform.localScale = Vector3.Lerp(BlackView.transform.localScale, Vector3.zero, Time.deltaTime);
-        }
+            //Debug.Log(KineticFieldController.Instance.Session.Value.GeneralAnchor.Value.Value - 4f);
+            Vector3 newPos = Point2d.Point.Position;
+            if (Point2d.Point.Id!=0)
+            {
+                newPos = new Vector3(newPos.x, newPos.y, newPos.z* KineticFieldController.Instance.Session.Value.GeneralScale.Value.Value);
 
-        if (KineticFieldController.Instance.ActivePoint.Value == Point2d)
-        {
-            Point2d.Point.Deep.SetValue(KineticFieldController.Instance.ActivePoint.Value.Point.Deep.BaseValue.Value - Input.mouseScrollDelta.y * 0.3f);
-         
-        }
+                newPos += Vector3.forward * (KineticFieldController.Instance.Session.Value.GeneralAnchor.Value.Value - 4f);
+            }
 
 
-        if (Point2d)
-        {
-            transform.position = Vector3.Lerp(transform.position, Point2d.Point.Position, Time.deltaTime*2f);
+            transform.position = Vector3.Lerp(transform.position, newPos, Time.deltaTime*LerpSpeed);
 
-            transform.localScale = Vector3.one * Point2d.Point.Radius.Value.Value;
+          
+            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * Point2d.Point.Radius.Value.Value,Time.deltaTime*LerpSpeed);
         }
 
         Point2d.transform.position = Camera.main.transform.position - (Camera.main.transform.position - transform.position).normalized;

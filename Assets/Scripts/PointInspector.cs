@@ -35,12 +35,12 @@ public class PointInspector : MonoBehaviour
 
     private void GradientChanged(string v)
     {
-        KineticFieldController.Instance.ActivePoint.Value.Point.Gradient = SessionsManipulator.Instance.Gradients.GetGradient(v);// DefaultResources.Settings.Gradients[v];
+        KineticFieldController.Instance.ActivePoint.Value.Point.Gradient = KineticFieldController.Instance.Session.Value.Gradients.GetGradient(v);// DefaultResources.Settings.Gradients[v];
     }
 
     private void CurveChanged(string v)
     {
-        KineticFieldController.Instance.ActivePoint.Value.Point.Curve = SessionsManipulator.Instance.Curves.GetCurve(v); //DefaultResources.Settings.SizeCurves[v];
+        KineticFieldController.Instance.ActivePoint.Value.Point.Curve = KineticFieldController.Instance.Session.Value.Curves.GetCurve(v); //DefaultResources.Settings.SizeCurves[v];
     }
 
     private void ActiveStateChanged(bool v)
@@ -67,7 +67,6 @@ public class PointInspector : MonoBehaviour
             Gradient.SetValue(point.Point.Gradient);
             Size.Init(point.Point.Radius);
             Deep.Init(point.Point.Deep);
-            Speed.Init(point.Point.Speed);
             Volume.Init(point.Point.Volume);
             ActivationToggle.isOn = KineticFieldController.Instance.ActivePoint.Value.Point.Active.Value;
             Gradient.gameObject.SetActive(point.Point.ShowGradient);

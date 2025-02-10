@@ -10,8 +10,11 @@ using UnityEngine.UI;
 
 public class SessionsManipulator : Singleton<SessionsManipulator>
 {
-    private string curvesPath;
-    private string gradientPath;
+    [SerializeField]
+    private TMPro.TMP_InputField SessionNameInput, TrackNameInput;
+
+    [SerializeField]
+    private TMPro.TMP_Dropdown TracksDropdown, SessionsDropdown;
 
     [SerializeField]
     private TMPro.TMP_InputField SessionName;
@@ -25,173 +28,245 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
     [SerializeField]
     private GameObject SessionBtn;
 
-    public CurvesStorage Curves;
-    public GradientStorage Gradients;
 
-    private List<string> FileNames = new List<string>();
+    private List<KineticSession> Sessions = new List<KineticSession>();
 
-    void Awake()
-    {
-        curvesPath = Application.persistentDataPath + "/" + "Curves.kfcu";
-        gradientPath = Application.persistentDataPath + "/" + "Gradients.kfgr";
-
-        LoadCurves();
-        LoadGradients();
-    }
+    public List<TrackLib> TrackLibs = new List<TrackLib>();
 
     private void Start()
     {
-        FileNames = Directory.GetFiles(Application.persistentDataPath, "*.kfs").ToList();
+        List<string> SessionNames = Directory.GetFiles(Application.persistentDataPath, "*.kfs").ToList();
 
-        for (int i = 0; i < FileNames.Count; i++)
+        List<string> TrackLibsNames = Directory.GetFiles(Application.persistentDataPath, "*.kft").ToList();
+
+        for (int i = 0; i < SessionNames.Count; i++)
         {
-            FileNames[i] = FileNames[i].Replace(Application.persistentDataPath, "");
-            FileNames[i] = FileNames[i].Replace(".kfs", "");
-            FileNames[i] = FileNames[i].Remove(0, 1);
+            SessionNames[i] = SessionNames[i].Replace(Application.persistentDataPath, "");
+            SessionNames[i] = SessionNames[i].Replace(".kfs", "");
+            SessionNames[i] = SessionNames[i].Remove(0, 1);
         }
 
-        if (FileNames.Count == 0)
+        for (int i = 0; i < TrackLibsNames.Count; i++)
         {
-            CreateSession();
+            TrackLibsNames[i] = TrackLibsNames[i].Replace(Application.persistentDataPath, "");
+            TrackLibsNames[i] = TrackLibsNames[i].Replace(".kft", "");
+            TrackLibsNames[i] = TrackLibsNames[i].Remove(0, 1);
         }
-        else
+
+        foreach (string s in TrackLibsNames)
         {
-            Load(FileNames[0]);
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(Application.persistentDataPath + "/" + s+ ".kft", FileMode.Open);
+
+            TrackLibs.Add((TrackLib)bf.Deserialize(file));
+
+            file.Close();
         }
+
+        foreach (string s in SessionNames)
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(Application.persistentDataPath + "/" + s + ".kfs", FileMode.Open);
+            Sessions.Add((KineticSession)bf.Deserialize(file));
+            file.Close();
+        }
+
+        KineticFieldController.Instance.ActivePoint.AddListener(ActivePointChanged);
+
+        UpdateTrackLibsDropdown();
+        UpdateSessionsDropdown();
+
+        SessionsDropdown.onValueChanged.AddListener(SessionDropdownChanged);
+        TracksDropdown.onValueChanged.AddListener(TrackLibDropdownChanged);
+
+        TrackNameInput.onEndEdit.AddListener(TrackNameChanged);
+        SessionNameInput.onEndEdit.AddListener(SessionNameChanged);
 
         KineticFieldController.Instance.Session.AddListener(SessionChanged);
+        TracksManager.Instance.CurrentLib.AddListener(TrackLibChanged);
 
-        StartCoroutine(DelayLoad());
-    }
-
-    private void LoadGradients()
-    {
-        if (File.Exists(gradientPath))
+        if (PlayerPrefs.HasKey("last_session"))
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(gradientPath, FileMode.Open);
-            Gradients = (GradientStorage)bf.Deserialize(file);
-            file.Close();
-        }
-        else
-        {
-            Gradients = new GradientStorage();
-            foreach (Gradient gr in DefaultResources.Settings.Gradients)
+            KineticSession session = Sessions.FirstOrDefault(s => s.SessionName == PlayerPrefs.GetString("last_session"));
+            if (session!=null) 
             {
-                Gradients.Gradients.Add(new GradientInstance(gr));
-            }
-            SaveGradients();
+                SessionsDropdown.SetValueWithoutNotify(Sessions.IndexOf(session)+1);
+                Load(session);
+            } 
         }
 
-    }
-
-    public void SaveGradients()
-    {
-        BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(gradientPath);
-        bf.Serialize(file, Gradients);
-        file.Close();
-    }
-
-
-    private void LoadCurves()
-    {
-        
-        if (File.Exists(curvesPath))
+        if (PlayerPrefs.HasKey("last_track_lib"))
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(curvesPath, FileMode.Open);
-            Curves = (CurvesStorage)bf.Deserialize(file);
-            file.Close();
-        }
-        else
-        {
-            Curves = new CurvesStorage();
-            foreach (AnimationCurve cu in DefaultResources.Settings.SizeCurves)
+            Debug.Log("load track lib");
+
+            Debug.Log(PlayerPrefs.GetString("last_track_lib"));
+            TrackLib trackLib = TrackLibs.FirstOrDefault(s => s.Name == PlayerPrefs.GetString("last_track_lib"));
+            if (trackLib != null)
             {
-                Curves.Curves.Add(new CurveInstance(cu));
+                Debug.Log(trackLib.Name);
+                Debug.Log(TrackLibs.IndexOf(trackLib) + 1);
+                TracksManager.Instance.CurrentLib.SetState(trackLib);
+                TracksDropdown.SetValueWithoutNotify(TrackLibs.IndexOf(trackLib)+1);
             }
-            SaveCurves();
         }
+
+
     }
 
-    public void SaveCurves()
+    private void TrackLibChanged(TrackLib lib)
     {
-        BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(curvesPath);
-        bf.Serialize(file, Curves);
-        file.Close();
-    }
-
-    private IEnumerator DelayLoad()
-    {
-        yield return new WaitForSeconds(0.3f);
-        Load(FileNames[0]);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKey(KeyCode.LeftAlt))
+        TrackNameInput.gameObject.SetActive(lib!=null);
+        if (lib!=null)
         {
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                Save(KineticFieldController.Instance.Session.Value.SessionName);
-            }
-        }      
+            TrackNameInput.SetTextWithoutNotify(lib.Name);
+        }
+        UpdateTrackLibsDropdown();
+        Autosave();
     }
-
-   
 
     private void SessionChanged(KineticSession session)
     {
-        SessionName.text = session.SessionName;
-    }
+        SessionNameInput.gameObject.SetActive(session != null);
 
-    public void SaveClicked()
-    {
-       
-        Save(SessionName.text);
-    }
-
-
-
-    public void Save(string name)
-    {
-        Debug.Log("save " + name);
-
-        
-        if (KineticFieldController.Instance.Session.Value!=null)
+        if (session != null)
         {
-            KineticFieldController.Instance.Session.Value.SessionName = name;
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Create(Application.persistentDataPath + "/" + KineticFieldController.Instance.Session.Value.SessionName + ".kfs");
-            bf.Serialize(file, KineticFieldController.Instance.Session.Value);
-            file.Close();
-
-            if (!FileNames.Contains(KineticFieldController.Instance.Session.Value.SessionName))
-            {
-                FileNames.Add(KineticFieldController.Instance.Session.Value.SessionName);
-            }
+            SessionNameInput.SetTextWithoutNotify(session.SessionName);
         }
     }
 
-    public void Load(string sessionName)
+    private void SessionNameChanged(string name)
     {
+        string delitingSessionName = KineticFieldController.Instance.Session.Value.SessionName;
+        if (name == delitingSessionName)
+        {
+            return;
+        }
+        KineticFieldController.Instance.Session.Value.SessionName = name;
+        Autosave();
+        UpdateSessionsDropdown();
+        SessionsDropdown.SetValueWithoutNotify(Sessions.IndexOf(KineticFieldController.Instance.Session.Value)+1);
+        SessionsDropdown.RefreshShownValue();
+ 
+        File.Delete(Application.persistentDataPath + "/" + delitingSessionName + ".kfs");
+    }
 
-       // Save(sessionName);
+    private void TrackNameChanged(string name)
+    {
+        string delitingTrackName = TracksManager.Instance.CurrentLib.Value.Name;
+        if (name == delitingTrackName)
+        {
+            return;
+        }
+        TracksManager.Instance.CurrentLib.Value.Name = name;
+        Autosave();
+        UpdateTrackLibsDropdown();
+        TracksDropdown.SetValueWithoutNotify(TrackLibs.IndexOf(TracksManager.Instance.CurrentLib.Value) + 1);
+        TracksDropdown.RefreshShownValue();
 
+        File.Delete(Application.persistentDataPath + "/" + delitingTrackName + ".kft");
+       
+    }
+
+  /*
+    private void CurrentLibChanged(TrackLib lib)
+    {
+        if (!TrackLibs.Contains(lib) && lib!=null)
+        {
+            TrackLibs.Add(lib);
+            UpdateTrackLibsDropdown();
+            TracksDropdown.SetValueWithoutNotify(TrackLibs.IndexOf(lib));
+            PlayerPrefs.SetString("last_track_lib", lib.Name);
+        }
+        else
+        {
+            PlayerPrefs.SetString("last_track_lib", string.Empty);
+        }
+       
+    }*/
+
+    private void UpdateSessionsDropdown()
+    {
+        SessionsDropdown.options.Clear();
+        SessionsDropdown.options.Add(new TMPro.TMP_Dropdown.OptionData("-"));
+        foreach (KineticSession s in Sessions)
+        {
+            SessionsDropdown.options.Add(new TMPro.TMP_Dropdown.OptionData(s.SessionName));
+        }
+  
+    }
+
+    private void SessionDropdownChanged(int v)
+    {
+        Autosave();
+        if (v<=0)
+        {
+            KineticFieldController.Instance.LoadSession(null);
+        }
+        else
+        {
+            Load(Sessions[v-1]);
+        }
+    }
+
+    private void TrackLibDropdownChanged(int v)
+    {
+        Autosave();
+        SaveTrackLib(TracksManager.Instance.CurrentLib.Value);
+        if (v<=0)
+        {
+            TracksManager.Instance.CurrentLib.SetState(null);
+        }
+        else
+        {
+            TracksManager.Instance.CurrentLib.SetState(TrackLibs[v - 1]);
+        }
+        
+    }
+
+    private void UpdateTrackLibsDropdown()
+    {
+        TracksDropdown.options.Clear();
+
+        TracksDropdown.options.Add(new TMPro.TMP_Dropdown.OptionData("-"));
+
+        foreach (TrackLib tl in TrackLibs)
+        {
+            TracksDropdown.options.Add(new TMPro.TMP_Dropdown.OptionData(tl.Name));
+        }
+    }
+
+    public void ActivePointChanged(KineticPoint obj)
+    {
+        SaveToFile(KineticFieldController.Instance.Session.Value);
+    }
+
+
+    private void SaveToFile(KineticSession session)
+    {
+        if (session!=null)
+        {
+            if (session.SessionName == string.Empty)
+            {
+                return;
+            }
             BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(Application.persistentDataPath + "/" + sessionName+".kfs", FileMode.Open);
+            FileStream file = File.Create(Application.persistentDataPath + "/" + session.SessionName + ".kfs");
+            bf.Serialize(file, session);
+            file.Close(); 
+        }
+    }
 
-            KineticFieldController.Instance.Session.SetState((KineticSession)bf.Deserialize(file));
-
-        KineticFieldController.Instance.Session.Value.Init();
-
-
-            file.Close();
-        KineticFieldController.Instance.LoadSession(KineticFieldController.Instance.Session.Value);
+    public void Load(KineticSession session)
+    {
+        KineticFieldController.Instance.ActivePoint.SetState(null);
+        KineticFieldController.Instance.LoadSession(session);
 
         SessionSelection.SetActive(false);
+
+        PresetsLerper.Instance.SetState(false);
+        PresetsLerper.Instance.SetState(true);
+
+        UpdateSessionsDropdown();
     }
 
     public void Open()
@@ -202,27 +277,94 @@ public class SessionsManipulator : Singleton<SessionsManipulator>
             Destroy(t.gameObject);
         }
 
-        for (int i = 0; i < FileNames.Count; i++)
+        for (int i = 0; i < Sessions.Count; i++)
         {
             GameObject newBtn = Instantiate(SessionBtn);
             newBtn.transform.SetParent(SessionsHub);
-            string fn = FileNames[i];
-            newBtn.GetComponent<Button>().onClick.AddListener(()=> { Load(fn);});
-            newBtn.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = FileNames[i];
-            if (FileNames[i] == KineticFieldController.Instance.Session.Value.SessionName)
+            int sId = i;
+            newBtn.GetComponent<Button>().onClick.AddListener(()=> { Load(Sessions[sId]);});
+            newBtn.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = Sessions[i].SessionName;
+            if (Sessions[i] == KineticFieldController.Instance.Session.Value)
             {
                 newBtn.GetComponent<Button>().interactable = false;
             }
         }
     }
 
-    public void CreateSession()
+    public void SaveTrackLib(TrackLib lib)
     {
-        //Save(KineticFieldController.Instance.Session.Name);
+        if (lib == null)
+        {
+            return;
+        }
+        if (lib.Name == string.Empty)
+        {
+            return;
+        }
 
-        KineticSession newSession = new KineticSession("NewSession_" + FileNames.Count);
-        KineticFieldController.Instance.LoadSession(newSession);
-        Save(newSession.SessionName);
-        Load(newSession.SessionName);
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file = File.Create(Application.persistentDataPath + "/" + lib.Name + ".kft");
+        bf.Serialize(file, lib);
+        file.Close();
+
+        if (!TrackLibs.Contains(lib))
+        {
+            TrackLibs.Add(lib);
+            UpdateTrackLibsDropdown();
+        }
+    }
+
+
+    //new iplement
+
+    public void NewSession()
+    {
+        Autosave();
+        KineticSession newSession = new KineticSession("NewSession_" + Sessions.Count);
+        Sessions.Add(newSession);
+        SaveToFile(newSession);
+        Load(newSession);
+        UpdateSessionsDropdown();
+
+        SessionsDropdown.SetValueWithoutNotify(Sessions.IndexOf(newSession) + 1);
+    }
+
+    public void NewTrackLib()
+    {
+        Autosave();
+        TrackLib newLib = new TrackLib("NewTrackLib_" + (TrackLibs.Count + 1));
+        TrackLibs.Add(newLib);
+        TracksManager.Instance.CurrentLib.SetState(newLib);
+        UpdateTrackLibsDropdown();
+
+        TracksDropdown.SetValueWithoutNotify(TrackLibs.IndexOf(newLib)+1);
+    }
+
+    public void Autosave()
+    {
+        if (TracksManager.Instance.CurrentLib.Value!=null)
+        {
+            SaveTrackLib(TracksManager.Instance.CurrentLib.Value);
+            Debug.Log(TracksManager.Instance.CurrentLib.Value.Name);
+            PlayerPrefs.SetString("last_track_lib", TracksManager.Instance.CurrentLib.Value.Name);
+        }
+
+        if (KineticFieldController.Instance.Session.Value!=null)
+        {
+            SaveToFile(KineticFieldController.Instance.Session.Value);
+            PlayerPrefs.SetString("last_session", KineticFieldController.Instance.Session.Value.SessionName);
+        }
+
+        PlayerPrefs.Save();
+    }
+
+    private void OnApplicationQuit()
+    {
+        Autosave();
+    }
+
+    public void Exit()
+    {
+        Application.Quit();
     }
 }

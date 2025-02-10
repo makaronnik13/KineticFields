@@ -2,12 +2,13 @@
 using UnityEngine;
 
 [Serializable]
-public class Oscilator : ISource
+public class Oscilator : Source
 {
-    public Oscilator(float multiplyer, int repeatRate)
+    public Oscilator(string name, Sprite icon, Color color, float multiplyer, int repeatRate, string curveId = ""): base (name, icon, 0f, 1f, color)
     {
         this.Multiplyer = multiplyer;
         this.RepeatRate = repeatRate;
+        this.curveId = curveId;
     }
 
     public Sprite Icon
@@ -55,7 +56,7 @@ public class Oscilator : ISource
     {
         get
         {
-            return SessionsManipulator.Instance.Curves.GetCurve(curveId);
+            return KineticFieldController.Instance.Session.Value.Curves.GetCurve(curveId);
         }
         set
         {
@@ -68,7 +69,7 @@ public class Oscilator : ISource
 
     public void UpdateOscilator()
     {
-        float repeatTime = 60f / BpmManager.Instance.Bpm.Value;
+        float repeatTime = 60f;
 
         if (RepeatRate>0)
         {
@@ -98,7 +99,14 @@ public class Oscilator : ISource
         value = Curve.Curve.Evaluate(v);
 
         onMiddleValueChanged(value);
+
         value*=Multiplyer;
+
+        if (Mathf.Abs(Multiplyer)==100)
+        {
+            value *= 100000f;
+        }
+
         OnValueChanged(value);
     }
 

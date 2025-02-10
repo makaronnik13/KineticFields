@@ -23,7 +23,7 @@ public sealed partial class SkinnedMeshBaker : MonoBehaviour
 
     #region Hidden asset reference
 
-    [SerializeField, HideInInspector] ComputeShader _compute = null;
+    [SerializeField] ComputeShader _compute = null;
 
     #endregion
 

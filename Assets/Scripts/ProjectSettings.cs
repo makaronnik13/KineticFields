@@ -9,12 +9,16 @@ public class ProjectSettings: ScriptableObject
     public List<AnimationCurve> SizeCurves;
     public List<Mesh> Meshes;
 
+    public LoopBackSettings LoopBack;
+
     public AnimationCurve PointsCountCurve;
 
 
 
     public int ThresholdWindowSize = 15;
     public float ThresholdMultiplier = 2f;
+    public float PointsLerpSpeed3d = 3f;
+    public float FrequencyGapMiultiplyer = 1f;
 
     public int GetCount(float lifetime)
     {

@@ -1,11 +1,7 @@
-﻿using Assets.Scripts;
-using com.armatur.common.flags;
-using System;
+﻿using KineticFields;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class FrequencyGapEditor : MonoBehaviour
 {
@@ -16,10 +12,9 @@ public class FrequencyGapEditor : MonoBehaviour
     [SerializeField]
     private float HideTime = 1.5f;
 
-    [SerializeField]
-    private BarSpectrum SpectrumBar;
+    private FFTService SpectrumBar;
 
-    public FrequencyGap activeGap =  null;
+    //public FrequencyGap activeGap =  null;
     [SerializeField]
     private GameObject GapVisualPrefab;
 
@@ -30,7 +25,7 @@ public class FrequencyGapEditor : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        KineticFieldController.Instance.ActiveGap.AddListener(ActiveGapChanged);
+        //KineticFieldController.Instance.ActiveGap.AddListener(ActiveGapChanged);
 
         /*
         foreach (Transform t in transform)
@@ -48,6 +43,7 @@ public class FrequencyGapEditor : MonoBehaviour
         }*/
     }
 
+    /*
     private void GroupChanged(FrequencyGap.GapGroup group)
     {
         foreach (Transform t in GapVisualPrefab.transform.parent)
@@ -56,40 +52,42 @@ public class FrequencyGapEditor : MonoBehaviour
         }
         GapVisualPrefab.transform.parent.GetChild(1+(int)group).gameObject.SetActive(true);
     }
-
+*/
     private void Update()
     {
-        if (Input.GetAxis("Mouse X") == 0 && Input.GetAxis("Mouse Y") == 0 && Input.mouseScrollDelta.magnitude == 0 && !Input.anyKey)
+        if (!PresetsLerper.Instance.Lerping.Value)
         {
-            if (hideCoroutine == null)
+            if (Input.GetAxis("Mouse X") == 0 && Input.GetAxis("Mouse Y") == 0 && Input.mouseScrollDelta.magnitude == 0 && !Input.anyKey)
             {
-               // hideCoroutine = StartCoroutine(Hide(HideTime)); //hide ui
+                if (hideCoroutine == null)
+                {
+                    // hideCoroutine = StartCoroutine(Hide(HideTime)); //hide ui
+                }
+            }
+            else
+            {
+                if (hideCoroutine != null)
+                {
+                    StopCoroutine(hideCoroutine);
+                    hideCoroutine = null;
+                    foreach (Transform t in transform)
+                    {
+                        t.gameObject.SetActive(true);
+                    }
+                    foreach (MeshRenderer mr in PointsVisual3d.GetComponentsInChildren<MeshRenderer>())
+                    {
+                        mr.enabled = true;
+                    }
+                    foreach (SpriteRenderer sr in PointsVisual2d.GetComponentsInChildren<SpriteRenderer>())
+                    {
+                        sr.enabled = true;
+                    }
+                    // FindObjectOfType<PointInspector>().TryShow();
+                    // FindObjectOfType<MainPointInspector>().TryShow();
+                }
+
             }
         }
-        else
-        {
-            if (hideCoroutine!=null)
-            {
-                StopCoroutine(hideCoroutine);
-                hideCoroutine = null;
-                foreach (Transform t in transform)
-                {
-                    t.gameObject.SetActive(true);
-                }
-                foreach (MeshRenderer mr in PointsVisual3d.GetComponentsInChildren<MeshRenderer>())
-                {
-                    mr.enabled = true;
-                }
-                foreach (SpriteRenderer sr in PointsVisual2d.GetComponentsInChildren<SpriteRenderer>())
-                {
-                    sr.enabled = true;
-                }
-               // FindObjectOfType<PointInspector>().TryShow();
-               // FindObjectOfType<MainPointInspector>().TryShow();
-            }
-           
-        }
-        
     }
 
     private IEnumerator Hide(float hideTime)
@@ -116,19 +114,19 @@ public class FrequencyGapEditor : MonoBehaviour
 
     private void Multiplyerchanged(string s)
     {
-        activeGap.Multiplyer.SetState(float.Parse(s));
+        //activeGap.Multiplyer.SetState(float.Parse(s));
     }
 
     private void SizeSliderValueChanged(float v)
     {
-        activeGap.GapSize.SetState(v);
+        //activeGap.GapSize.SetState(v);
     }
 
     public void AddGap(FrequencyGap fg)
     {
         GameObject newGapSlider = Instantiate(GapVisualPrefab);
         newGapSlider.transform.SetParent(GapVisualPrefab.transform.parent);
-        newGapSlider.GetComponent<FrequencyGapSlider>().Init(fg);
+        //newGapSlider.GetComponent<FrequencyGapSlider>().Init(fg);
         newGapSlider.SetActive(true);
         newGapSlider.GetComponent<RectTransform>().offsetMax = GapVisualPrefab.GetComponent<RectTransform>().offsetMax;
         newGapSlider.GetComponent<RectTransform>().offsetMin = GapVisualPrefab.GetComponent<RectTransform>().offsetMin;
@@ -137,28 +135,30 @@ public class FrequencyGapEditor : MonoBehaviour
 
     private void SliderValueChanged(float v)
     {
-        activeGap.Position.SetState(v);
+        //activeGap.Position.SetState(v);
     }
 
     private void ActiveGapChanged(FrequencyGap gap)
     {
+        /*
         if  (activeGap!=null)
         {
-            activeGap.Position.RemoveListener(GapChanged);
-            activeGap.GapSize.RemoveListener(GapChanged);
+            //activeGap.Position.RemoveListener(GapChanged);
+            //activeGap.GapSize.RemoveListener(GapChanged);
         }
 
         activeGap = gap;
 
         if (activeGap!= null)
         {
-            activeGap.Position.AddListener(GapChanged);
-            activeGap.GapSize.AddListener(GapChanged);
+            //activeGap.Position.AddListener(GapChanged);
+            //activeGap.GapSize.AddListener(GapChanged);
         }
         else
         {
             ColoriseSpectrum(0,0, Color.gray);
         }
+        */
     }
 
     public void Init(KineticSession preset)
@@ -176,15 +176,15 @@ public class FrequencyGapEditor : MonoBehaviour
 
     private void GapChanged(float v)
     {
-        ColoriseSpectrum(activeGap.Start, activeGap.End, activeGap.color);
+        //ColoriseSpectrum(activeGap.Start, activeGap.End, activeGap.color);
     }
 
     private void ColoriseSpectrum(float start, float end, Color color)
     {
         int i = 0;
-       
 
-       List < MeshRenderer > renderers = SpectrumBar.GetComponentsInChildren<MeshRenderer>().ToList();
+
+        List<MeshRenderer> renderers = new List<MeshRenderer>();// SpectrumBar.GetComponentsInChildren<MeshRenderer>().ToList();
         int startPos = Mathf.RoundToInt(renderers.Count * start);
         int endPos = Mathf.RoundToInt(renderers.Count * end);
 
