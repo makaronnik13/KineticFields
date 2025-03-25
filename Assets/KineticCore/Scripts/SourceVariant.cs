@@ -1,5 +1,5 @@
 
-using Assets.WasapiAudio.Scripts.Core;
+using Assets.WasapiAudio.Scripts.Wasapi;
 using CSCore.CoreAudioAPI;
 
 public class SourceVariant

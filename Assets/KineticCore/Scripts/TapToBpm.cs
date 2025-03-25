@@ -4,89 +4,75 @@ using System.Collections.Generic;
 using System.Linq;
 using UniRx;
 using UnityEngine;
+using Zenject;
 
 public class TapToBpm : MonoBehaviour
 {
-
+    [SerializeField] private ButtonSO TapInput;
+    [SerializeField] private ButtonSO ResyncInput;
+    
     [SerializeField]
     private ConstantBPMSource bpmSource;
 
-    [SerializeField]
-    private KeyCode keyCode;
+    private float lastTapTime = -1f;  // Время последнего тапа
+    private float currentBpm;  // Текущее значение BPM
+    private const float MINIMAL_BPM = 20f;  // Минимальное BPM
+    private Subject<float> tapTimes = new Subject<float>();  // Поток временных интервалов между тапами
 
-    [SerializeField]
-    private float silenceTime;
-
-    private CompositeDisposable relax = new CompositeDisposable();
-
-    private float lastClick;
-    private List<float> dists = new List<float>();
-
-    // Update is called once per frame
-    void Update()
+    [Inject]
+    void Construct(KineticInputService inputService)
     {
-        if (Input.GetKeyDown(keyCode))
+        inputService.OnItemsLoaded.Subscribe(_ =>
         {
-            Tap();
-        }
+            (inputService.GetItemInstance(TapInput) as ButtonSO).OnPressed += Tap;
+            (inputService.GetItemInstance(ResyncInput) as ButtonSO).OnPressed += Resync;
+        }).AddTo(this);
+        
+        // Подписка на поток tapTimes для вычисления BPM
+        tapTimes
+            .ThrottleFirst(System.TimeSpan.FromSeconds(1f / MINIMAL_BPM))  // Сброс интервала через заданное время
+            .Subscribe(interval =>
+            {
+                // Если второй тап был совершён достаточно быстро
+                if (lastTapTime != -1f)
+                {
+                    // Вычисляем BPM
+                    currentBpm = 60f / interval; // 60 секунд / интервал между тапами
+                    bpmSource.Bpm.Value = Mathf.RoundToInt(currentBpm); // Обновляем BPM источника
+                    Debug.Log($"New BPM: {currentBpm}");
+                }
+                
+                lastTapTime = Time.time;  // Обновляем время последнего тапа
+            });
     }
 
+    private void Resync()
+    {
+        bpmSource.Restart();
+    }
+
+    
+    
     private void Tap()
     {
-        if (lastClick == 0)
+// Если это первый тап или прошло слишком много времени
+        if (lastTapTime == -1f || Time.time - lastTapTime > 1f / MINIMAL_BPM)
         {
-            lastClick = Time.realtimeSinceStartup;
-
+            // Сбрасываем таймер, так как второй тап был слишком поздно
+            lastTapTime = Time.time;
+            currentBpm = 0f;
         }
         else
         {
-            float d = Time.realtimeSinceStartup - lastClick;
-            Debug.Log(d);
-            dists.Add(d);
+            // Отправляем интервал между тапами в поток
+            tapTimes.OnNext(Time.time - lastTapTime);
         }
-
-
-        relax.Clear();
-        Observable.Timer(TimeSpan.FromSeconds(silenceTime)).Subscribe(_ =>
-        {
-            if (dists.Count == 0)
-            {
-                return;
-            }
-            Debug.Log(dists.Average());
-            Debug.Log("set " + Mathf.RoundToInt(60f / dists.Average()));
-
-            int bpm = Mathf.RoundToInt(60f / dists.Average());
-
-            float changeTime = lastClick;
-            while (changeTime <= Time.realtimeSinceStartup)
-            {
-                changeTime += 60f / bpm;
-            }
-
-            Observable.Timer(TimeSpan.FromSeconds(changeTime - Time.realtimeSinceStartup)).Subscribe(_ =>
-            {
-                bpmSource.Restart(bpm);
-                lastClick = 0;
-                dists.Clear();
-            }).AddTo(this);
-        }).AddTo(relax);
-
-        lastClick = Time.realtimeSinceStartup;
-
     }
 
     void OnDestroy()
     {
-        relax.Dispose();
-    }
-
-    public void OscTap(float v)
-    {
-        if (v>0)
-        {
-            Debug.Log("Tap");
-            Tap();
-        }
+        ResyncInput.OnPressed -= Resync;
+        TapInput.OnPressed += Tap;
+        tapTimes.Dispose();  
     }
 }

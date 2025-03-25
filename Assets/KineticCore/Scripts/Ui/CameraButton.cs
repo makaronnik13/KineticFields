@@ -13,7 +13,6 @@ public class CameraButton : MonoBehaviour
     [Inject]
     public void Construct([InjectOptional]CameraController cameraController, CamerasService camerasService)
     {
-        Debug.Log(cameraController);
         if (cameraController == null)
         {
             return;

@@ -4,7 +4,6 @@
 uint2 MapDimensions;
 float BaseDepth;
 float MaxDepth;
-float MinDepth;
 
 StructuredBuffer<uint> PositionBuffer;
 StructuredBuffer<float2> DepthToColorMap;
@@ -27,9 +26,9 @@ void BakeDepth(uint3 id : SV_DispatchThreadID)
 	}
 	depth >>= 16;
 
-	if (depth>MaxDepth*1000 || depth<MinDepth*1000)
+	if (depth>MaxDepth*1000)
 	{
-		depth = 1000000;
+		depth = 100000;
 	}
 	
 	float angle = 0.0;

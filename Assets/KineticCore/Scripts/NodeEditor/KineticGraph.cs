@@ -9,8 +9,8 @@ using XNode;
 [CreateAssetMenu(menuName = "KineticGraph/New Kinetic Graph")]
 public class KineticGraph : NodeGraph
 {
-    public List<Node> GetNodes<T>()
+    public List<T> GetNodes<T>() where T : Node
     {
-        return nodes.Where(n => n.GetType() == typeof(T)).ToList();
+        return nodes.OfType<T>().ToList();
     }
 }

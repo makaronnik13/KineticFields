@@ -20,7 +20,7 @@ public class BpmCounter : MonoBehaviour
     {
         if (text!=null)
         {
-            bpmSource.OnBPMchanged.Subscribe(bpm =>
+            bpmSource.Bpm.Subscribe(bpm =>
             {
                 text.text = bpm + " bpm";
             }).AddTo(this);

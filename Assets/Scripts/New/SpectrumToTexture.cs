@@ -81,7 +81,7 @@ using Zenject;
 
         void UpdateTexture()
         {
-            float[] spectrum = fftService.GetSpectrumGap(FrequencyGap.None);
+            float[] spectrum = fftService.GetSpectrum(0);
         if (spectrum.Length == 0)
         {
             return;

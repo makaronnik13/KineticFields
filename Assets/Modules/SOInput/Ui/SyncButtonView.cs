@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UniRx;
 using UnityEngine.UI;
@@ -32,6 +33,15 @@ public class SyncButtonView : SyncControllView<float>
             {
                 InputInstance?.SetValue(_value?1:0);
             }).AddTo(this);
+            
+            (InputInstance as ButtonSO).OnPressed += () =>
+            {
+               _button.SetPressed(true); // Кнопка "не нажата"
+                Observable.Timer(TimeSpan.FromSeconds(0.25f)).Subscribe(_ =>
+                {
+                    _button.SetPressed(false);  // Кнопка "нажата"
+                }).AddTo(this);
+            };
         }).AddTo(this);
     }
 }

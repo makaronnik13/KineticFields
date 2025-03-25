@@ -12,9 +12,6 @@ public class SetMaterialPropertyBlock : MonoBehaviour
     [SerializeField] PropertyScriptableObject m_overrideSettings = null;
     [SerializeReference] List<IProperty> m_properties = new List<IProperty>();
 
-    private MaterialPropertyBlock m_cachedPropBlock;
-
-
     public PropertyScriptableObject OverrideSettings {
         get {
             return m_overrideSettings;
@@ -45,24 +42,22 @@ public class SetMaterialPropertyBlock : MonoBehaviour
         ApplyCurrentSetting();
     }
 
-    void GetRequired()
-    {
-        if (!m_renderer) m_renderer = GetComponent<Renderer>();
-        if (m_cachedPropBlock == null) m_cachedPropBlock = new MaterialPropertyBlock();
+    void GetRequired() {
+        if(!m_renderer) m_renderer = GetComponent<Renderer>();
     }
 
-    public void ApplyCurrentSetting()
-    {
+    public void ApplyCurrentSetting() {
         List<IProperty> properties = CurrentSettings;
 
-        if (m_renderer == null || properties.Count == 0) return;
+        if(m_renderer == null || properties.Count == 0) return;
 
-        m_renderer.GetPropertyBlock(m_cachedPropBlock);
-        foreach (var propValue in properties)
+        var prop = new MaterialPropertyBlock();
+        m_renderer.GetPropertyBlock(prop);
+        foreach(var propValue in properties) 
         {
-            propValue.Set(m_cachedPropBlock);
+            propValue.Set(prop);
         }
-        m_renderer.SetPropertyBlock(m_cachedPropBlock);
+        m_renderer.SetPropertyBlock(prop);
     }
 
     public void ClearBlockData() {

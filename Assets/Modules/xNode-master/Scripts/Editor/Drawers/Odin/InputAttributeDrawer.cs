@@ -16,7 +16,12 @@ namespace XNodeEditor {
 			Node node = Property.Tree.WeakTargets[0] as Node;
 			NodePort port = node.GetInputPort(Property.Name);
 
-			if (!NodeEditor.inNodeEditor) {
+			if (!NodeEditor.inNodeEditor)
+            {
+                if (port == null)
+                {
+                    return;
+                }
 				if (Attribute.backingValue == XNode.Node.ShowBackingValue.Always || Attribute.backingValue == XNode.Node.ShowBackingValue.Unconnected && !port.IsConnected)
 					CallNextDrawer(label);
 				return;

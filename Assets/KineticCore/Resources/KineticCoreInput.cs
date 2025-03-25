@@ -25,50 +25,172 @@ public partial class @KineticCoreInput: IInputActionCollection2, IDisposable
     ""name"": ""KineticCoreInput"",
     ""maps"": [
         {
-            ""name"": ""Controllers"",
-            ""id"": ""30556dfa-ac7d-4942-87ba-b9290bab753c"",
+            ""name"": ""New"",
+            ""id"": ""cc6b625d-4072-4fe5-9d14-997ad6c8286c"",
             ""actions"": [
                 {
-                    ""name"": ""RightClip"",
+                    ""name"": ""Btn1"",
                     ""type"": ""Button"",
-                    ""id"": ""73a1faf9-2028-4ef9-a5c3-5b33dd8846a4"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""LeftClip"",
-                    ""type"": ""Button"",
-                    ""id"": ""5b710c01-77ea-41e7-a0d9-d962575e5562"",
-                    ""expectedControlType"": ""Button"",
+                    ""id"": ""f8086909-4718-47f6-9e4a-5276a78e50c0"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Btn2"",
+                    ""type"": ""Button"",
+                    ""id"": ""43845ed7-fe6b-4f60-8f08-67a430a53c4d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Btn3"",
+                    ""type"": ""Button"",
+                    ""id"": ""3e3bd0d1-44f3-4840-bd63-7c167d2a51f6"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Toggle1"",
+                    ""type"": ""Button"",
+                    ""id"": ""d5be0a68-f21e-49d5-801f-06efe7ec54ca"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Toggle2"",
+                    ""type"": ""Button"",
+                    ""id"": ""3bde7e36-33e5-49a5-a23a-511ecd5070d3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Toggle3"",
+                    ""type"": ""Button"",
+                    ""id"": ""69c7522b-22be-4952-afc4-25c7bd978a71"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Knob1"",
+                    ""type"": ""Value"",
+                    ""id"": ""459f3967-cebd-4e9f-97b2-80d326070d38"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
                 {
                     ""name"": """",
-                    ""id"": ""9e5aaee1-5396-4ed8-81c1-74d736755c02"",
-                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""id"": ""bd70cacc-1da0-4772-8f9d-7bd6215c81f8"",
+                    ""path"": ""<Keyboard>/1"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Pc"",
-                    ""action"": ""RightClip"",
+                    ""groups"": """",
+                    ""action"": ""Btn1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""f7bb6b20-ea60-44cd-acb8-08ccdc7c0b1b"",
-                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""id"": ""fa2ca600-9be4-4b53-8fee-f6bae3931ae9"",
+                    ""path"": ""<Keyboard>/2"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Pc"",
-                    ""action"": ""LeftClip"",
+                    ""groups"": """",
+                    ""action"": ""Btn2"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ce18214c-0d35-421c-a49f-e7cf1d3f0393"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Btn3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ad58d49e-14c3-4476-9e32-034650ef3bcf"",
+                    ""path"": ""<Keyboard>/4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Toggle1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cd7bfa9c-ba52-4c0c-a3cb-5bef6d6b5275"",
+                    ""path"": ""<Keyboard>/5"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Toggle2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""65ac36f0-0399-4154-997d-5439bd00aba2"",
+                    ""path"": ""<Keyboard>/6"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Toggle3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""f24de76b-d54d-4939-b78b-e63e962e13af"",
+                    ""path"": ""1DAxis(whichSideWins=1)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Knob1"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""b713b784-6419-4fd1-9391-45b86c7c3720"",
+                    ""path"": ""<Keyboard>/8"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Knob1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""f726531d-48f0-43f2-92cc-3cf2abb8c3bf"",
+                    ""path"": ""<Keyboard>/7"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Knob1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -92,15 +214,20 @@ public partial class @KineticCoreInput: IInputActionCollection2, IDisposable
         }
     ]
 }");
-        // Controllers
-        m_Controllers = asset.FindActionMap("Controllers", throwIfNotFound: true);
-        m_Controllers_RightClip = m_Controllers.FindAction("RightClip", throwIfNotFound: true);
-        m_Controllers_LeftClip = m_Controllers.FindAction("LeftClip", throwIfNotFound: true);
+        // New
+        m_New = asset.FindActionMap("New", throwIfNotFound: true);
+        m_New_Btn1 = m_New.FindAction("Btn1", throwIfNotFound: true);
+        m_New_Btn2 = m_New.FindAction("Btn2", throwIfNotFound: true);
+        m_New_Btn3 = m_New.FindAction("Btn3", throwIfNotFound: true);
+        m_New_Toggle1 = m_New.FindAction("Toggle1", throwIfNotFound: true);
+        m_New_Toggle2 = m_New.FindAction("Toggle2", throwIfNotFound: true);
+        m_New_Toggle3 = m_New.FindAction("Toggle3", throwIfNotFound: true);
+        m_New_Knob1 = m_New.FindAction("Knob1", throwIfNotFound: true);
     }
 
     ~@KineticCoreInput()
     {
-        Debug.Assert(!m_Controllers.enabled, "This will cause a leak and performance issues, KineticCoreInput.Controllers.Disable() has not been called.");
+        Debug.Assert(!m_New.enabled, "This will cause a leak and performance issues, KineticCoreInput.New.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -159,59 +286,99 @@ public partial class @KineticCoreInput: IInputActionCollection2, IDisposable
         return asset.FindBinding(bindingMask, out action);
     }
 
-    // Controllers
-    private readonly InputActionMap m_Controllers;
-    private List<IControllersActions> m_ControllersActionsCallbackInterfaces = new List<IControllersActions>();
-    private readonly InputAction m_Controllers_RightClip;
-    private readonly InputAction m_Controllers_LeftClip;
-    public struct ControllersActions
+    // New
+    private readonly InputActionMap m_New;
+    private List<INewActions> m_NewActionsCallbackInterfaces = new List<INewActions>();
+    private readonly InputAction m_New_Btn1;
+    private readonly InputAction m_New_Btn2;
+    private readonly InputAction m_New_Btn3;
+    private readonly InputAction m_New_Toggle1;
+    private readonly InputAction m_New_Toggle2;
+    private readonly InputAction m_New_Toggle3;
+    private readonly InputAction m_New_Knob1;
+    public struct NewActions
     {
         private @KineticCoreInput m_Wrapper;
-        public ControllersActions(@KineticCoreInput wrapper) { m_Wrapper = wrapper; }
-        public InputAction @RightClip => m_Wrapper.m_Controllers_RightClip;
-        public InputAction @LeftClip => m_Wrapper.m_Controllers_LeftClip;
-        public InputActionMap Get() { return m_Wrapper.m_Controllers; }
+        public NewActions(@KineticCoreInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Btn1 => m_Wrapper.m_New_Btn1;
+        public InputAction @Btn2 => m_Wrapper.m_New_Btn2;
+        public InputAction @Btn3 => m_Wrapper.m_New_Btn3;
+        public InputAction @Toggle1 => m_Wrapper.m_New_Toggle1;
+        public InputAction @Toggle2 => m_Wrapper.m_New_Toggle2;
+        public InputAction @Toggle3 => m_Wrapper.m_New_Toggle3;
+        public InputAction @Knob1 => m_Wrapper.m_New_Knob1;
+        public InputActionMap Get() { return m_Wrapper.m_New; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
         public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(ControllersActions set) { return set.Get(); }
-        public void AddCallbacks(IControllersActions instance)
+        public static implicit operator InputActionMap(NewActions set) { return set.Get(); }
+        public void AddCallbacks(INewActions instance)
         {
-            if (instance == null || m_Wrapper.m_ControllersActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_ControllersActionsCallbackInterfaces.Add(instance);
-            @RightClip.started += instance.OnRightClip;
-            @RightClip.performed += instance.OnRightClip;
-            @RightClip.canceled += instance.OnRightClip;
-            @LeftClip.started += instance.OnLeftClip;
-            @LeftClip.performed += instance.OnLeftClip;
-            @LeftClip.canceled += instance.OnLeftClip;
+            if (instance == null || m_Wrapper.m_NewActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_NewActionsCallbackInterfaces.Add(instance);
+            @Btn1.started += instance.OnBtn1;
+            @Btn1.performed += instance.OnBtn1;
+            @Btn1.canceled += instance.OnBtn1;
+            @Btn2.started += instance.OnBtn2;
+            @Btn2.performed += instance.OnBtn2;
+            @Btn2.canceled += instance.OnBtn2;
+            @Btn3.started += instance.OnBtn3;
+            @Btn3.performed += instance.OnBtn3;
+            @Btn3.canceled += instance.OnBtn3;
+            @Toggle1.started += instance.OnToggle1;
+            @Toggle1.performed += instance.OnToggle1;
+            @Toggle1.canceled += instance.OnToggle1;
+            @Toggle2.started += instance.OnToggle2;
+            @Toggle2.performed += instance.OnToggle2;
+            @Toggle2.canceled += instance.OnToggle2;
+            @Toggle3.started += instance.OnToggle3;
+            @Toggle3.performed += instance.OnToggle3;
+            @Toggle3.canceled += instance.OnToggle3;
+            @Knob1.started += instance.OnKnob1;
+            @Knob1.performed += instance.OnKnob1;
+            @Knob1.canceled += instance.OnKnob1;
         }
 
-        private void UnregisterCallbacks(IControllersActions instance)
+        private void UnregisterCallbacks(INewActions instance)
         {
-            @RightClip.started -= instance.OnRightClip;
-            @RightClip.performed -= instance.OnRightClip;
-            @RightClip.canceled -= instance.OnRightClip;
-            @LeftClip.started -= instance.OnLeftClip;
-            @LeftClip.performed -= instance.OnLeftClip;
-            @LeftClip.canceled -= instance.OnLeftClip;
+            @Btn1.started -= instance.OnBtn1;
+            @Btn1.performed -= instance.OnBtn1;
+            @Btn1.canceled -= instance.OnBtn1;
+            @Btn2.started -= instance.OnBtn2;
+            @Btn2.performed -= instance.OnBtn2;
+            @Btn2.canceled -= instance.OnBtn2;
+            @Btn3.started -= instance.OnBtn3;
+            @Btn3.performed -= instance.OnBtn3;
+            @Btn3.canceled -= instance.OnBtn3;
+            @Toggle1.started -= instance.OnToggle1;
+            @Toggle1.performed -= instance.OnToggle1;
+            @Toggle1.canceled -= instance.OnToggle1;
+            @Toggle2.started -= instance.OnToggle2;
+            @Toggle2.performed -= instance.OnToggle2;
+            @Toggle2.canceled -= instance.OnToggle2;
+            @Toggle3.started -= instance.OnToggle3;
+            @Toggle3.performed -= instance.OnToggle3;
+            @Toggle3.canceled -= instance.OnToggle3;
+            @Knob1.started -= instance.OnKnob1;
+            @Knob1.performed -= instance.OnKnob1;
+            @Knob1.canceled -= instance.OnKnob1;
         }
 
-        public void RemoveCallbacks(IControllersActions instance)
+        public void RemoveCallbacks(INewActions instance)
         {
-            if (m_Wrapper.m_ControllersActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_NewActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
-        public void SetCallbacks(IControllersActions instance)
+        public void SetCallbacks(INewActions instance)
         {
-            foreach (var item in m_Wrapper.m_ControllersActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_NewActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_ControllersActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_NewActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
-    public ControllersActions @Controllers => new ControllersActions(this);
+    public NewActions @New => new NewActions(this);
     private int m_PcSchemeIndex = -1;
     public InputControlScheme PcScheme
     {
@@ -221,9 +388,14 @@ public partial class @KineticCoreInput: IInputActionCollection2, IDisposable
             return asset.controlSchemes[m_PcSchemeIndex];
         }
     }
-    public interface IControllersActions
+    public interface INewActions
     {
-        void OnRightClip(InputAction.CallbackContext context);
-        void OnLeftClip(InputAction.CallbackContext context);
+        void OnBtn1(InputAction.CallbackContext context);
+        void OnBtn2(InputAction.CallbackContext context);
+        void OnBtn3(InputAction.CallbackContext context);
+        void OnToggle1(InputAction.CallbackContext context);
+        void OnToggle2(InputAction.CallbackContext context);
+        void OnToggle3(InputAction.CallbackContext context);
+        void OnKnob1(InputAction.CallbackContext context);
     }
 }

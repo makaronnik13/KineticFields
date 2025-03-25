@@ -22,13 +22,31 @@ public class SyncToggleView : SyncControllView<float>
             if (InputInstance != null)
             {
                 _toggle.isOn = Mathf.Approximately(InputInstance.Value.Value, 1f);
+                
                 _toggle.onValueChanged.AddListener((v) =>
                 { 
                     InputInstance.Value.Value = v?1:0;
                 });
+
+                InputInstance.Value.Subscribe(v =>
+                {
+                    _toggle.isOn = Mathf.Approximately(v, 1f);
+                }).AddTo(this);
+                /*
+                InputInstance.Value.Subscribe(v =>
+                {
+                    if (Mathf.Approximately(v, 0))
+                    {
+                        _toggle.isOn = false;
+                    }
+                    else
+                    {
+                        _toggle.isOn = true;
+                    }
+                }).AddTo(this);
+                */
             }
-            
-           
+
 
         }).AddTo(this);
     }

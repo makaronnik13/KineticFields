@@ -1,5 +1,5 @@
 using Assets.WasapiAudio.Scripts.Unity;
-using Assets.WasapiAudio.Scripts.Core;
+using Assets.WasapiAudio.Scripts.Wasapi;
 using System;
 using System.Collections;
 using System.Collections.Generic;

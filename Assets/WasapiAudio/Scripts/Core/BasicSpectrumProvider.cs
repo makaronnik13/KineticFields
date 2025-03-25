@@ -7,12 +7,12 @@ namespace Assets.WasapiAudio.Scripts.Core
     /// <summary>
     ///     BasicSpectrumProvider
     /// </summary>
-    public class BasicSpectrumProvider : FftProviderEx, ISpectrumProvider
+    public class BasicSpectrumProvider : FftProvider, ISpectrumProvider
     {
         private readonly int _sampleRate;
         private readonly List<object> _contexts = new List<object>();
 
-        public BasicSpectrumProvider(int channels, int sampleRate, FftSize fftSize, WindowFunction windowFunction)
+        public BasicSpectrumProvider(int channels, int sampleRate, FftSize fftSize)
             : base(channels, fftSize)
         {
             if (sampleRate <= 0)
@@ -21,8 +21,6 @@ namespace Assets.WasapiAudio.Scripts.Core
             }
 
             _sampleRate = sampleRate;
-
-            WindowFunction = windowFunction;
         }
 
         public int GetFftBandIndex(float frequency)

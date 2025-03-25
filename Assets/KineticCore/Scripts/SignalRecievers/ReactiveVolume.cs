@@ -12,23 +12,23 @@ public class ReactiveVolume : MonoBehaviour
     public class SignalVolumePair
     {
         [HideInInspector]
-        public string signalSourceName; // Для отладки, чтобы показывать имя источника
+        public string signalSourceName; // Р”Р»СЏ РѕС‚Р»Р°РґРєРё, С‡С‚РѕР±С‹ РїРѕРєР°Р·С‹РІР°С‚СЊ РёРјСЏ РёСЃС‚РѕС‡РЅРёРєР°
 
-        [Required, Tooltip("Объект, реализующий ISignalSource")]
+        [Required, Tooltip("РћР±СЉРµРєС‚, СЂРµР°Р»РёР·СѓСЋС‰РёР№ ISignalSource")]
         [SerializeReference]
-        public BaseSignalSource signalSource; // Ссылка на источник сигнала
+        public BaseSignalSource signalSource; // РЎСЃС‹Р»РєР° РЅР° РёСЃС‚РѕС‡РЅРёРє СЃРёРіРЅР°Р»Р°
 
-        [ValueDropdown(nameof(GetFieldNames)), Tooltip("Имя числового поля в формате ComponentName/FieldName")]
-        public string fieldName; // Имя числового поля в формате ComponentName/FieldName
+        [ValueDropdown(nameof(GetFieldNames)), Tooltip("РРјСЏ С‡РёСЃР»РѕРІРѕРіРѕ РїРѕР»СЏ РІ С„РѕСЂРјР°С‚Рµ ComponentName/FieldName")]
+        public string fieldName; // РРјСЏ С‡РёСЃР»РѕРІРѕРіРѕ РїРѕР»СЏ РІ С„РѕСЂРјР°С‚Рµ ComponentName/FieldName
 
         public Volume volume;
 
-        // Список доступных полей
+        // РЎРїРёСЃРѕРє РґРѕСЃС‚СѓРїРЅС‹С… РїРѕР»РµР№
         private IEnumerable<string> GetFieldNames()
         {
             if (volume == null || volume.sharedProfile == null)
             {
-                return new List<string> { "Volume или VolumeProfile не назначены" };
+                return new List<string> { "Volume РёР»Рё VolumeProfile РЅРµ РЅР°Р·РЅР°С‡РµРЅС‹" };
             }
 
             var profile = volume.sharedProfile;
@@ -37,7 +37,7 @@ public class ReactiveVolume : MonoBehaviour
                           .SelectMany(component =>
                               component.GetType().GetFields()
                                        .Where(field => typeof(VolumeParameter<float>).IsAssignableFrom(field.FieldType))
-                                       .Select(field => $"{component.GetType().Name}/{field.Name}")); // Формат ComponentName/FieldName
+                                       .Select(field => $"{component.GetType().Name}/{field.Name}")); // Р¤РѕСЂРјР°С‚ ComponentName/FieldName
         }
 
         
@@ -59,7 +59,7 @@ public class ReactiveVolume : MonoBehaviour
                 continue;
             }
 
-            // Разделяем имя на ComponentName и FieldName
+            // Р Р°Р·РґРµР»СЏРµРј РёРјСЏ РЅР° ComponentName Рё FieldName
             var split = pair.fieldName.Split('/');
             if (split.Length != 2)
             {
@@ -70,7 +70,7 @@ public class ReactiveVolume : MonoBehaviour
             var componentName = split[0];
             var fieldName = split[1];
 
-            // Получаем VolumeComponent по имени
+            // РџРѕР»СѓС‡Р°РµРј VolumeComponent РїРѕ РёРјРµРЅРё
             var component = pair.volume.sharedProfile.components.FirstOrDefault(c => c.GetType().Name == componentName);
             if (component == null)
             {
@@ -78,7 +78,7 @@ public class ReactiveVolume : MonoBehaviour
                 continue;
             }
 
-            // Получаем поле внутри компонента
+            // РџРѕР»СѓС‡Р°РµРј РїРѕР»Рµ РІРЅСѓС‚СЂРё РєРѕРјРїРѕРЅРµРЅС‚Р°
             var field = component.GetType().GetField(fieldName);
             if (field == null || !typeof(VolumeParameter<float>).IsAssignableFrom(field.FieldType))
             {
@@ -86,7 +86,7 @@ public class ReactiveVolume : MonoBehaviour
                 continue;
             }
 
-            // Подписываемся на сигнал и обновляем значение
+            // РџРѕРґРїРёСЃС‹РІР°РµРјСЃСЏ РЅР° СЃРёРіРЅР°Р» Рё РѕР±РЅРѕРІР»СЏРµРј Р·РЅР°С‡РµРЅРёРµ
             var volumeField = field.GetValue(component) as VolumeParameter<float>;
             if (volumeField == null)
             {
@@ -94,7 +94,7 @@ public class ReactiveVolume : MonoBehaviour
                 continue;
             }
 
-            pair.signalSource.OutputSignal.Subscribe(signalValue =>
+            pair.signalSource.MultipliedSignal.Subscribe(signalValue =>
             {
                 volumeField.value = signalValue;
             }).AddTo(this);

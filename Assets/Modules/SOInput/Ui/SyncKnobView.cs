@@ -26,6 +26,11 @@ public class SyncKnobView : SyncControllView<float>
                     InputInstance.Value.Value = v;
 
                 });
+
+                InputInstance.Value.Subscribe(v =>
+                {
+                    _knob.value = v;
+                }).AddTo(this);
             }
         }).AddTo(this);
     }

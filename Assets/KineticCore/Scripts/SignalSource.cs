@@ -35,7 +35,7 @@ public class SignalSource : BaseSignalSource
 
     public float V => v;
 
-    private float[] data;
+    private List<float> data;
 
     [Inject]
     public void Construct(FFTService fftService)
@@ -50,9 +50,9 @@ public class SignalSource : BaseSignalSource
             return;
         }
 
-        data = GetSpectrumData();
+        data = GetSpectrumData().ToList();
 
-        if (data!=null && data.Length > 0)
+        if (data!=null && data.Count > 0)
         {
             max = data.Max();
             average = data.Average();
@@ -68,7 +68,17 @@ public class SignalSource : BaseSignalSource
 
             if (interpolate)
             {
-                v = Mathf.Lerp(Signal.Value, v, Time.deltaTime / interpolaionTime);  
+                if (Signal.Value>v)
+                {
+                    v = Mathf.Lerp(Signal.Value, v, Time.deltaTime / interpolaionTime);
+                }
+                else
+                {
+                    if (v>0)
+                    {
+                        v -= Time.deltaTime / interpolaionTime;
+                    }
+                }
             }
 
 
@@ -89,9 +99,14 @@ public class SignalSource : BaseSignalSource
         }
     }
 
-    public float[] GetSpectrumData()
-    {   
-        return fftService.GetSpectrumGap(gap);
+    public IEnumerable<float> GetSpectrumData()
+    {
+        if (fftService == null)
+        {
+            return null; // new float[0];
+        }
+        
+        return fftService.GetCachedSpectrumGap(gap);
     }
     
     public enum SignalType

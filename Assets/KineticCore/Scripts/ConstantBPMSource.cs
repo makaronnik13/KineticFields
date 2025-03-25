@@ -1,44 +1,38 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
-public class ConstantBPMSource : MonoBehaviour, IBPMSource
+public class ConstantBPMSource : MonoBehaviour
 {
-    private ReactiveCommand onBeat = new ReactiveCommand();
-    private ReactiveCommand<int> onBPMChanged = new ReactiveCommand<int>();
-    public ReactiveCommand OnBeat => onBeat;
-    public ReactiveCommand<int> OnBPMchanged => onBPMChanged;
-
-    public int Bpm => bpm;
-
+    public ReactiveCommand OnBeat {get; private set; }  = new ReactiveCommand();
+    public ReactiveCommand OnResync {get; private set; }  = new ReactiveCommand();
+    public ReactiveProperty<int> Bpm {get; private set; }  = new ReactiveProperty<int>();
+    
     private CompositeDisposable counter = new CompositeDisposable();
     
-    [SerializeField] private int bpm = 120;
+    private readonly int _startBpm = 120;
 
 
     void Start()
     {
-        Restart(bpm);    
+        Restart(_startBpm);    
     }
 
     [ContextMenu("Restart")]
     public void Restart()
     {
-        Restart(bpm);
+        Restart(Bpm.Value);
     }
     
     public void Restart(int bpm)
     {
-        this.bpm = bpm;
+        Bpm.Value = bpm;
         counter.Clear();
-        OnBPMchanged.Execute(bpm);
         Observable.Interval(TimeSpan.FromSeconds(60f * 1f / bpm)).Subscribe(_ =>
         {
-            onBeat.Execute();
+            OnBeat.Execute();
         }).AddTo(counter);
+        OnResync.Execute();
     }
 
     void OnDestroy()

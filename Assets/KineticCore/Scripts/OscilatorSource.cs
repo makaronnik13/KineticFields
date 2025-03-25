@@ -18,7 +18,7 @@ public class OscilatorSource : BaseSignalSource
     
 
     private CompositeDisposable disposables = new CompositeDisposable();
-    private IBPMSource bpmSource;
+    private ConstantBPMSource bpmSource;
     private int skipedBeats = 0;
     private float time = 0;
     private int bpm;
@@ -30,7 +30,7 @@ public class OscilatorSource : BaseSignalSource
     {
         
         this.bpmSource = bpmSource;
-        bpmSource.OnBPMchanged.Subscribe(bpm =>
+        bpmSource.Bpm.Subscribe(bpm =>
         {
             this.bpm = bpm;
             
